@@ -11,6 +11,7 @@
 <meta property="og:description" content="เดินเล่น จิบบัตเตอร์เบียร์ ดูดาว และคุยกับเพื่อน 50 คนในโลกเวทมนตร์ ไปพร้อมกับลูน่า เลิฟกู๊ด — แฟนเกมฟรี ไม่แสวงหากำไร">
 <meta property="og:locale" content="th_TH">
 <meta name="twitter:card" content="summary">
+<link rel="manifest" href="manifest.webmanifest"><meta name="screen-orientation" content="landscape"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1530'/%3E%3Cline x1='12' y1='54' x2='44' y2='18' stroke='%238b5a2b' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='16' r='4' fill='%23fff6b0'/%3E%3Cellipse cx='22' cy='30' rx='10' ry='8' fill='%23ff8fc8' stroke='%23fff' stroke-width='2'/%3E%3Cellipse cx='42' cy='38' rx='10' ry='8' fill='%2380d8ff' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M31 32 Q32 30 33 35' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <script>/* Tailwind is optional: the game is fully styled by the embedded CSS below if the CDN is unavailable. */</script>
 <script src="https://cdn.tailwindcss.com" async onerror="void 0"></script>
@@ -76,9 +77,17 @@ input[type=text]{background:#1b1433;color:#fff;border:1px solid var(--gold);bord
 .bubble3d{position:fixed;left:0;top:0;pointer-events:none;max-width:240px;background:rgba(255,252,240,.96);color:#3a2a5a;border:2px solid #c9a0ff;border-radius:14px;padding:7px 11px;font-size:13px;line-height:1.45;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 #camHint{position:fixed;bottom:2px;right:8px;font-size:10px;opacity:.55;z-index:3;pointer-events:none}
 #loading{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#120d22;color:#f2d68a;font-size:18px}
+#rot{position:fixed;left:0;top:0;width:100vw;height:100vh;overflow:hidden}
+body.rotated #rot{width:100vh;height:100vw;transform-origin:top left;transform:translateX(100vw) rotate(90deg)}
+@supports (height:100dvh){body.rotated #rot{width:100dvh;height:100dvw;transform:translateX(100dvw) rotate(90deg)}}
+#startScr{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(circle at 50% 40%,#3a2a6a,#120d22);color:#f2d68a;font-size:22px;font-weight:800;cursor:pointer;text-align:center}
+#startScr small{font-size:13px;color:#d9ccff;font-weight:500;opacity:.8}
+#rotHint{display:none;position:fixed;top:44px;left:50%;transform:translateX(-50%);z-index:60;background:rgba(20,14,40,.85);color:#f2d68a;padding:6px 14px;border-radius:12px;font-size:13px;pointer-events:none}
+body.rotated #rotHint{display:block;animation:rh 6s forwards}@keyframes rh{0%,70%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
+<div id="startScr"><div style="font-size:54px">🏰✨</div>แตะเพื่อเริ่มเล่น<small>Tap to start • เกมจะแสดงแบบแนวนอน</small></div>
 <div id="game3d"></div>
 <div id="bubbleLayer"></div>
 <div id="topbar" class="hud">
@@ -110,7 +119,7 @@ input[type=text]{background:#1b1433;color:#fff;border:1px solid var(--gold);bord
   <button class="btn" id="mL">ลูน่า</button>
 </div>
 <div id="toast"></div>
-<div id="camHint">ลาก = หมุนกล้อง • ล้อเมาส์/บีบนิ้ว = ซูม • Q/R หมุน</div><div id="loading">✨ กำลังเสกฮอกวอตส์ 3D...</div>
+<div id="rotHint">📱↻ หมุนจอเป็นแนวนอนเพื่อเล่นเต็มจอ</div><div id="camHint">ลาก = หมุนกล้อง • ล้อเมาส์/บีบนิ้ว = ซูม • Q/R หมุน</div><div id="loading">✨ กำลังเสกฮอกวอตส์ 3D...</div>
 <div id="disclaimer">แฟนเกมไม่แสวงหากำไร (Non-commercial fan game) • ไม่มีส่วนเกี่ยวข้องกับ J.K. Rowling, Warner Bros. หรือ Wizarding World • สิทธิ์ในตัวละครเป็นของเจ้าของลิขสิทธิ์</div>
 
 <div class="modal" id="setup"><div class="card" style="width:min(520px,94vw)">
@@ -670,7 +679,15 @@ function drawFace(g,L,S,hy,o){const blink=o.blink, ey=hy+1.5*S, ex=5.2*S;
 function playerLook(){return{hair:player.hair,hs:player.hs,eye:'#6a4a3a',skin:SK.l};}
 /* ===================== 3D ENGINE (Three.js, toon / cel-shaded) ===================== */
 const ctx=document.createElement('canvas').getContext('2d'); // scratch 2D context (portraits use their own canvases)
-let VW=window.innerWidth,VH=window.innerHeight;
+
+// ===== LANDSCAPE LOCK / ROTATION =====
+const ROT={on:false};
+(function(){const r=document.createElement('div');r.id='rot';for(const n of [...document.body.childNodes]){if(n.nodeName==='SCRIPT'||n.id==='startScr')continue;r.appendChild(n);}document.body.insertBefore(r,document.body.firstChild);})();
+function viewSize(){return ROT.on?[window.innerHeight,window.innerWidth]:[window.innerWidth,window.innerHeight];}
+function updRot(){const portrait=window.innerHeight>window.innerWidth*1.05;ROT.on=portrait;document.body.classList.toggle('rotated',portrait);}
+function toLocal(x,y){return ROT.on?{x:y,y:window.innerWidth-x}:{x,y};}
+window.__ROT=ROT;
+updRot();let [VW,VH]=viewSize();
 const IS_MOBILE=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
 const renderer=new THREE.WebGLRenderer({antialias:!IS_MOBILE,powerPreference:'high-performance'});
 renderer.setPixelRatio(Math.min(IS_MOBILE?1.25:1.5,window.devicePixelRatio||1));renderer.setSize(VW,VH);
@@ -679,7 +696,8 @@ renderer.domElement.id='game';document.getElementById('game3d').appendChild(rend
 const cv=renderer.domElement;
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(40,VW/VH,0.1,200);
-window.addEventListener('resize',()=>{VW=window.innerWidth;VH=window.innerHeight;renderer.setSize(VW,VH);camera.aspect=VW/VH;camera.updateProjectionMatrix();});
+function onResize(){updRot();[VW,VH]=viewSize();renderer.setSize(VW,VH);camera.aspect=VW/VH;camera.updateProjectionMatrix();}
+window.addEventListener('resize',onResize);window.addEventListener('orientationchange',()=>setTimeout(onResize,250));if(screen.orientation)screen.orientation.addEventListener('change',()=>setTimeout(onResize,100));
 const cam={yaw:0.35,pitch:0.9,dist:13,tx:0,tz:0};
 let patronus=null;
 /* --- materials (cached) --- */
@@ -1008,13 +1026,14 @@ function camRel(x,y){const c=Math.cos(cam.yaw),s=Math.sin(cam.yaw);return{x:c*x+
 let drag=null;const pointers=new Map();let pinch0=0,dist0=0;
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('wheel',e=>{cam.dist=clamp(cam.dist+e.deltaY*0.01,6,26);e.preventDefault();},{passive:false});
-cv.addEventListener('pointerdown',e=>{Audio.init();if(Audio.ac&&Audio.ac.state==='suspended')Audio.ac.resume();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+function L(e){const q=toLocal(e.clientX,e.clientY);return{clientX:q.x,clientY:q.y,pointerId:e.pointerId,button:e.button,type:e.type,preventDefault:()=>e.preventDefault()};}
+cv.addEventListener('pointerdown',e0=>{const e=L(e0);Audio.init();if(Audio.ac&&Audio.ac.state==='suspended')Audio.ac.resume();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pointers.size===2){const p=[...pointers.values()];pinch0=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);dist0=cam.dist;if(drag)drag.moved=true;return;}
   drag={x:e.clientX,y:e.clientY,yaw:cam.yaw,pitch:cam.pitch,moved:false,btn:e.button,id:e.pointerId};try{cv.setPointerCapture(e.pointerId);}catch(_){}});
-cv.addEventListener('pointermove',e=>{if(pointers.has(e.pointerId))pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+cv.addEventListener('pointermove',e0=>{const e=L(e0);if(pointers.has(e.pointerId))pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pointers.size===2&&pinch0){const p=[...pointers.values()];cam.dist=clamp(dist0*pinch0/Math.max(20,Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)),6,26);return;}
   if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>8)drag.moved=true;if(drag.moved){cam.yaw=drag.yaw-dx*0.008;cam.pitch=clamp(drag.pitch+dy*0.005,0.3,1.35);}});
-const endPtr=e=>{pointers.delete(e.pointerId);if(pointers.size<2)pinch0=0;if(!drag||drag.id!==e.pointerId)return;const d=drag;drag=null;if(!d.moved&&d.btn===0&&e.type==='pointerup')clickAt(e.clientX,e.clientY);};
+const endPtr=e0=>{const e=L(e0);pointers.delete(e.pointerId);if(pointers.size<2)pinch0=0;if(!drag||drag.id!==e.pointerId)return;const d=drag;drag=null;if(!d.moved&&d.btn===0&&e.type==='pointerup')clickAt(e.clientX,e.clientY);};
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
 window.addEventListener('keydown',e=>{if(uiOpen||(e.target&&e.target.tagName==='INPUT'))return;if(e.code==='KeyQ')cam.yaw+=0.25;if(e.code==='KeyR')cam.yaw-=0.25;if(e.code==='Minus')cam.dist=clamp(cam.dist+1.5,6,26);if(e.code==='Equal')cam.dist=clamp(cam.dist-1.5,6,26);});
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hitV=new THREE.Vector3();
@@ -1122,7 +1141,7 @@ window.addEventListener('keydown',e=>{Audio.init();if(Audio.ac&&Audio.ac.state==
 window.addEventListener('keyup',e=>{delete keysPressed[e.code];});
 window.addEventListener('blur',()=>{keysPressed={};joy.on=false;});
 // Virtual joystick
-(function(){const J=$('joy'),K=$('joyK');let id=null;function set(e){const r=J.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const l=Math.hypot(dx,dy),m=45;if(l>m){dx*=m/l;dy*=m/l;}K.style.transform='translate('+dx+'px,'+dy+'px)';joy.x=dx/m;joy.y=dy/m;joy.on=true;if(player.sit)standUp();clickTarget=null;}
+(function(){const J=$('joy'),K=$('joyK');let id=null;function set(e){const r=J.getBoundingClientRect();let sx=e.clientX-(r.left+r.width/2),sy=e.clientY-(r.top+r.height/2);let dx=ROT.on?sy:sx,dy=ROT.on?-sx:sy;const l=Math.hypot(dx,dy),m=45;if(l>m){dx*=m/l;dy*=m/l;}K.style.transform='translate('+dx+'px,'+dy+'px)';joy.x=dx/m;joy.y=dy/m;joy.on=true;if(player.sit)standUp();clickTarget=null;}
   J.addEventListener('pointerdown',e=>{Audio.init();id=e.pointerId;J.setPointerCapture(id);set(e);});J.addEventListener('pointermove',e=>{if(e.pointerId===id)set(e);});
   const end=e=>{if(e.pointerId!==id)return;id=null;joy.on=false;joy.x=joy.y=0;K.style.transform='';};J.addEventListener('pointerup',end);J.addEventListener('pointercancel',end);})();
 if(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches||('ontouchstart' in window))document.body.classList.add('touch');
@@ -1277,6 +1296,12 @@ function frame(ts){let dt=(ts-last)/1000;last=ts;if(!(dt>0))dt=1/60;dt=Math.min(
 window.__game={THREE,renderer,scene,MAIN_ZONE_IDS,ZONES,CHARACTERS,NPCS,player,luna,get zone(){return zone;},changeZone,unstuck,castSpell,openDirectory,openMap,openLuna,closeModal,get fps(){return fps;},get uiOpen(){return uiOpen;},solidAt,doorSpawn,findFree,setTime:i=>{timeIdx=i;buildCandles();updateHud();},setWeather:w=>{weather=w;updateHud();}};
 changeZone('entrance_hall',{x:10,y:9},true);updateHud();
 if(!save.name)openSetup();else setTimeout(()=>lunaBubble('ยินดีต้อนรับกลับมาจ้ะ '+player.name+'~'),800);
+
+// start screen: fullscreen + orientation lock
+(function(){const S=document.getElementById('startScr');if(!S)return;S.addEventListener('click',async()=>{S.remove();try{Audio.init();}catch(_){}
+ try{const d=document.documentElement;if(!document.fullscreenElement&&d.requestFullscreen)await d.requestFullscreen({navigationUI:'hide'});else if(d.webkitRequestFullscreen)d.webkitRequestFullscreen();}catch(_){}
+ try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');}catch(_){}
+ setTimeout(onResize,300);});})();
 requestAnimationFrame(frame);
 const _ld=document.getElementById('loading');if(_ld)_ld.remove();
 </script>
