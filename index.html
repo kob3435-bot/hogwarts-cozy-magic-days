@@ -51,6 +51,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#120d22;font-family:"S
 .dirItem .b{display:flex;gap:4px;margin-top:4px}
 .dirItem .btn{padding:3px 7px;font-size:11px}
 #mapGrid{display:block}
+.flooPanel{margin-top:10px;padding:8px 10px;border-radius:14px;background:linear-gradient(135deg,#1d3a2a,#2a2440);border:1px solid #6ad08a55}
+.flooPanel h4{margin:0 0 6px;color:#9cf0b0;font-size:14px}.flooRow{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:4px 0}.flooRow b{color:#f2d68a;font-size:12px;margin-right:4px;min-width:110px}
+.flooBtn{font:inherit;font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid #6ad08a88;background:#0f2a1c;color:#e8ffe8;cursor:pointer}.flooBtn.here{background:#2e7a4a}
+#flooFx{position:fixed;inset:0;pointer-events:none;z-index:999;opacity:0}#flooFx.go{animation:flooA .9s ease-out}#flooFx.floo{background:radial-gradient(circle,#7dff9a 0%,#1fa84a99 45%,transparent 75%)}#flooFx.pk{background:radial-gradient(circle,#fff6c0 0%,#ffcf5a88 40%,transparent 75%)}
+@keyframes flooA{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+#game3d canvas{filter:saturate(1.1) contrast(1.04) brightness(1.02)}
+
 .bigMap{position:relative;width:100%;aspect-ratio:100/72;border-radius:14px;overflow:hidden;border:1px solid rgba(242,214,138,.4);margin-bottom:10px}
 .bigMap svg{position:absolute;inset:0;width:100%;height:100%}
 .mapNode{position:absolute;transform:translate(-50%,-50%);background:rgba(20,14,40,.88);color:#fff;border:1px solid #b9a4e0;border-radius:8px;padding:1px 5px;font-size:10px;line-height:1.25;cursor:pointer;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;font-family:system-ui,"Noto Sans Thai",Tahoma,sans-serif}
@@ -637,7 +644,101 @@ CONNS.push(
     if(SF[c[3]])c[5]=Math.min(ZONES[c[3]][c[4]==='N'||c[4]==='S'?'w':'h']-2,Math.round(c[5]*SF[c[3]].sx));}
   for(const ch of CHARACTERS){if(ch.at&&SF[ch.zone]){ch.at=[ch.at[0]*SF[ch.zone].sx,ch.at[1]*SF[ch.zone].sy];}}
 })();
-function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const d of (z.doors||[])){if(d.side!==side)continue;const z2=ZONES[d.to];if(z2&&(z2.out||z2.outdoorSky))return d;}return null;}
+/* ===== v11: new locations (London, Ottery St Catchpole, Godric's Hollow, castle extras) ===== */
+const V11Z={
+ diagon_alley:{th:'ตรอกไดแอกอน',en:'Diagon Alley',w:60,h:24,floor:'cobble',wall:'#6a4a3a',out:1,village:1,region:'london',
+  furn:[[1,1,3,1,'shopwin'],[8,1,8,1,'shopwin'],[20,1,8,1,'shopwin'],[32,1,8,1,'shopwin'],[44,1,8,1,'shopwin'],[56,1,3,1,'shopwin'],
+   [4,2,1,1,'sign','โอลลิแวนเดอร์ · Ollivanders'],[16,2,1,1,'sign','ธนาคารกริงกอตส์ · Gringotts'],[28,2,1,1,'sign','ฟลอริชแอนด์บล็อตส์ · Flourish & Blotts'],[40,2,1,1,'sign','ร้านนกฮูกอีย์ล็อปส์ · Eeylops'],[52,2,1,1,'sign','มาดามมัลกิ้น · Madam Malkin\'s'],
+   [1,22,7,1,'shopwin'],[13,22,9,1,'shopwin'],[27,22,9,1,'shopwin'],[41,22,18,1,'shopwin'],
+   [8,21,1,1,'sign','ไอศกรีมฟลอเรียน ฟอร์เทสคิว'],[22,21,1,1,'sign','อุปกรณ์ควิดดิชคุณภาพ'],[36,21,1,1,'sign','ร้านเกมกลวิเศษวีสลีย์'],[57,11,1,1,'sign','→ ตรอกน็อกเทิร์น'],[2,11,1,1,'sign','← ร้านหม้อใหญ่รั่ว'],
+   [14,8,3,2,'stall','แผงหม้อต้มยาราคาพิเศษ'],[34,14,3,2,'stall','แผงขนมหวานพ่อมด'],[24,8,2,2,'cauldron'],[44,8,1,1,'perch'],[46,8,1,1,'perch'],[10,15,2,1,'crate'],[50,15,1,1,'barrel'],[51,15,1,1,'barrel'],
+   [6,6,1,1,'lamp'],[19,15,1,1,'lamp'],[30,6,1,1,'lamp'],[41,16,1,1,'lamp'],[54,6,1,1,'lamp'],[26,16,3,1,'flowers'],[38,6,2,1,'flowers'],[48,11,2,1,'bench']],
+  sits:[[18,12,'มองป้ายร้านที่เรียงยาวจนสุดตา'],[49,12.6,'นั่งพักกินไอศกรีมกลางตรอก']]},
+ ollivanders:{sub:'diagon',th:'ร้านไม้กายสิทธิ์โอลลิแวนเดอร์',en:'Ollivanders',w:20,h:14,floor:'wood',wall:'#4a3a2a',light:'candles',region:'london',
+  furn:[[1,1,18,1,'shelf'],[1,3,1,8,'shelf'],[18,3,1,8,'shelf'],[4,4,4,1,'shelf'],[12,4,4,1,'shelf'],[7,7,6,1,'counter','เคาน์เตอร์ลองไม้กายสิทธิ์'],[3,10,1,1,'candelabra'],[16,10,1,1,'candelabra'],[9,5,2,1,'books'],[14,9,1,1,'quills']],
+  sits:[[10,10,'ลองโบกไม้กายสิทธิ์ทีละอัน จนแจกันดอกไม้ลอยได้']]},
+ gringotts:{sub:'diagon',th:'โถงธนาคารกริงกอตส์',en:'Gringotts Lobby',w:28,h:18,floor:'white',wall:'#d8cfb8',light:'candles',region:'london',
+  furn:[[3,3,22,1,'counter','เคาน์เตอร์ก็อบลิน'],[2,1,24,1,'shelf'],[3,7,1,1,'statue'],[24,7,1,1,'statue'],[3,12,1,1,'statue'],[24,12,1,1,'statue'],[12,6,4,1,'trophycase','ทองคำและอัญมณี'],[8,9,12,4,'rug'],[1,15,1,1,'candelabra'],[26,15,1,1,'candelabra'],[13,1,2,1,'clock']],
+  sits:[[14,14,'ยื่นกุญแจห้องนิรภัยให้ก็อบลินอย่างสุภาพ']]},
+ flourish_blotts:{sub:'diagon',th:'ร้านหนังสือฟลอริชแอนด์บล็อตส์',en:'Flourish & Blotts',w:22,h:15,floor:'wood',wall:'#6a3a2a',light:'candles',region:'london',
+  furn:[[1,1,20,1,'shelf'],[1,3,1,9,'shelf'],[20,3,1,9,'shelf'],[4,4,5,1,'shelf'],[13,4,5,1,'shelf'],[5,8,3,1,'books'],[14,8,3,1,'books'],[9,10,4,1,'counter'],[10,6,2,1,'table'],[3,12,1,1,'plant'],[18,12,1,1,'plant']],
+  sits:[[11,12.5,'เปิดอ่านหนังสือคาถาเล่มใหม่ที่ไม่กัดมือ']]},
+ eeylops:{sub:'diagon',th:'ร้านนกฮูกอีย์ล็อปส์',en:'Eeylops Owl Emporium',w:20,h:14,floor:'straw',wall:'#5a4a3a',light:'candles',region:'london',
+  furn:[[1,1,18,1,'shelf'],[2,3,1,1,'perch'],[5,3,1,1,'perchgold'],[14,3,1,1,'perch'],[17,3,1,1,'perchgold'],[2,7,1,1,'perch'],[17,7,1,1,'perch'],[7,8,6,1,'counter'],[4,10,2,1,'crate'],[15,10,2,1,'crate']],
+  sits:[[10,11,'ลูบขนนกฮูกหิมะตัวน้อยอย่างเบามือ']]},
+ fortescue:{sub:'diagon',th:'ร้านไอศกรีมฟลอเรียน ฟอร์เทสคิว',en:"Florean Fortescue's Ice Cream",w:20,h:14,floor:'candy',wall:'#e8b8c8',light:'candles',region:'london',
+  furn:[[3,11,14,1,'counter','ไอศกรีม 30 รสชาติ'],[2,12,6,1,'candyshelf'],[12,12,6,1,'candyshelf'],[3,4,2,2,'roundtable'],[9,4,2,2,'roundtable'],[15,4,2,2,'roundtable'],[1,1,1,1,'plant'],[18,1,1,1,'plant'],[7,8,2,1,'candytable']],
+  sits:[[6,7,'ตักไอศกรีมรสพุดดิ้งช็อกโกแลตกับถั่ว']]},
+ quality_quidditch:{sub:'diagon',th:'ร้านอุปกรณ์ควิดดิชคุณภาพ',en:'Quality Quidditch Supplies',w:20,h:14,floor:'wood',wall:'#3a4a6a',light:'candles',region:'london',
+  furn:[[1,12,18,1,'shelf'],[2,3,1,3,'broomrack'],[17,3,1,3,'broomrack'],[6,3,1,1,'mannequin'],[13,3,1,1,'mannequin'],[8,6,4,1,'trophycase','ไม้กวาดนิมบัสรุ่นใหม่'],[4,9,2,1,'crate'],[14,9,2,1,'crate'],[9,2,2,1,'banner']],
+  sits:[[10,9,'จ้องไม้กวาดรุ่นใหม่ในตู้กระจกตาเป็นประกาย']]},
+ weasleys_wheezes:{sub:'diagon',th:'ร้านเกมกลวิเศษวีสลีย์',en:"Weasleys' Wizard Wheezes",w:24,h:16,floor:'candy',wall:'#d86a2a',light:'candles',region:'london',
+  furn:[[1,14,22,1,'jokeshelf'],[1,3,1,9,'jokeshelf'],[22,3,1,9,'jokeshelf'],[5,4,4,1,'candyshelf'],[15,4,4,1,'candyshelf'],[9,9,6,1,'counter','กล่องขนมโดดเรียน'],[11,2,2,1,'gears'],[4,10,2,1,'candytable'],[18,10,2,1,'candytable'],[11,6,2,1,'banner']],
+  sits:[[12,12,'หัวเราะกับพลุมังกรที่บินวนรอบเพดาน']]},
+ malkins:{sub:'diagon',th:'ร้านเสื้อคลุมมาดามมัลกิ้น',en:"Madam Malkin's Robes",w:20,h:14,floor:'bluerug',wall:'#7a5a8a',light:'candles',region:'london',
+  furn:[[1,12,18,1,'shelf'],[3,3,1,1,'mannequin'],[6,3,1,1,'mannequin'],[13,3,1,1,'mannequin'],[16,3,1,1,'mannequin'],[9,2,2,1,'mirror'],[7,8,6,1,'counter'],[2,7,1,1,'quills'],[17,7,1,1,'plant']],
+  sits:[[10,10,'ยืนบนม้านั่งให้วัดตัวตัดเสื้อคลุมฮอกวอตส์']]},
+ knockturn_entrance:{th:'ปากตรอกน็อกเทิร์น',en:'Knockturn Alley Entrance',w:24,h:16,floor:'cobble',wall:'#3a3448',out:1,village:1,region:'london',
+  furn:[[1,1,22,1,'shopwin'],[20,3,1,10,'fence'],[18,7,1,1,'sign','ห้ามเข้าลึกกว่านี้นะ!'],[4,4,1,1,'lantern'],[12,4,1,1,'lantern'],[6,12,2,1,'crate'],[14,12,1,1,'barrel'],[9,8,2,2,'shack','ร้านโบร์กินแอนด์เบิร์กส (ปิด)'],[2,13,2,1,'flowers']],
+  sits:[[5,9,'แอบมองตรอกมืดแล้วรีบกลับไปทางไดแอกอน']]},
+ leaky_cauldron:{th:'ร้านหม้อใหญ่รั่ว',en:'The Leaky Cauldron',w:26,h:16,floor:'wood',wall:'#5a3a2a',light:'fire',region:'london',
+  furn:[[2,1,10,1,'counter','บาร์ของทอม'],[2,2,10,1,'barrel'],[20,1,4,1,'fire','เตาผงฟลู'],[4,6,2,2,'roundtable'],[10,7,2,2,'roundtable'],[18,7,2,2,'roundtable'],[5,11,3,1,'longtable'],[22,11,2,3,'stairs'],[1,14,1,1,'lamp'],[15,3,1,1,'clock'],[14,13,1,1,'plant']],
+  sits:[[8,9,'จิบบัตเตอร์เบียร์อุ่นๆ ข้างเตาผิง']]},
+ kings_cross:{th:'สถานีคิงส์ครอส ชานชาลา 9¾',en:"King's Cross · Platform 9¾",w:44,h:22,floor:'stone',wall:'#7a4a3a',light:'candles',region:'london',
+  furn:[[3,16,38,3,'train','ฮอกวอตส์เอ็กซ์เพรส'],[2,14,40,1,'platform'],[20,7,3,1,'partition','ชานชาลา 9¾'],[21,8,1,1,'sign','ชานชาลา 9¾'],[6,5,1,2,'crate','รถเข็นกระเป๋า'],[7,5,1,1,'perch'],[30,5,1,2,'crate'],[12,10,3,1,'bench'],[28,10,3,1,'bench'],[21,1,2,1,'clock'],[2,2,1,1,'lamp'],[41,2,1,1,'lamp'],[36,9,1,1,'sign','← พอร์ตคีย์/ฟลู']],
+  sits:[[18,11,'วิ่งทะลุกำแพงอิฐเข้ามาที่ชานชาลา 9¾']]},
+ express_carriage:{th:'ตู้โดยสารฮอกวอตส์เอ็กซ์เพรส',en:'Hogwarts Express Carriage',w:30,h:9,floor:'redrug',wall:'#7a2a2a',light:'candles',region:'hogsmeade',
+  furn:[[1,1,4,1,'sofa'],[8,1,4,1,'sofa'],[15,1,4,1,'sofa'],[22,1,4,1,'sofa'],[6,1,1,2,'partition'],[13,1,1,2,'partition'],[20,1,1,2,'partition'],[27,1,1,2,'partition'],[3,3,2,1,'teaset'],[17,3,2,1,'teaset'],[10,6,2,1,'candytable','รถเข็นขนม'],[1,7,4,1,'sofa'],[24,7,4,1,'sofa'],[3,0,2,1,'window'],[10,0,2,1,'window'],[17,0,2,1,'window'],[24,0,2,1,'window']],
+  sits:[[9,4.5,'ซื้อกบช็อกโกแลตจากรถเข็นขนม แล้วดูวิวทุ่งหญ้า']]},
+ ministry_atrium:{th:'โถงกระทรวงเวทมนตร์',en:'Ministry of Magic Atrium',w:40,h:24,floor:'bluerug',wall:'#1f4a3a',light:'fire',region:'london',
+  furn:[[1,3,1,3,'fire'],[1,9,1,3,'fire'],[1,15,1,3,'fire'],[38,3,1,3,'fire'],[38,9,1,3,'fire'],[38,15,1,3,'fire'],[17,8,6,5,'fountain','น้ำพุแห่งภราดรภาพ'],[16,18,8,1,'desk','จุดตรวจไม้กายสิทธิ์'],[19,1,2,1,'clock'],[8,1,2,1,'banner'],[30,1,2,1,'banner'],[6,20,1,1,'statue'],[33,20,1,1,'statue'],[10,6,1,1,'lamp'],[29,6,1,1,'lamp']],
+  sits:[[20,15,'มองบันทึกช่วยจำกระดาษพับเป็นนกบินว่อนเหนือหัว']]},
+ grimmauld_place:{th:'บ้านเลขที่ 12 กริมโมลด์เพลซ',en:'12 Grimmauld Place',w:22,h:14,floor:'wood',wall:'#3a4a3a',light:'candles',region:'london',
+  furn:[[5,5,10,2,'longtable','โต๊ะประชุมภาคี'],[1,1,3,1,'fire'],[8,1,6,1,'tapestry','ผ้าทอต้นตระกูลแบล็ก'],[17,1,2,1,'portrait'],[1,5,1,4,'shelf'],[20,5,1,4,'shelf'],[3,11,1,1,'candelabra'],[18,11,1,1,'candelabra'],[17,9,2,1,'cauldron'],[2,12,2,1,'teaset']],
+  sits:[[10,9,'ช่วยกันทำความสะอาดบ้านจนสว่างอบอุ่นขึ้น']]},
+ burrow_garden:{th:'สวนบ้านโพรงกระต่าย',en:'The Burrow Garden',w:50,h:30,floor:'grass',wall:'#7a8a4a',out:1,region:'ottery',
+  furn:[[16,1,14,7,'house','บ้านโพรงกระต่าย'],[2,2,4,4,'shack','โรงรถของมิสเตอร์วีสลีย์'],[34,2,4,3,'shack','โรงเก็บไม้กวาด'],[8,10,6,3,'pumpkins'],[3,16,8,2,'flowers'],[20,12,6,2,'table','โต๊ะปิกนิก'],[14,20,12,1,'fence'],[42,8,2,2,'tree'],[6,24,2,2,'oak'],[30,24,2,2,'birch'],[26,9,1,1,'broomrack'],[2,12,1,1,'mushrooms'],[46,26,1,1,'mushrooms'],[30,14,2,1,'bench']],
+  water:[36,18,10,6],dock:[39,16,2,4],
+  sits:[[22,15.5,'ไล่จับโนมสวนแล้วโยนข้ามรั้วไปเบาๆ']]},
+ burrow_house:{th:'ในบ้านโพรงกระต่าย',en:'The Burrow (Kitchen)',w:22,h:14,floor:'wood',wall:'#8a6a4a',light:'fire',region:'ottery',
+  furn:[[6,5,8,2,'longtable','โต๊ะอาหารครอบครัววีสลีย์'],[1,1,3,1,'fire','เตาผงฟลู'],[9,1,2,1,'clock','นาฬิกาครอบครัววีสลีย์'],[14,1,4,1,'shelf'],[18,4,2,2,'cauldron'],[1,9,3,2,'sofa'],[17,10,3,3,'stairs'],[5,1,2,1,'teaset'],[20,1,1,1,'plant'],[12,10,2,1,'books']],
+  sits:[[10,9,'ช่วยคุณนายวีสลีย์ถักผ้าพันคอด้วยไม้กายสิทธิ์']]},
+ lovegood_house:{th:'บ้านเลิฟกู้ด',en:'The Lovegood House',w:18,h:14,floor:'wood',wall:'#5a7a9a',light:'candles',region:'ottery',
+  furn:[[6,4,4,3,'gears','แท่นพิมพ์เดอะควิบเบลอร์'],[1,1,4,1,'shelf'],[13,1,4,1,'books'],[1,5,1,4,'fruitpaint'],[14,9,3,3,'stairs'],[2,11,3,1,'flowers'],[8,1,2,1,'tapestry','ภาพวาดเพื่อนๆ บนเพดาน'],[11,9,1,1,'plant']],
+  sits:[[7,10,'อ่านเดอะควิบเบลอร์กลับหัวเพื่อหาคำใบ้ลับ']]},
+ godrics_hollow:{th:'ก็อดริกส์ฮอลโลว์ (ฤดูหนาว)',en:"Godric's Hollow (Winter)",w:50,h:30,floor:'white',wall:'#8a9aaa',out:1,village:1,snowy:1,region:'godric',
+  furn:[[3,1,9,6,'house'],[15,1,8,6,'house'],[27,1,9,6,'house','โบสถ์ประจำหมู่บ้าน'],[40,1,8,6,'house'],[22,12,3,3,'statue','อนุสรณ์ใจกลางจัตุรัส'],[20,11,7,1,'flowers'],[6,12,1,1,'lamp'],[16,18,1,1,'lamp'],[32,18,1,1,'lamp'],[44,12,1,1,'lamp'],[4,22,2,2,'pine'],[12,25,2,2,'pine'],[38,24,2,2,'pine'],[45,20,2,2,'pine'],[24,24,4,1,'bench'],[30,9,10,1,'fence'],[9,16,2,1,'stall','แผงช็อกโกแลตร้อน']],
+  sits:[[24,21,'ฟังเสียงเพลงคริสต์มาสจากโบสถ์ท่ามกลางหิมะ']]},
+ boats_arrival:{th:'ท่าเรือนักเรียนปีหนึ่ง',en:'First-Years Boat Landing',w:40,h:24,floor:'grass',wall:'#5a6a5a',out:1,region:'hogwarts',
+  furn:[[3,1,4,3,'boathouse'],[30,1,6,3,'rock'],[10,3,1,1,'lantern'],[28,4,1,1,'lantern'],[4,7,2,2,'rock'],[34,8,2,2,'pine']],
+  water:[4,11,32,12],dock:[17,6,6,7],
+  sits:[[20,8,'นั่งเรือข้ามทะเลสาบมองปราสาทที่ส่องแสงระยิบ']]},
+ hufflepuff_barrels:{th:'ทางเข้าถังไม้ฮัฟเฟิลพัฟ',en:'Hufflepuff Barrel Entrance',w:18,h:10,floor:'stone',wall:'#6a5a3a',light:'torch',region:'hogwarts',
+  furn:[[3,1,5,1,'barrel'],[11,1,5,1,'barrel'],[3,2,5,1,'barrel'],[11,2,5,1,'barrel'],[2,7,1,1,'plant'],[15,7,1,1,'plant'],[14,5,1,1,'sign','เคาะจังหวะ "เฮลกา ฮัฟเฟิลพัฟ"'],[2,4,1,1,'torch'],[15,4,1,1,'torch']],
+  sits:[[9,6,'เคาะถังไม้ตามจังหวะ ประตูกลมเปิดออก']]},
+ gryffindor_dorm:{th:'หอนอนกริฟฟินดอร์',en:'Gryffindor Dormitory',w:22,h:12,floor:'redrug',wall:'#7a2a2a',light:'candles',region:'hogwarts',
+  furn:[[2,1,3,3,'bed'],[7,1,3,3,'bed'],[12,1,3,3,'bed'],[17,1,3,3,'bed'],[2,8,3,3,'bed'],[3,5,1,1,'crate'],[8,5,1,1,'crate'],[13,5,1,1,'crate'],[18,5,1,1,'crate'],[16,9,2,1,'window'],[9,9,3,2,'rug'],[20,8,1,1,'candelabra']],
+  sits:[[10,7,'นอนเล่นบนเตียงสี่เสา ฟังเสียงฝนพรำ']]},
+ ravenclaw_balcony:{th:'ระเบียงหอคอยเรเวนคลอ',en:'Ravenclaw Tower Balcony',w:24,h:12,floor:'stone',wall:'#2a3a6a',outdoorSky:1,region:'hogwarts',
+  furn:[[1,11,22,1,'rail'],[4,3,1,1,'telescope'],[19,3,1,1,'telescope'],[10,2,1,1,'statue','รูปปั้นโรวีนา เรเวนคลอ'],[2,7,2,1,'planter'],[20,7,2,1,'planter'],[8,8,3,1,'bench'],[14,8,3,1,'bench']],
+  sits:[[12,9,'มองดาวและภูเขาไกลๆ จากระเบียงสูง']]}
+};
+(function(){let n=0;for(const id in ZONES)if(ZONES[id].num>n)n=ZONES[id].num;for(const id in V11Z){const z=V11Z[id];z.x6=1;z.v11=1;if(!z.sub)z.num=++n;ZONES[id]=z;}
+ const F=(id,side,f)=>{const z=ZONES[id];return Math.max(1,Math.min((side==='N'||side==='S'?z.w:z.h)-2,Math.round((side==='N'||side==='S'?z.w:z.h)*f)));};
+ CONNS.push(
+  ['diagon_alley','N',6,'ollivanders','S',10],['diagon_alley','N',18,'gringotts','S',14],['diagon_alley','N',30,'flourish_blotts','S',11],['diagon_alley','N',42,'eeylops','S',10],['diagon_alley','N',54,'malkins','S',10],
+  ['diagon_alley','S',10,'fortescue','N',10],['diagon_alley','S',24,'quality_quidditch','N',10],['diagon_alley','S',38,'weasleys_wheezes','N',12],
+  ['diagon_alley','E',12,'knockturn_entrance','W',8],['leaky_cauldron','E',8,'diagon_alley','W',12],
+  ['kings_cross','N',12,'leaky_cauldron','S',8],['kings_cross','N',22,'ministry_atrium','S',20],['kings_cross','N',32,'grimmauld_place','S',11],
+  ['kings_cross','E',11,'express_carriage','W',4],['express_carriage','E',4,'hogsmeade_station','W',F('hogsmeade_station','W',0.5)],
+  ['kings_cross','W',6,'burrow_garden','N',25,'pk'],['kings_cross','W',11,'godrics_hollow','E',15,'pk'],
+  ['burrow_garden','W',15,'burrow_house','E',7],['burrow_garden','E',12,'lovegood_house','W',7],['stone_circle','N',F('stone_circle','N',0.5),'burrow_garden','S',25,'pk'],
+  ['lake_shore','S',F('lake_shore','S',0.5),'boats_arrival','N',20],
+  ['kitchen_corridor','W',F('kitchen_corridor','W',0.5),'hufflepuff_barrels','E',5],['hufflepuff_barrels','N',9,'hufflepuff_common','S',F('hufflepuff_common','S',0.5)],
+  ['gryffindor_common','E',F('gryffindor_common','E',0.5),'gryffindor_dorm','W',6],['ravenclaw_common','E',F('ravenclaw_common','E',0.5),'ravenclaw_balcony','W',6]);
+})();
+
+function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const d of (z.doors||[])){if(d.side!==side||d.pk)continue;const z2=ZONES[d.to];if(z2&&(z2.out||z2.outdoorSky))return d;}return null;}
 function openOutdoorSides(z){return{N:!!outdoorEdge(z,'N'),S:!!outdoorEdge(z,'S'),W:!!outdoorEdge(z,'W'),E:!!outdoorEdge(z,'E')};}
 
 // ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
@@ -680,7 +781,7 @@ const NONSOLID_K=['rug','stairs','torch','window','banner','portrait','sign','sk
 /* --- build doors, validate zones --- */
 const ZONE_IDS=Object.keys(ZONES);const MAIN_ZONE_IDS=ZONE_IDS.filter(id=>!ZONES[id].sub&&ZONES[id].num<=24);
 for(const id of ZONE_IDS){const z=ZONES[id];z.id=id;z.doors=[];z.furn=z.furn.map(f=>({x:f[0],y:f[1],w:f[2],h:f[3],k:f[4],label:f[5]||'',solid:!NONSOLID_K.includes(f[4])}));}
-for(const c of CONNS){ZONES[c[0]].doors.push({side:c[1],pos:c[2],to:c[3]});ZONES[c[3]].doors.push({side:c[4],pos:c[5],to:c[0]});}
+for(const c of CONNS){ZONES[c[0]].doors.push({side:c[1],pos:c[2],to:c[3],pk:c[6]==='pk'});ZONES[c[3]].doors.push({side:c[4],pos:c[5],to:c[0],pk:c[6]==='pk'});}
 function doorTrigger(z,d){ // returns center point at the inner edge
   if(d.side==='N')return{x:d.pos+.5,y:1};if(d.side==='S')return{x:d.pos+.5,y:z.h-1};
   if(d.side==='W')return{x:1,y:d.pos+.5};return{x:z.w-1,y:d.pos+.5};}
@@ -909,7 +1010,7 @@ const IS_MOBILE=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||(window.m
 const QUALS={low:{pr:1,sh:1024,bloom:0,ssao:0,amb:0.5,aa:false},medium:{pr:1.5,sh:2048,bloom:1,ssao:0,amb:0.8,aa:true},high:{pr:2,sh:2048,bloom:1,ssao:0,amb:1,aa:true}};
 function detectQ(){try{const c=document.createElement('canvas').getContext('webgl');const e=c&&c.getExtension('WEBGL_debug_renderer_info');const r=e?c.getParameter(e.UNMASKED_RENDERER_WEBGL):'';if(/SwiftShader|llvmpipe|Software|Basic Render/i.test(r))return 'low';}catch(e){}return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||matchMedia('(pointer:coarse)').matches?'medium':'high';}
 const QSET=new URLSearchParams(location.search).get('q')||localStorage.getItem('hcm_q')||'auto';const QAUTO=detectQ();const QN=QUALS[QSET]?QSET:QAUTO;const Q=window.__Q=QUALS[QN];
-const renderer=new THREE.WebGLRenderer({antialias:Q.aa,powerPreference:'high-performance'});renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const renderer=new THREE.WebGLRenderer({antialias:Q.aa,powerPreference:'high-performance'});renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.outputColorSpace=THREE.SRGBColorSpace;
 let PX=1,LW=1,LH=1;function pixSize(){LW=VW;LH=VH;renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,Q.pr));renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}
 pixSize();
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -920,7 +1021,7 @@ const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,200);
 function camProj(){const h=cam.dist*0.42,a=VW/VH;camera.left=-h*a;camera.right=h*a;camera.top=h;camera.bottom=-h;camera.updateProjectionMatrix();}
 function onResize(){updRot();[VW,VH]=viewSize();pixSize();camProj();}
 // low-res target + lo-fi palette pass (desaturate, cool shadows, warm highlights, ordered dither, posterize)
-let composer=null,bloomPass=null;if(Q.bloom||Q.ssao){composer=window.__composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));if(Q.ssao){const ss=new SSAOPass(scene,camera,VW,VH);ss.kernelRadius=0.6;ss.minDistance=0.0006;ss.maxDistance=0.02;composer.addPass(ss);}if(Q.bloom){bloomPass=new UnrealBloomPass(new THREE.Vector2(VW,VH),0.6,0.6,0.78);composer.addPass(bloomPass);}composer.addPass(new OutputPass());composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(VW,VH);}
+let composer=null,bloomPass=null;if(Q.bloom||Q.ssao){composer=window.__composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));if(Q.ssao){const ss=new SSAOPass(scene,camera,VW,VH);ss.kernelRadius=0.6;ss.minDistance=0.0006;ss.maxDistance=0.02;composer.addPass(ss);}if(Q.bloom){bloomPass=new UnrealBloomPass(new THREE.Vector2(VW,VH),0.5,0.55,0.84);composer.addPass(bloomPass);}composer.addPass(new OutputPass());composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(VW,VH);}
 const postMat={uniforms:{uRes:{value:new THREE.Vector2()},uWet:{value:0},tD:{value:null}}};
 const pmrem=new THREE.PMREMGenerator(renderer);const ENVC={};
 function envFor(outside,t,TL){const key=(outside?'o':'i')+t;if(ENVC[key])return ENVC[key];let tex;if(!outside){tex=pmrem.fromScene(new RoomEnvironment(),0.04).texture;}else{const es=new THREE.Scene();es.add(new THREE.Mesh(new THREE.SphereGeometry(50,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,uniforms:{top:{value:new THREE.Color(TL.sky[0])},bot:{value:new THREE.Color(TL.sky[1])},gr:{value:new THREE.Color(TL.hg)}},vertexShader:'varying vec3 vP;void main(){vP=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'varying vec3 vP;uniform vec3 top,bot,gr;void main(){vec3 c=vP.y>0.?mix(bot,top,smoothstep(0.,.6,vP.y)):mix(bot,gr*.6,smoothstep(0.,-.3,vP.y));gl_FragColor=vec4(c,1.);}'})));const sun=new THREE.Mesh(new THREE.SphereGeometry(4,12,8),new THREE.MeshBasicMaterial({color:new THREE.Color(TL.sc).multiplyScalar(t==='night'?1:6)}));sun.position.set(25,30,20);es.add(sun);tex=pmrem.fromScene(es,0.02).texture;}return ENVC[key]=tex;}
@@ -1631,7 +1732,7 @@ const QEYE={};function qEyeTex(src,col){const key=col;if(QEYE[key])return QEYE[k
 function qHolder(bone,ptModel,rotZ,scale,wq){const h=new THREE.Group();bone.add(h);const q=wq.clone().invert();if(rotZ)q.multiply(new THREE.Quaternion().setFromAxisAngle(_Z,rotZ));h.quaternion.copy(q);
   bone.updateWorldMatrix(true,false);h.position.copy(bone.worldToLocal(ptModel.clone()));if(scale)h.scale.setScalar(scale);return h;}
 /* ===================== v9 ANIME STYLE: toon ramp, rim light, inverted-hull outlines, anime heads/hair ===================== */
-const TOON_RAMP=(()=>{const d=new Uint8Array([158,146,176,255, 210,204,218,255, 246,246,246,255, 255,255,255,255]);const t=new THREE.DataTexture(d,4,1,THREE.RGBAFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.generateMipmaps=false;t.needsUpdate=true;return t;})();
+const TOON_RAMP=(()=>{const d=new Uint8Array([168,156,188,255, 192,182,208,255, 216,210,228,255, 236,232,242,255, 250,248,250,255, 255,255,255,255]);const t=new THREE.DataTexture(d,6,1,THREE.RGBAFormat);t.minFilter=t.magFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t;})();
 const RIMU={value:0.32};
 function rimify(m){const ob=m.onBeforeCompile;m.onBeforeCompile=function(sh,r){if(ob)ob.call(this,sh,r);sh.uniforms.uRim=RIMU;sh.fragmentShader='uniform float uRim;\n'+sh.fragmentShader.replace('#include <opaque_fragment>','{vec3 vd=isOrthographic?vec3(0.0,0.0,1.0):normalize(vViewPosition);float rr=1.0-clamp(dot(normal,vd),0.0,1.0);outgoingLight+=diffuseColor.rgb*uRim*smoothstep(0.62,0.95,rr);}\n#include <opaque_fragment>');};
   const ck=m.customProgramCacheKey?m.customProgramCacheKey.bind(m):()=>'';m.customProgramCacheKey=()=>ck()+'|rim';return m;}
@@ -1704,11 +1805,13 @@ function animeHair(hd,L,hairC,fem,M){const mat=toonify(new THREE.MeshStandardMat
   const add=(gm,x,y,z,sx,sy,sz,rx,ry,rz)=>{const m=new THREE.Mesh(gm,mat);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.rotation.order='YXZ';m.rotation.set(rx||0,ry||0,rz||0);m.castShadow=true;hd.add(m);return m;};
   const R=0.104;const onHead=(a,y)=>{const r=R*Math.sqrt(Math.max(0,1-Math.pow((y-0.11)/0.13,2)))+0.012;return [Math.sin(a)*r*0.86,y,Math.cos(a)*r*0.86-0.006];};
   const lock=(a,y,len,w,tilt,tw,ins)=>{let [x,yy,z]=onHead(a,y);if(ins){x*=ins;z=z*ins;}const m=add(lockGeo(),x,yy,z,w*1.35,len,w*0.7,tilt,a,tw||0);m.userData.noOutline=1;return m;};
-  const cap=(big)=>add(geo('hcap9',()=>new THREE.SphereGeometry(1,32,20,0,Math.PI*2,0,Math.PI*0.62)),0,0.118,-0.022,0.12*(big||1),0.124*(big||1),0.124*(big||1),-0.62);
+  const cap=(big)=>add(geo('hcap9',()=>new THREE.SphereGeometry(1,32,20,0,Math.PI*2,0,Math.PI*0.62)),0,0.118,-0.022,0.118*(big||1),0.118*(big||1),0.122*(big||1),-0.62);
   const bangs=(n,len,spread,opt)=>{opt=opt||{};for(let i=0;i<n;i++){const t=n>1?i/(n-1):0.5;const a=(t-0.5)*2*spread+(opt.shift||0);const cl=len*(opt.even?1:(0.8+0.35*Math.cos((t-0.5)*Math.PI)))*(0.9+hash(i,7)*0.2);lock(a,0.215,cl*0.95,0.042,-0.42-(opt.lift||0),(t-0.5)*(opt.sweep||0.3),1.12);}};
   const sides=(len,n)=>{for(const s of[-1,1])for(let i=0;i<(n||2);i++)lock(s*(1.3+i*0.22),0.17,len*(1-i*0.12),0.036,-0.12,s*0.1);};
   const back=(n,len,w)=>{for(let i=0;i<n;i++){const a=Math.PI*0.62+i/(n-1)*Math.PI*0.76;lock(a,0.19,len*(0.92+hash(i,3)*0.16),w||0.045,0.08,0);}};
   const shine=()=>{const s=new THREE.Mesh(geo('hshine',()=>new THREE.TorusGeometry(1,0.06,4,24,Math.PI*0.75)),toonify(new THREE.MeshStandardMaterial({color:new THREE.Color(hairC).lerp(new THREE.Color('#ffffff'),0.45)})));s.scale.set(0.112,0.112,0.118);s.position.set(0,0.165,0.0);s.rotation.set(-Math.PI/2+0.25,0,Math.PI*0.125+Math.PI/2);s.userData.noOutline=1;hd.add(s);};
+  const crown=(n,len)=>{for(let i=0;i<n;i++){const a=Math.PI*0.35+i/n*Math.PI*1.3+hash(i,11)*0.2;lock(a,0.226,len*(0.85+hash(i,5)*0.3),0.052,0.35,0.15*(hash(i,2)-0.5),0.92);}};
+  if(!['buzz','thin','none'].includes(hs))crown(fem?6:7,fem?0.07:0.075);
   switch(hs){
    case'short':cap();bangs(8,0.075,0.95);sides(0.1);back(9,0.11);break;
    case'messy':cap();bangs(9,0.085,1.0,{sweep:0.5});sides(0.1);back(9,0.11);for(let i=0;i<9;i++){const a=hash(i,5)*6.28;const [x,y,z]=onHead(a,0.2+hash(i,2)*0.03);add(lockGeo(),x*0.8,y+0.01,z*0.8,0.03,0.05,0.02,Math.PI-1.1-hash(i,9)*0.5,a,0).userData.noOutline=1;}break;
@@ -1749,8 +1852,8 @@ function buildDistantCastle(z,t){const g=new THREE.Group();const night=t==='nigh
   styleModel(g,{w:1.0,col:night?'#1a1a30':'#4a4a6a'});return g;}
 /* ---------- stylised clouds & god rays ---------- */
 function addClouds(grp,z,t){if(t==='night')return;const cm=toonify(new THREE.MeshStandardMaterial({color:t==='sunset'?'#ffd0d8':'#ffffff',emissive:new THREE.Color(t==='sunset'?'#ff9a8a':'#d8e8ff'),emissiveIntensity:0.35}));const ld=geo('cloudlump',()=>new THREE.IcosahedronGeometry(1,3));
-  for(let i=0;i<9;i++){const c=new THREE.Group();const n=4+(i%3);for(let k=0;k<n;k++){const m=new THREE.Mesh(ld,cm);const s=2.2+hash(i,k)*2.2;m.scale.set(s*1.3,s*0.85,s);m.position.set((k-n/2)*2.6,Math.sin(k*1.7)*0.8+(k%2?1:0),hash(k,i)*1.5);c.add(m);}const fb=new THREE.Mesh(ld,cm);fb.scale.set(n*1.6,1.2,2.5);c.add(fb);
-    const x0=z.w/2-70+i*18,y0=22+hash(i,2)*14,z0=-38-hash(i,5)*20;c.position.set(x0,y0,z0);grp.add(c);ANIM8.push(tt=>{c.position.x=x0+((tt*0.4+i*30)%40)-20;});}}
+  for(let i=0;i<15;i++){const c=new THREE.Group();const n=4+(i%4);for(let k=0;k<n;k++){const m=new THREE.Mesh(ld,cm);const s=2.2+hash(i,k)*2.2;m.scale.set(s*1.3,s*0.85,s);m.position.set((k-n/2)*2.6,Math.sin(k*1.7)*0.8+(k%2?1:0),hash(k,i)*1.5);c.add(m);}const fb=new THREE.Mesh(ld,cm);fb.scale.set(n*1.6,1.2,2.5);c.add(fb);
+    const x0=z.w/2-80+i*12,y0=20+hash(i,2)*18,z0=-38-hash(i,5)*20;c.position.set(x0,y0,z0);grp.add(c);ANIM8.push(tt=>{c.position.x=x0+((tt*0.4+i*30)%40)-20;});}}
 function addGodRays(grp,z,t){if(t==='night'||weather==='rain'||weather==='snow')return;const mat=new THREE.MeshBasicMaterial({map:shaftTex(),color:new THREE.Color(t==='sunset'?'#ffb070':'#fff0c0').multiplyScalar(1.1),transparent:true,opacity:0.16,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
   for(let i=0;i<7;i++){const m=new THREE.Mesh(PLANE,mat);m.scale.set(3+hash(i,1)*4,30,1);m.position.set(z.w*(0.1+i*0.14),9,z.h*(0.2+hash(i,3)*0.6));m.rotation.set(0,Math.PI/4,0.55);grp.add(m);const ph=i;ANIM8.push(tt=>{m.material.opacity=0.12+0.05*Math.sin(tt*0.3+ph);});}}
 
@@ -1767,8 +1870,9 @@ function buildElfAnime(L,house,opt){opt=opt||{};const lite=!!opt.lite;const id=L
   const hd=new THREE.Group();hd.position.set(0,0.64,0);hd.scale.setScalar(1.2);rig.add(hd);
   const AF=animeHead(hd,L,skinC,false,ghost);
   // big bat-like ears
-  for(const s of[-1,1]){const e=new THREE.Mesh(geo('elfear',()=>{const g=new THREE.ConeGeometry(0.05,0.16,10);g.translate(0,0.08,0);g.scale(1,1,0.45);return g;}),skin);
-    e.position.set(s*0.095,0.1,-0.02);e.rotation.set(0.1,0,-s*1.75);hd.add(e);}
+  for(const s of[-1,1]){const e=new THREE.Mesh(geo('elfear11',()=>{const g=new THREE.SphereGeometry(1,16,12);const q=g.attributes.position;for(let i=0;i<q.count;i++){const y=q.getY(i);const t=(y+1)/2;q.setX(i,q.getX(i)*(1-0.55*t*t));q.setZ(i,q.getZ(i)*(0.35+0.25*(1-t))*(q.getZ(i)>0?0.6:1));}g.computeVertexNormals();g.scale(0.055,0.1,0.055);g.translate(0,0.09,0);return g;}),skin);
+    e.position.set(s*0.095,0.1,-0.02);e.rotation.set(0.25,s*0.35,-s*1.6);hd.add(e);
+    const ei=new THREE.Mesh(geo('elfearin',()=>{const g=new THREE.SphereGeometry(1,12,8);g.scale(0.03,0.065,0.012);g.translate(0,0.085,0.022);return g;}),toonify(new THREE.MeshStandardMaterial({color:new THREE.Color('#f0a8a8')})));ei.userData.noOutline=1;e.add(ei);}
   if(id==='dobby'&&!lite){const sk=new THREE.Mesh(geo('sock',()=>new THREE.CapsuleGeometry(0.03,0.1,4,8)),toonify(new THREE.MeshStandardMaterial({color:new THREE.Color('#7a8ab0')})));sk.position.set(0.22,0.38,0.05);rig.add(sk);}
   if(L.tea&&!lite){const cup=new THREE.Mesh(CYL,toonify(new THREE.MeshStandardMaterial({color:new THREE.Color('#fff')})));cup.scale.set(0.035,0.05,0.035);cup.position.set(-0.22,0.38,0.05);rig.add(cup);}
   const blob=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:BLOBTEX,transparent:true,depthWrite:false,opacity:0.45}));blob.rotation.x=-Math.PI/2;blob.position.y=0.015;blob.scale.set(0.55,0.4,1);root.add(blob);
@@ -1789,7 +1893,7 @@ function buildHuman(L,house,opt){opt=opt||{};if(L.elf)return buildElfAnime(L,hou
   if(!ghost&&!L.peeves){addShell(qShell(base,'pants'),fabric(stu?'#3a3a42':'#2a2630'));addShell(qShell(base,'shoes'),fabric('#141216',{roughness:0.35,side:THREE.FrontSide}));}
   const openRobe=stu||id==='lupin'||id==='hagrid';
   if(stu||id==='lupin'||id==='oliver'||id==='hagrid'){addShell(qShell(base,'shirt'),fabric(id==='hagrid'?'#6a5040':'#eef0f2',{roughness:0.75}));}
-  if(stu){addShell(qShell(base,'jumper'),fabric(id==='ron'?'#7a2a2a':'#55565e',{roughness:0.95,map:knitTex()}));}
+  if(stu){addShell(qShell(base,'jumper'),fabric(id==='ron'?'#7a2a2a':'#55565e',{roughness:0.95}));}
   if(openRobe){addShell(qShell(base,'robe'),robeMat);}else{addShell(qShell(base,'coat'),robeMat);}
   const flare=(L.stout||L.big?0.36:0.3)+(ghost?0.05:0);const len=ghost?1.0:(L.peeves?0.6:(I.pos.pelvis.y+0.1-0.1));
   addShell(qSkirt(base,openRobe?0.42:0.0,flare,len),robeMat);
@@ -1866,6 +1970,7 @@ function qAccessories(c){const {L,id,H,stu,lite,ghost,M,hd,chest,neck,hand,rig,h
     case'spiky':for(let i=0;i<7;i++){const sp=hm(G_CONE,hair,-0.08+i*0.027,0.25,0,0.025,0.1,0.025);sp.rotation.z=(i-3)*0.18;hd.add(sp);}break;
     case'curtain':for(const s of[-1,1])hd.addR(hm(G_BOX,hair,s*0.1,0.06,0.02,0.025,0.2,0.15));break;}
   if(L.beard){const bc=M(hairC,{r:0.8});if(id==='dumbledore'){const b=hm(hg('beardL',()=>{const g=new THREE.ConeGeometry(0.075,0.6,16);g.translate(0,-0.3,0);g.rotateX(Math.PI);return g;}),bc,0,0.04,0.09,1,1,0.7);b.rotation.x=Math.PI-0.12;hd.add(b);}
+    else if(L.big&&c.anime){const bm=hm(G_SPH,bc,0,-0.035,0.06,0.095,0.1,0.07);hd.addR(bm);for(let i=0;i<12;i++){const a=(i/11-0.5)*2.6;const e=Math.abs(a)/1.3;hd.addR(hm(G_ICO,bc,Math.sin(a)*0.095,-0.03+e*0.09+(i%2)*0.008,0.03+Math.cos(a)*0.05,0.03));}hd.addR(hm(G_SPH,bc,0,0.035,0.105,0.05,0.016,0.02));}
     else if(L.big){for(let i=0;i<22;i++){const a=hash(i,2)*Math.PI-Math.PI/2;hd.addR(hm(G_ICO,bc,Math.sin(a)*0.085,(c.anime?0.0:0.03)-hash(i,4)*0.12,(c.anime?0.05:0.06)+Math.cos(a)*0.05,c.anime?0.032:0.045));}}
     else if(id==='flitwick')hd.addR(hm(G_SPH,bc,0,0.03,0.085,0.05,0.06,0.04));}
   if(L.hat){const hc=M(L.hat,{r:0.85});const hat=new THREE.Group();hat.position.set(0,0.215,-0.01);hd.add(hat);hat.addR(hm(G_CYL,hc,0,0,0,0.21,0.01,0.21));
@@ -1928,7 +2033,7 @@ let WL=[];function labelSprite(text,kind){const o=new THREE.Object3D();o.userDat
 function buildEdgeScenery(z,grp){const OS=openOutdoorSides(z);const forest=z.floor==='forest'||z.floor==='grass';const N=Q===QUALS.low?80:180;
   const trunk=new THREE.InstancedMesh(CYL,toon('#6a4a32'),N),crown=new THREE.InstancedMesh(geo('edgecrown',()=>new THREE.IcosahedronGeometry(1,1)),toon(z.floor==='cobble'?'#7aa860':'#5aa858'),N),pine=new THREE.InstancedMesh(geo('edgepine',()=>new THREE.ConeGeometry(1,2.2,8)),toon('#3f8a5a'),N);
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),sc=new THREE.Vector3();let nt=0,np=0;
-  const gapAt=(side,a)=>{for(const d of z.doors){if(d.side!==side)continue;const z2=ZONES[d.to];if(!(z2&&(z2.out||z2.outdoorSky)))continue;if(Math.abs(a-(d.pos+0.5))<4)return true;}return false;};
+  const gapAt=(side,a)=>{for(const d of z.doors){if(d.side!==side||d.pk)continue;const z2=ZONES[d.to];if(!(z2&&(z2.out||z2.outdoorSky)))continue;if(Math.abs(a-(d.pos+0.5))<4)return true;}return false;};
   const place=(x,y,i)=>{const h=hash(i*7+3,i*13+1);if(h<0.45&&np<N){sc.set(0.7+h,0.9+h*0.8,0.7+h);v.set(x,1.1*sc.y,y);m4.compose(v,q,sc);pine.setMatrixAt(np++,m4);}
     else if(nt<N){const s2=0.9+h*0.9;sc.set(0.09,1.4,0.09);v.set(x,0.7,y);m4.compose(v,q,sc);trunk.setMatrixAt(nt,m4);sc.set(s2,s2*0.85,s2);v.set(x,1.4+s2*0.6,y);m4.compose(v,q,sc);crown.setMatrixAt(nt++,m4);}};
   let i=0;
@@ -1964,7 +2069,7 @@ function buildZone3D(){clearWorld();const z=zone,t=TIMES[timeIdx],TL=TIME_LIGHT[
   for(const f of z.furn)buildFurn(world,f);FB.flush(world);if(outside)buildEdgeScenery(z,world);
   for(const s of z.sits){const r=mesh(geo('ring',()=>new THREE.TorusGeometry(0.32,0.03,6,24)),new THREE.MeshBasicMaterial({color:0xf2d68a,transparent:true,opacity:0.7,depthWrite:false}),s.x,0.03,s.y,1,1,1,false);r.rotation.x=Math.PI/2;world.add(r);sitRings.push(r);world.add(mesh(CYL,toon('#b0607a'),s.x,0.05,s.y,0.22,0.08,0.22));}
   waterMat=null;boatMesh=null;
-  if(z.waterR){const w=z.waterR;waterMat=new THREE.MeshPhysicalMaterial({color:t==='night'?'#0a1830':'#1d4a66',roughness:0.08,metalness:0,transparent:true,opacity:0.88,clearcoat:1,clearcoatRoughness:0.05,normalMap:waterNormal(),normalScale:new THREE.Vector2(0.18,0.18)});waterMat.normalMap.repeat.set(w.w/3,w.h/3);
+  if(z.waterR){const w=z.waterR;waterMat=new THREE.MeshPhysicalMaterial({color:t==='night'?'#12305a':(t==='sunset'?'#3a6a8a':'#2a7aa8'),roughness:0.08,metalness:0,transparent:true,opacity:0.88,clearcoat:1,clearcoatRoughness:0.05,normalMap:waterNormal(),normalScale:new THREE.Vector2(0.18,0.18)});waterMat.normalMap.repeat.set(w.w/3,w.h/3);
     const wm=new THREE.Mesh(new THREE.PlaneGeometry(w.w,w.h,40,24),waterMat);wm.userData.own=1;wm.rotation.x=-Math.PI/2;wm.position.set(w.x+w.w/2,0.03,w.y+w.h/2);world.add(wm);
     const d=z.dock;box(world,d[2],0.12,d[3]+0.4,'#7a5a3a',d[0]+d[2]/2,0.02,d[1]+d[3]/2+0.2);
     boatMesh=new THREE.Group();boatMesh.add(outlined(mesh(geo('hull',()=>new THREE.SphereGeometry(1,16,8,0,Math.PI*2,Math.PI/2,Math.PI/2)),toon('#6a4426'),0,0.22,0,0.45,0.25,0.85),1.04));boatMesh.add(mesh(BOX,toon('#8a5a32'),0,0.2,0,0.8,0.04,0.2));boatMesh.add(mesh(SPHL,basic('#ffd77a'),0,0.75,0.7,0.06));boatMesh.add(mesh(CYL,toon('#5a3a20'),0,0.5,0.7,0.015,0.5,0.015));world.add(boatMesh);}
@@ -2376,8 +2481,32 @@ function buildMagic(){if(MG){scene.remove(MG);}MG=new THREE.Group();scene.add(MG
   // animated portraits / portraits replaced in buildFurn
   FB.flush(G);}
 /* ---------- detailed furniture overrides ---------- */
-function buildFurn(W,f){const k=f.k;const fn=FURN8[k];if(!fn)return buildFurnV7(W,f);const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f.y+f.h/2);try{fn(g,f,f.w,f.h);}catch(e){console.warn('furn8',k,e);}W.add(g);if(g.userData.anim)animFurn.push(g);}
+function buildFurn(W,f){const k=f.k;const fn=FURN8[k];if(!fn)return buildFurnV7(W,f);const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f.y+f.h/2);try{fn(g,f,f.w,f.h);}catch(e){console.warn('furn8',k,e);(window.__fw=window.__fw||[]).push(k+':'+e.message);}W.add(g);if(g.userData.anim)animFurn.push(g);}
 const FURN8={
+ armour(g,f,w,d){const st=fmat('arm11',()=>toonify(new THREE.MeshStandardMaterial({color:'#c4cad8',metalness:0.5,roughness:0.35}))),dk=fmat('arm11d',()=>toonify(new THREE.MeshStandardMaterial({color:'#6a6e80'}))),rd=fmat('arm11r',()=>toonify(new THREE.MeshStandardMaterial({color:'#b02a3a'})));
+  wadd(g,'arm_pl',BOX,dk,0,0.08,0,0.7,0.16,0.55);for(const sx of[-0.12,0.12]){wadd(g,'arm_lg',latheGeo('armleg',[[0,0],[0.09,0],[0.08,0.3],[0.07,0.42],[0.085,0.5],[0.075,0.78],[0,0.8]]),st,sx,0.16,0,1,1,1);}
+  wadd(g,'arm_to',latheGeo('armtorso',[[0,0],[0.2,0],[0.22,0.12],[0.25,0.38],[0.27,0.55],[0.2,0.66],[0,0.68]]),st,0,0.94,0,1,1,0.75);wadd(g,'arm_belt',BOX,dk,0,0.98,0,0.46,0.05,0.34);
+  for(const sx of[-1,1]){wadd(g,'arm_pa',SPH,st,sx*0.28,1.56,0,0.13,0.1,0.13);wadd(g,'arm_ar',latheGeo('armarm',[[0,0],[0.06,0],[0.055,0.25],[0.065,0.3],[0.05,0.55],[0,0.56]]),st,sx*0.32,0.96,0,1,1,1);}
+  wadd(g,'arm_he',latheGeo('armhelm',[[0,0],[0.13,0],[0.15,0.08],[0.15,0.2],[0.12,0.3],[0.06,0.35],[0,0.36]]),st,0,1.66,0,1,1,1);wadd(g,'arm_vi',BOX,dk,0,1.8,0.14,0.18,0.025,0.03);
+  wadd(g,'arm_pm',CONE,rd,0,2.12,-0.03,0.07,0.22,0.07);wadd(g,'arm_hb',CYL,dk,0.42,1.1,0.05,0.025,2.2,0.025);wadd(g,'arm_bl',latheGeo('armax',[[0,0],[0.14,0.05],[0.14,0.2],[0,0.3]],4),st,0.42,2.05,0.05,0.4,1,1.6);},
+ trophycase(g,f,w,d){const wd=fmat('tc11w',()=>toonify(new THREE.MeshStandardMaterial({color:'#6a3e22'}))),gl=fmat('tc11g',()=>new THREE.MeshStandardMaterial({color:'#d8f0ff',transparent:true,opacity:0.22,roughness:0.05,depthWrite:false})),au=fmat('tc11a',()=>toonify(new THREE.MeshStandardMaterial({color:'#f2c544',metalness:0.7,roughness:0.25,emissive:new THREE.Color('#5a3a00'),emissiveIntensity:0.4}))),sv=fmat('tc11s',()=>toonify(new THREE.MeshStandardMaterial({color:'#d8dce8',metalness:0.6,roughness:0.3})));
+  const L=Math.max(w,d),D=Math.min(w,d),rot=w>=d?0:Math.PI/2,ax=(a,b)=>w>=d?[a,b]:[b,a];
+  wadd(g,'tc_base',BOX,wd,0,0.12,0,w,0.24,d);wadd(g,'tc_top',BOX,wd,0,2.0,0,w+0.12,0.14,d+0.12);
+  const bk=ax(0,-D/2+0.04);wadd(g,'tc_bk',BOX,wd,bk[0],1.05,bk[1],w>=d?w:0.06,1.9,w>=d?0.06:d);for(const sy of[0.75,1.35])wadd(g,'tc_sh',BOX,wd,0,sy,0,w-0.1,0.04,d-0.1);
+  const gp=ax(0,D/2-0.02);wadd(g,'tc_gl',BOX,gl,gp[0],1.05,gp[1],w>=d?w-0.1:0.02,1.7,w>=d?0.02:d-0.1);
+  const cup=latheGeo('cup11',[[0,0],[0.08,0],[0.08,0.02],[0.02,0.04],[0.02,0.12],[0.1,0.18],[0.12,0.3],[0,0.3]]);const n=Math.max(2,Math.floor(L*2.2));
+  for(let r=0;r<3;r++)for(let i=0;i<n;i++){const t=-L/2+0.3+(L-0.6)*(i+0.5)/n;const p=ax(t,0);const big=hash(i,r)>0.6;wadd(g,'tc_cup'+r+i%2,cup,(i+r)%3?au:sv,p[0],0.25+r*0.6,p[1],big?1.2:0.85,big?1.3:0.9,big?1.2:0.85);}},
+ train(g,f,w,d){const L=Math.max(w,d),rot=w>=d?0:Math.PI/2;const red=fmat('tr11r',()=>toonify(new THREE.MeshStandardMaterial({color:'#b0182a'}))),blk=fmat('tr11k',()=>toonify(new THREE.MeshStandardMaterial({color:'#24242c'}))),au=fmat('tr11a',()=>toonify(new THREE.MeshStandardMaterial({color:'#e8b83a',metalness:0.6,roughness:0.3}))),win=fmat('tr11w',()=>toonify(new THREE.MeshStandardMaterial({color:'#ffe8a8',emissive:new THREE.Color('#ffcf70'),emissiveIntensity:0.9}))),rf=fmat('tr11f',()=>toonify(new THREE.MeshStandardMaterial({color:'#3a3a44'})));
+  const AX=w>=d?[0,0,0,Math.PI/2]:[0,0,Math.PI/2,0],SD=w>=d?[0,0,Math.PI/2,0]:[0,0,0,Math.PI/2];const P=(a,b)=>w>=d?[a,b]:[b,a];const S=(a,b,c)=>w>=d?[a,b,c]:[c,b,a];const eng=Math.min(9,L*0.28);const cars=Math.max(1,Math.floor((L-eng)/7.5));const cl=(L-eng)/cars;
+  for(let c=0;c<cars;c++){const cx=-L/2+cl*(c+0.5);const p=P(cx,0);wadd(g,'tr_body',BOX,red,p[0],1.2,p[1],...S(cl-0.4,1.7,2.4));wadd(g,'tr_roof',CYL,rf,p[0],2.1,p[1],0.7,cl-0.3,2.5,...AX);
+   wadd(g,'tr_trim',BOX,au,p[0],1.7,p[1],...S(cl-0.38,0.08,2.44));wadd(g,'tr_ch',BOX,blk,p[0],0.32,p[1],...S(cl-0.6,0.3,2.2));
+   for(let i=0;i<Math.floor(cl/1.3);i++){const wx=cx-cl/2+0.9+i*1.3;for(const sd of[-1,1]){const q=P(wx,sd*1.22);wadd(g,'tr_win',BOX,win,q[0],1.35,q[1],...S(0.8,0.55,0.04));}}
+   for(const o of[-cl/2+1,cl/2-1])for(const sd of[-0.95,0.95]){const q=P(cx+o,sd);wadd(g,'tr_wh',CYL,blk,q[0],0.32,q[1],0.32,0.14,0.32,...SD);}}
+  const ex=L/2-eng/2;let q=P(ex+eng*0.1,0);wadd(g,'tr_boiler',CYL,red,q[0],1.3,q[1],1.05,eng*0.7,1.05,...AX);wadd(g,'tr_bt',CYL,au,q[0],1.3,q[1],1.08,0.1,1.08,...AX);
+  q=P(ex-eng*0.35,0);wadd(g,'tr_cab',BOX,red,q[0],1.5,q[1],...S(eng*0.3,2.2,2.4));wadd(g,'tr_cabr',BOX,blk,q[0],2.65,q[1],...S(eng*0.34,0.12,2.6));
+  q=P(ex+eng*0.3,0);wadd(g,'tr_chim',latheGeo('chim11',[[0,0],[0.22,0],[0.2,0.6],[0.36,0.9],[0.36,1.0],[0,1.0]]),blk,q[0],2.2,q[1],1,1,1);q=P(ex+eng*0.45,0);wadd(g,'tr_front',CYL,blk,q[0],1.3,q[1],1.0,0.12,1.0,...AX);wadd(g,'tr_lamp',SPH,win,...(()=>{const r=P(ex+eng*0.48,0);return [r[0],1.9,r[1]];})(),0.16,0.16,0.16);
+  for(let i=0;i<3;i++)for(const sd of[-0.95,0.95]){const r=P(ex-eng*0.2+i*eng*0.25,sd);wadd(g,'tr_dw',CYL,blk,r[0],0.5,r[1],0.5,0.16,0.5,...SD);}},
+
  stairs(g,f,w,d){const st=fmat('marble2',()=>new THREE.MeshStandardMaterial({color:'#b8b0a6',roughness:0.45}));const run=fmat('runner',()=>new THREE.MeshStandardMaterial({color:'#8a1a22',roughness:0.85,map:clothTex()}));const gold=fmat('gold',()=>new THREE.MeshStandardMaterial({color:'#e0b850',metalness:0.9,roughness:0.28}));
    const n=6;for(let i=0;i<n;i++){const z=-d/2+d/12+i*d/6,h=0.12*(i+1);wadd(g,'step',BOX,st,0,h/2,z,w-0.4,h,d/6);wadd(g,'runner',BOX,run,0,h+0.006,z,(w-0.4)*0.45,0.012,d/6+0.01);wadd(g,'rod',CYL,gold,0,h+0.02,z+d/12-0.02,0.012,(w-0.4)*0.48,0.012,0,null,0,Math.PI/2);}
    for(const sx of[-1,1]){for(let i=0;i<n;i++){const z=-d/2+d/12+i*d/6,h=0.12*(i+1);wadd(g,'bal',latheGeo('baluster',[[0,0],[0.05,0],[0.05,0.05],[0.025,0.12],[0.04,0.35],[0.02,0.55],[0.035,0.6],[0,0.62]],8),st,sx*(w/2-0.25),h,z,1,1,1);}
@@ -2568,7 +2697,7 @@ function unstuck(){player.sit=null;player.boat=false;const p=zone.center;player.
 function moveEntity(e,dx,dy,r,boat){let moved=false;if(dx&&!solidAt(zone,e.x+dx,e.y,r,boat)){e.x+=dx;moved=true;}if(dy&&!solidAt(zone,e.x,e.y+dy,r,boat)){e.y+=dy;moved=true;}return moved;}
 function checkDoors(){if(doorCooldown>0)return;
   // seamless full-edge transitions between adjacent outdoor zones
-  const seamDoors=zone.doors.filter(d=>{const z2=ZONES[d.to];return (zone.out||zone.outdoorSky)&&z2&&(z2.out||z2.outdoorSky);}).sort((a,b)=>{const pa=(a.side==='N'||a.side==='S')?player.x:player.y,pb=(b.side==='N'||b.side==='S')?player.x:player.y;return Math.abs(a.pos-pa)-Math.abs(b.pos-pb);});
+  const seamDoors=zone.doors.filter(d=>{const z2=ZONES[d.to];return !d.pk&&(zone.out||zone.outdoorSky)&&z2&&(z2.out||z2.outdoorSky);}).sort((a,b)=>{const pa=(a.side==='N'||a.side==='S')?player.x:player.y,pb=(b.side==='N'||b.side==='S')?player.x:player.y;return Math.abs(a.pos-pa)-Math.abs(b.pos-pb);});
   for(const d of seamDoors){const z2=ZONES[d.to];
     let hit=false,along=0.5;const pad=0.55;
     if(d.side==='N'&&player.y<=pad){hit=true;along=player.x/zone.w;}
@@ -2681,12 +2810,25 @@ function castSpell(i){Audio.init();Audio.sfx('spell');toast('🪄 '+SPELLS[i].th
 document.querySelectorAll('.spell').forEach(b=>b.addEventListener('click',()=>{castSpell(+b.dataset.s);}));
 
 /* ===================== MAP & DIRECTORY ===================== */
-const MAPXY={gryffindor_common:[18,7],ravenclaw_common:[28,5],astronomy:[38,4],divination:[48,5],headmaster:[58,7],room_of_requirement:[70,5],
+const MAPXY={gryffindor_dorm:[12,3],ravenclaw_balcony:[31,1.8],hufflepuff_barrels:[44,52],boats_arrival:[56,70],gryffindor_common:[18,7],ravenclaw_common:[28,5],astronomy:[38,4],divination:[48,5],headmaster:[58,7],room_of_requirement:[70,5],
  trophy_room:[5,17],library:[13,23],charms:[22,15],grand_staircase:[36,16],transfiguration:[47,13],hospital:[58,16],seventh_corridor:[70,13],prefects_bathroom:[69,21],
  dada:[44,23],great_hall:[21,31],entrance_hall:[34,30],slytherin_common:[21,44],potions:[32,42],dungeon_corridor:[30,50],kitchens:[42,42],kitchen_corridor:[42,50],hufflepuff_common:[52,47],
  courtyard:[54,34],owlery:[46,32],clock_tower:[56,26],bell_tower:[61,30],wooden_bridge:[67,29],stone_circle:[76,36],greenhouses:[64,40],viaduct:[62,51],hogsmeade_station:[73,57],
  black_lake:[44,60],boathouse:[36,57],lake_shore:[50,67],whomping_willow:[30,64],hagrid_hut:[62,62],quidditch:[80,24],forest_trail:[90,18],centaur_glade:[97,10],changing_rooms:[86,31],stands_tower:[80,14],
  hogsmeade:[86,52],three_broomsticks:[81,44],honeydukes:[88,43],zonkos:[95,45],scrivenshafts:[96,52],dervish_banges:[93,38],shrieking_overlook:[97,59],gladrags:[92,62],hogs_head:[80,66],puddifoots:[87,68],post_office:[94,68]};
+
+/* ===== v11 Floo / Portkey travel ===== */
+const FLOO_REGIONS=[['hogwarts','🏰 ฮอกวอตส์',['great_hall','gryffindor_dorm','ravenclaw_balcony','hufflepuff_barrels','boats_arrival']],['hogsmeade','🏘️ ฮอกส์มี้ด',['hogsmeade','hogsmeade_station','express_carriage']],
+ ['london','🎩 ลอนดอน',['leaky_cauldron','diagon_alley','ollivanders','gringotts','flourish_blotts','eeylops','fortescue','quality_quidditch','weasleys_wheezes','malkins','knockturn_entrance','kings_cross','ministry_atrium','grimmauld_place']],
+ ['ottery','🌾 ออตเทอรี เซนต์แคทช์โพล',['burrow_garden','burrow_house','lovegood_house']],['godric','❄️ ก็อดริกส์ฮอลโลว์',['godrics_hollow']]];
+function flooTravel(id,kind){const z=ZONES[id];if(!z)return;closeModal();let fx=document.getElementById('flooFx');if(!fx){fx=document.createElement('div');fx.id='flooFx';document.body.appendChild(fx);}
+ fx.className=kind==='pk'?'pk':'floo';void fx.offsetWidth;fx.classList.add('go');try{Audio.sfx('spell');}catch(e){}
+ toast((kind==='pk'?'🥾 พอร์ตคีย์พาไป… ':'🔥 โยนผงฟลู! "')+z.th+(kind==='pk'?'':'"'));setTimeout(()=>changeZone(id,z.center),380);}
+function flooPanel(){const d=document.createElement('div');d.className='flooPanel';d.innerHTML='<h4>🔥 เครือข่ายผงฟลู & พอร์ตคีย์</h4>';
+ for(const [rg,name,ids] of FLOO_REGIONS){const row=document.createElement('div');row.className='flooRow';row.innerHTML='<b>'+name+'</b>';
+  for(const id of ids){const z=ZONES[id];if(!z)continue;const b=document.createElement('button');b.className='flooBtn'+(id===zone.id?' here':'');b.textContent=z.th;b.title=z.en;
+   b.addEventListener('click',()=>flooTravel(id,rg==='godric'||rg==='ottery'&&id==='burrow_garden'?'pk':'floo'));row.appendChild(b);}d.appendChild(row);}return d;}
+window.__floo=flooTravel;
 function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';
   const trackZone=trackId?(NPCS.find(n=>n.c.id===trackId)||{}).zone:null;
   const wrap=document.createElement('div');wrap.className='bigMap';let svg='<svg viewBox="0 0 100 72" preserveAspectRatio="none"><defs><radialGradient id="mg" cx="50%" cy="45%"><stop offset="0" stop-color="#3a3060"/><stop offset="1" stop-color="#15102a"/></radialGradient></defs><rect width="100" height="72" fill="url(#mg)"/>'+
@@ -2698,6 +2840,7 @@ function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';
     b.className='mapNode'+(id===zone.id?' here':'')+(id===trackZone?' track':'')+(z.sub?' shop':'')+(z.x6?' new':'');b.style.left=p[0]+'%';b.style.top=(p[1]/72*100)+'%';
     b.innerHTML=(id===zone.id?'📍':id===trackZone?'🧭':'')+(z.num?'<i>'+z.num+'</i>':'')+'<span>'+z.th.replace(/ \(ฮอกส์มี้ด\)/,'')+'</span>'+(ppl?'<em>'+ppl+'</em>':'');b.title=z.th+' · '+z.en+(ppl?' · 👥 '+ppl:'');
     b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});wrap.appendChild(b);}
+  grid.appendChild(flooPanel());
   grid.appendChild(wrap);
   const list=document.createElement('div');list.className='mapList';for(const id of ZONE_IDS){const z=ZONES[id];const ppl=NPCS.filter(n=>n.zone===id);const b=document.createElement('button');b.className='btn mapZ'+(id===zone.id?' on':'');
    b.innerHTML='<b>'+(id===zone.id?'📍 ':id===trackZone?'🧭 ':'')+(z.num?z.num+'. ':'↳ ')+z.th+'</b><small>'+z.en+(z.sub?' — ย่านฮอกส์มี้ด':'')+'</small>'+(ppl.length?'<small>👥 '+ppl.map(n=>n.c.th.split(' ')[0]).join(', ')+'</small>':'');
