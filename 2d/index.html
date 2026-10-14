@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Hogwarts: Cozy Magic Days (วันสบายๆ ในฮอกวอตส์)</title>
+<meta name="description" content="เกมแฟนเมดแนว Cozy Slice-of-Life ใช้ชีวิตสบายๆ ในฮอกวอตส์ไปกับลูน่า เลิฟกู๊ด — Non-commercial fan game.">
+<meta name="theme-color" content="#1b1530">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hogwarts: Cozy Magic Days (วันสบายๆ ในฮอกวอตส์)">
+<meta property="og:description" content="เดินเล่น จิบบัตเตอร์เบียร์ ดูดาว และคุยกับเพื่อน 50 คนในโลกเวทมนตร์ ไปพร้อมกับลูน่า เลิฟกู๊ด — แฟนเกมฟรี ไม่แสวงหากำไร">
+<meta property="og:locale" content="th_TH">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1530'/%3E%3Cline x1='12' y1='54' x2='44' y2='18' stroke='%238b5a2b' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='16' r='4' fill='%23fff6b0'/%3E%3Cellipse cx='22' cy='30' rx='10' ry='8' fill='%23ff8fc8' stroke='%23fff' stroke-width='2'/%3E%3Cellipse cx='42' cy='38' rx='10' ry='8' fill='%2380d8ff' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M31 32 Q32 30 33 35' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<script>/* Tailwind is optional: the game is fully styled by the embedded CSS below if the CDN is unavailable. */</script>
+<script src="https://cdn.tailwindcss.com" async onerror="void 0"></script>
+<style>
+:root{--gold:#f2d68a;--ink:#2a2140;--panel:rgba(30,22,52,.92)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#120d22;font-family:"Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,system-ui,sans-serif;color:#f6efe0;user-select:none;-webkit-user-select:none;touch-action:none}
+#game{position:fixed;inset:0;width:100vw;height:100vh;display:block;cursor:pointer}
+.hud{position:fixed;z-index:5;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#topbar{top:8px;left:8px;right:8px;justify-content:space-between;pointer-events:none}
+#topbar>*{pointer-events:auto}
+.chip{background:var(--panel);border:1px solid rgba(242,214,138,.45);border-radius:14px;padding:6px 10px;font-size:13px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.btn{background:linear-gradient(180deg,#4a3a7a,#2d2352);color:#fff7e0;border:1px solid rgba(242,214,138,.6);border-radius:12px;padding:6px 10px;font-size:13px;cursor:pointer;font-family:inherit;transition:transform .12s,box-shadow .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 12px rgba(242,214,138,.5)}
+.btn.on{background:linear-gradient(180deg,#b8913d,#7a5a1e)}
+#zoneName{font-weight:700;color:var(--gold);font-size:15px;animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{text-shadow:0 0 10px rgba(242,214,138,.8)}}
+#topbar{flex-wrap:wrap;align-items:flex-start}#rightBtns{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:1 1 300px;min-width:0}
+#spellBar{bottom:10px;left:50%;transform:translateX(-50%)}
+.spell{width:54px;height:54px;border-radius:50%;font-size:10px;line-height:1.1;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.spell b{font-size:18px}
+.modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(10,6,24,.55);backdrop-filter:blur(3px)}
+.modal.show{display:flex;animation:fade .25s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.card{background:linear-gradient(180deg,rgba(46,34,82,.97),rgba(24,18,44,.97));border:2px solid rgba(242,214,138,.6);border-radius:20px;padding:16px;max-width:min(860px,94vw);max-height:88vh;overflow:auto;box-shadow:0 10px 50px rgba(0,0,0,.6),inset 0 0 30px rgba(242,214,138,.08);touch-action:pan-y}
+.card h2{margin:0 0 10px;color:var(--gold);font-size:20px}
+#dlg{align-items:flex-end;background:rgba(10,6,24,.25)}
+#dlgCard{width:min(900px,96vw);margin-bottom:12px;display:flex;gap:14px;align-items:flex-start}
+#portrait{width:180px;height:200px;border-radius:16px;flex:none;background:#2a2050;border:2px solid rgba(242,214,138,.5)}
+#dlgName{font-weight:700;color:var(--gold);font-size:18px}
+#dlgText{font-size:16px;line-height:1.6;min-height:70px;margin:6px 0 10px;white-space:pre-line}
+#dlgOpts{display:flex;gap:6px;flex-wrap:wrap}
+.hearts{color:#ff7aa8;letter-spacing:1px}
+#dirList{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.dirItem{background:rgba(255,255,255,.06);border-radius:12px;padding:8px;display:flex;gap:8px;align-items:center;font-size:13px}
+.dirItem canvas{flex:none;border-radius:10px;background:rgba(255,255,255,.08)}
+.dirItem .b{display:flex;gap:4px;margin-top:4px}
+.dirItem .btn{padding:3px 7px;font-size:11px}
+#mapGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.mapZ{padding:10px;border-radius:12px;text-align:left}
+.mapZ small{display:block;opacity:.75;font-size:11px;margin-top:3px}
+#bubbleLayer{position:fixed;inset:0;pointer-events:none;z-index:4}
+#toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:30;pointer-events:none}
+.toastMsg{background:var(--panel);border:1px solid var(--gold);padding:7px 14px;border-radius:14px;margin-bottom:6px;font-size:14px;animation:fade .3s}
+#joy{position:fixed;left:18px;bottom:18px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(242,214,138,.4);z-index:6;display:none;touch-action:none}
+#joyK{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(242,214,138,.6)}
+#mBtns{position:fixed;right:14px;bottom:80px;z-index:6;display:none;flex-direction:column;gap:8px}
+#mBtns .btn{width:56px;height:56px;border-radius:50%;font-size:13px}
+body.touch #joy{display:block} body.touch #mBtns{display:flex}
+body.touch #spellBar{left:auto;right:84px;transform:none;bottom:14px;flex-direction:column}
+body.touch .spell{width:46px;height:46px}
+#disclaimer{position:fixed;bottom:2px;left:6px;font-size:10px;opacity:.55;z-index:3;pointer-events:none}
+body.touch #disclaimer{left:150px}
+label{display:block;margin:8px 0 4px;color:var(--gold);font-size:14px}
+input[type=text]{background:#1b1433;color:#fff;border:1px solid var(--gold);border-radius:10px;padding:8px;font-size:15px;width:100%;font-family:inherit}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff3;cursor:pointer}
+.sw.on{border-color:#fff;box-shadow:0 0 8px #fff}
+@media (max-width:640px){#portrait{width:96px;height:110px}#dlgText{font-size:14px}.btn{font-size:12px;padding:5px 8px}#rightBtns{max-width:70vw}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="bubbleLayer"></div>
+<div id="topbar" class="hud">
+  <div class="hud">
+    <div class="chip"><span id="zoneName">ฮอกวอตส์</span> <span id="timeInfo" style="opacity:.8"></span></div>
+    <div class="chip" id="trackInfo" style="display:none"></div>
+  </div>
+  <div id="rightBtns">
+    <button class="btn" id="bTime" title="เปลี่ยนช่วงเวลา">🌅 เวลา</button>
+    <button class="btn" id="bAuto" title="เวลาอัตโนมัติ">⏳ อัตโนมัติ</button>
+    <button class="btn" id="bWeather" title="เปลี่ยนสภาพอากาศ">☁️ อากาศ</button>
+    <button class="btn" id="bMap" title="แผนที่ (M)">🗺️ แผนที่</button>
+    <button class="btn" id="bDir" title="ทำเนียบ (Tab)">📖 ทำเนียบ</button>
+    <button class="btn" id="bLuna" title="คุยกับลูน่า (L)">🌙 ลูน่า</button>
+    <button class="btn" id="bUnstuck" title="รีเซ็ตตำแหน่ง">🧭 Unstuck</button>
+    <button class="btn" id="bMute" title="เสียง">🔊</button>
+    <button class="btn" id="bSet" title="ตัวละคร">⚙️</button>
+  </div>
+</div>
+<div id="spellBar" class="hud">
+  <button class="btn spell" data-s="0"><b>✨</b>1 ลูมอส</button>
+  <button class="btn spell" data-s="1"><b>🪶</b>2 วินการ์เดียม</button>
+  <button class="btn spell" data-s="2"><b>🐇</b>3 แพโทรนัส</button>
+  <button class="btn spell" data-s="3"><b>🌸</b>4 ออร์คิเดียส</button>
+</div>
+<div id="joy"><div id="joyK"></div></div>
+<div id="mBtns">
+  <button class="btn" id="mE">คุย E</button>
+  <button class="btn" id="mL">ลูน่า</button>
+</div>
+<div id="toast"></div>
+<div id="disclaimer">แฟนเกมไม่แสวงหากำไร (Non-commercial fan game) • ไม่มีส่วนเกี่ยวข้องกับ J.K. Rowling, Warner Bros. หรือ Wizarding World • สิทธิ์ในตัวละครเป็นของเจ้าของลิขสิทธิ์</div>
+
+<div class="modal" id="setup"><div class="card" style="width:min(520px,94vw)">
+  <h2>🪄 Hogwarts: Cozy Magic Days</h2>
+  <div style="font-size:14px;opacity:.85">ยินดีต้อนรับสู่ฮอกวอตส์ ลูน่ารอคุณอยู่ที่ห้องโถงทางเข้าแล้ว~</div>
+  <label>ชื่อของคุณ</label><input type="text" id="sName" maxlength="16" value="">
+  <label>บ้าน</label><div class="opts" id="sHouse"></div>
+  <label>ทรงผม</label><div class="opts" id="sHair"></div>
+  <label>สีผม</label><div class="opts" id="sHairC"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+    <canvas id="sPrev" width="120" height="140" style="background:rgba(255,255,255,.07);border-radius:12px"></canvas>
+    <button class="btn" id="sGo" style="font-size:16px;padding:10px 18px">เริ่มวันสบายๆ ✨</button>
+  </div>
+  <div style="font-size:11px;opacity:.6;margin-top:10px">WASD/ลูกศร เดิน • E คุย/นั่ง • L ลูน่า • M แผนที่ • Tab ทำเนียบ • 1-4 คาถา • คลิกเพื่อเดิน</div>
+</div></div>
+<div class="modal" id="dlg"><div class="card" id="dlgCard">
+  <canvas id="portrait" width="180" height="200"></canvas>
+  <div style="flex:1;min-width:0"><div id="dlgName"></div><div class="hearts" id="dlgHearts"></div><div id="dlgText"></div><div id="dlgOpts"></div></div>
+</div></div>
+<div class="modal" id="mapM"><div class="card" style="width:min(860px,94vw)"><h2>🗺️ แผนที่ตัวกวน... เอ้ย แผนที่ฮอกวอตส์ <button class="btn" style="float:right" data-close="mapM">ปิด ✕</button></h2><div style="font-size:12px;opacity:.7;margin-bottom:8px">คลิกโซนเพื่อวาร์ป (เครือข่ายผงฟลู) • ตัวเลขคือจำนวนตัวละครที่อยู่ในโซนนั้น</div><div id="mapGrid"></div></div></div>
+<div class="modal" id="dirM"><div class="card" style="width:min(860px,94vw)"><h2>📖 สมุดทำเนียบฮอกวอตส์ (50 คน) <button class="btn" style="float:right" data-close="dirM">ปิด ✕</button></h2><div id="dirList"></div></div></div>
+<script>
+"use strict";
+/* ===================== DATA: HOUSES ===================== */
+const HOUSES={
+  G:{th:'กริฟฟินดอร์',en:'Gryffindor',c1:'#8a1414',c2:'#e0b23a'},
+  R:{th:'เรเวนคลอ',en:'Ravenclaw',c1:'#1c2f6e',c2:'#b07d3d'},
+  H:{th:'ฮัฟเฟิลพัฟ',en:'Hufflepuff',c1:'#e8b923',c2:'#2a2a2a'},
+  S:{th:'สลิธีริน',en:'Slytherin',c1:'#1d5c35',c2:'#c0c0c8'},
+  N:{th:'บุคลากร/อื่นๆ',en:'Staff & Others',c1:'#4a3b6b',c2:'#b9a4e0'}
+};
+/* ===================== DATA: 24 ZONES ===================== */
+// furniture: [x,y,w,h,kind,label?]  sits: [x,y,activityText]
+// 24 main zones (num 1-24) + 3 shop interiors that are sub-areas of zone 24 (sub:'hogsmeade')
+const ZONES={
+ great_hall:{num:1,th:'ห้องโถงใหญ่',en:'Great Hall',w:26,h:18,floor:'stone',wall:'#6a5a52',light:'candles',candles:1,
+  furn:[[4,1,16,1,'hightable'],[3,4,2,10,'longtable'],[8,4,2,10,'longtable'],[13,4,2,10,'longtable'],[18,4,2,10,'longtable'],[22,2,2,1,'fire']],
+  sits:[[5.5,8,'จิบน้ำฟักทองและกินพุดดิ้งช็อกโกแลต'],[10.5,10,'กินพายน้ำเชื่อมกับลูน่า'],[22.5,4.2,'ผิงไฟข้างเตาผิงใหญ่']]},
+ entrance_hall:{num:2,th:'ห้องโถงทางเข้าและบันไดหินอ่อน',en:'Entrance Hall & Marble Staircase',w:20,h:14,floor:'stone',wall:'#6d6273',light:'torch',
+  furn:[[2,2,1,1,'statue'],[17,2,1,1,'statue'],[2,11,1,1,'hourglass'],[17,11,1,1,'hourglass'],[13,3,3,4,'stairs','บันไดหินอ่อน'],[5,5,4,3,'rug'],[5,2,1,1,'torch'],[14,2,1,1,'torch']],
+  sits:[[6,9,'นั่งพักดูนาฬิกาทรายคะแนนบ้านเปล่งประกาย']]},
+ grand_staircase:{num:3,th:'บันไดเวียนใหญ่',en:'Grand Staircase',w:26,h:18,floor:'wood',wall:'#5c4f63',light:'torch',
+  furn:[[10,6,6,6,'stairs','บันไดเคลื่อนที่'],[1,1,1,1,'portrait'],[24,1,1,1,'portrait'],[6,1,1,1,'portrait'],[5,15,1,1,'plant']],
+  sits:[[3,9,'นั่งบนขั้นบันไดดูภาพวาดเคลื่อนไหวคุยกัน']]},
+ gryffindor_common:{num:4,th:'ห้องนั่งเล่นกริฟฟินดอร์',en:'Gryffindor Common Room',w:18,h:13,floor:'redrug',wall:'#7a2f2a',light:'fire',
+  furn:[[7,1,3,1,'fire'],[5,4,2,1,'sofa'],[10,4,2,1,'sofa'],[13,7,2,2,'table'],[2,7,1,3,'shelf'],[15,2,1,1,'banner']],
+  sits:[[8.5,3.3,'อ่านหนังสือริมเตาผิงอุ่นๆ'],[5.5,5.3,'จิบโกโก้บนโซฟานุ่ม']]},
+ ravenclaw_common:{num:5,th:'ห้องนั่งเล่นเรเวนคลอ (หอคอย)',en:'Ravenclaw Common Room',w:18,h:13,floor:'bluerug',wall:'#3a4f86',light:'candles',stars:1,
+  furn:[[8,4,2,2,'statue'],[2,2,1,3,'shelf'],[15,2,1,3,'shelf'],[4,8,2,1,'sofa'],[12,8,2,1,'sofa'],[8,1,2,1,'window']],
+  sits:[[5,9.4,'อ่านเดอะควิบเบลอร์กลับหัวกับลูน่า'],[12.8,7.2,'มองเพดานโดมดวงดาว']]},
+ hufflepuff_common:{num:6,th:'ห้องนั่งเล่นฮัฟเฟิลพัฟ',en:'Hufflepuff Common Room',w:18,h:13,floor:'wood',wall:'#8a6a34',light:'fire',
+  furn:[[7,1,3,1,'fire'],[3,4,1,1,'plant'],[14,4,1,1,'plant'],[5,7,2,1,'sofa'],[11,7,2,1,'sofa'],[3,10,1,1,'plant'],[15,10,1,1,'barrel']],
+  sits:[[6,8.4,'ดูแลต้นไม้ในกระถางทองแดง'],[8.5,3,'งีบข้างเตาผิงกลม']]},
+ slytherin_common:{num:7,th:'ห้องนั่งเล่นสลิธีริน',en:'Slytherin Common Room',w:18,h:13,floor:'stone',wall:'#2d4a3e',light:'fire',underwater:1,
+  furn:[[7,1,3,1,'fire'],[5,5,2,1,'sofa'],[11,5,2,1,'sofa'],[2,2,1,1,'window'],[15,2,1,1,'window'],[8,8,2,2,'table']],
+  sits:[[6,6.4,'มองปลาหมึกยักษ์ว่ายผ่านหน้าต่างใต้ทะเลสาบ']]},
+ library:{num:8,th:'ห้องสมุด',en:'Library',w:22,h:16,floor:'wood',wall:'#5a4634',light:'candles',
+  furn:[[2,2,1,5,'shelf'],[5,2,1,5,'shelf'],[8,2,1,5,'shelf'],[11,2,1,5,'shelf'],[2,10,1,4,'shelf'],[17,1,3,1,'fire'],[15,6,3,2,'table'],[15,11,3,2,'table'],[6,11,2,1,'desk']],
+  sits:[[16.5,9,'อ่านหนังสือ "สัตว์มหัศจรรย์" ใต้แสงเทียน'],[18.5,3,'ผิงไฟกับแมวขนฟู']]},
+ charms:{num:9,th:'ห้องเรียนคาถา',en:'Charms Classroom',w:16,h:12,floor:'wood',wall:'#6b5a7a',light:'candles',
+  furn:[[3,3,2,1,'desk'],[7,3,2,1,'desk'],[3,6,2,1,'desk'],[7,6,2,1,'desk'],[11,2,2,1,'books'],[2,9,1,1,'plant']],
+  sits:[[4,4.3,'ฝึกเสกขนนกให้ลอย']]},
+ transfiguration:{num:10,th:'ห้องเรียนแปลงร่าง',en:'Transfiguration Classroom',w:16,h:12,floor:'stone',wall:'#5b6273',light:'torch',
+  furn:[[6,2,4,1,'desk'],[3,5,2,1,'desk'],[8,5,2,1,'desk'],[11,5,2,1,'desk'],[3,8,2,1,'desk'],[11,8,2,1,'desk']],
+  sits:[[4,6.3,'แปลงถ้วยชาเป็นหนูตัวน้อย (แล้วแปลงกลับ)']]},
+ potions:{num:11,th:'ห้องใต้ดินปรุงยา',en:'Potions Dungeon',w:16,h:12,floor:'stone',wall:'#3f4a3f',light:'cauldron',
+  furn:[[3,3,1,1,'cauldron'],[6,3,1,1,'cauldron'],[9,3,1,1,'cauldron'],[12,3,1,1,'cauldron'],[3,7,1,1,'cauldron'],[12,7,1,1,'cauldron'],[1,9,1,2,'shelf'],[14,9,1,2,'shelf']],
+  sits:[[6.5,8,'เคี่ยวโกโก้ร้อนในหม้อใบเล็ก (ศาสตราจารย์สเนปอนุญาตแล้ว)']]},
+ dada:{num:12,th:'ห้องเรียนป้องกันตัวจากศาสตร์มืด',en:'Defence Against the Dark Arts Classroom',w:18,h:13,floor:'wood',wall:'#5a4a5a',light:'candles',
+  furn:[[4,1,9,3,'skeleton'],[3,6,2,1,'desk'],[7,6,2,1,'desk'],[11,6,2,1,'desk'],[3,9,2,1,'desk'],[11,9,2,1,'desk'],[15,2,1,3,'shelf']],
+  sits:[[8,10,'กินช็อกโกแลตของศาสตราจารย์ลูปินใต้โครงกระดูกมังกร']]},
+ divination:{num:13,th:'หอพยากรณ์ศาสตร์',en:'Divination Tower',w:16,h:12,floor:'redrug',wall:'#7a4a6a',light:'fire',
+  furn:[[6,1,3,1,'fire'],[3,4,1,1,'roundtable'],[7,4,1,1,'roundtable'],[11,4,1,1,'roundtable'],[3,8,1,1,'roundtable'],[11,8,1,1,'roundtable'],[6,7,3,2,'rug']],
+  sits:[[7.5,8.4,'นั่งบนพุฟนุ่มๆ ดูใบชาในถ้วย']]},
+ headmaster:{num:14,th:'ห้องอาจารย์ใหญ่',en:"Headmaster's Office",w:16,h:12,floor:'bluerug',wall:'#5a3a6a',light:'candles',
+  furn:[[6,3,4,1,'desk'],[11,3,1,1,'perchgold'],[1,2,1,4,'shelf'],[14,2,1,4,'shelf'],[3,8,1,1,'instruments'],[12,8,1,1,'instruments'],[5,1,1,1,'portrait'],[9,1,1,1,'portrait']],
+  sits:[[8,6,'จิบชากับลูกอมมะนาวของอาจารย์ใหญ่']]},
+ hospital:{num:15,th:'ห้องพยาบาลและห้องน้ำพรีเฟ็คต์',en:"Hospital Wing & Prefects' Bathroom",w:22,h:12,floor:'white',wall:'#a9a3a0',light:'candles',
+  furn:[[2,2,1,2,'bed'],[5,2,1,2,'bed'],[8,2,1,2,'bed'],[2,8,1,2,'bed'],[5,8,1,2,'bed'],[11,1,1,4,'partition'],[11,7,1,4,'partition'],[14,3,5,4,'bathtub'],[13,9,1,1,'plant']],
+  sits:[[7,6,'จิบชาสมุนไพรของมาดามพอมฟรีย์'],[16.5,8,'ดูฟองสบู่สีรุ้งในห้องน้ำพรีเฟ็คต์']]},
+ kitchens:{num:16,th:'ห้องครัว',en:'Kitchens',w:18,h:13,floor:'stone',wall:'#7a5a44',light:'fire',
+  furn:[[3,4,2,6,'longtable'],[7,4,2,6,'longtable'],[11,4,2,6,'longtable'],[13,1,3,1,'fire'],[2,1,1,1,'barrel'],[15,10,1,1,'barrel']],
+  sits:[[5.5,11,'ชิมพายเนื้อและพุดดิ้งร้อนๆ ที่เอลฟ์ทำให้']]},
+ courtyard:{num:17,th:'ลานหอนาฬิกา',en:'Clock Tower Courtyard',w:22,h:20,floor:'cobble',wall:'#7a7068',out:1,
+  furn:[[16,1,2,2,'clock'],[9,8,3,3,'fountain'],[3,5,1,1,'tree'],[18,6,1,1,'tree'],[3,15,1,1,'tree'],[18,15,1,1,'tree'],[5,10,2,1,'bench'],[14,12,2,1,'bench']],
+  sits:[[6,11.3,'นั่งม้านั่งฟังเสียงระฆังหอนาฬิกา'],[15,13.3,'ให้อาหารนกเล็กๆ ที่ลานหิน']]},
+ astronomy:{num:18,th:'หอดูดาว',en:'Astronomy Tower',w:18,h:14,floor:'stone',wall:'#3a3f5c',light:'none',outdoorSky:1,
+  furn:[[4,4,1,1,'telescope'],[8,3,1,1,'telescope'],[13,4,1,1,'telescope'],[7,9,4,2,'rug']],
+  sits:[[9,8,'นอนดูดาวและนับกลุ่มดาวกับลูน่า'],[4.5,6,'ส่องกล้องดูดาวซิริอุส']]},
+ owlery:{num:19,th:'หอนกฮูก',en:'Owlery',w:14,h:12,floor:'straw',wall:'#7b6d5c',light:'none',
+  furn:[[2,2,1,1,'perch'],[5,2,1,1,'perch'],[8,2,1,1,'perch'],[11,2,1,1,'perch'],[2,7,1,1,'perch'],[11,7,1,1,'perch']],
+  sits:[[6.5,5.5,'ให้อาหารนกฮูกและเกาหัวพวกมันเบาๆ']]},
+ greenhouses:{num:20,th:'เรือนกระจกสมุนไพรศาสตร์ 1-3',en:'Herbology Greenhouses 1-3',w:24,h:13,floor:'soil',wall:'#6f8f72',light:'none',
+  furn:[[2,3,5,1,'planter'],[2,7,5,1,'planter'],[3,1,2,1,'sign','เรือนกระจก 1'],[8,1,1,4,'glasswall'],[8,8,1,4,'glasswall'],[10,3,5,1,'planter'],[10,7,5,1,'planter'],[11,1,2,1,'sign','เรือนกระจก 2'],[16,1,1,4,'glasswall'],[16,8,1,4,'glasswall'],[18,3,4,1,'planter'],[18,7,2,1,'mandrake'],[19,1,2,1,'sign','เรือนกระจก 3'],[2,10,1,1,'pots'],[4,10,1,1,'pots']],
+  sits:[[4.5,5,'ปลูกเมล็ดพันธุ์เรืองแสงกับศาสตราจารย์สเปราต์'],[20,9.5,'รดน้ำต้นไม้ที่ร้องเพลงได้']]},
+ black_lake:{num:21,th:'ทุ่งหญ้าและโรงเรือทะเลสาบดำ',en:'Grounds & Black Lake Boathouse',w:30,h:22,floor:'grass',wall:'#4f6b4a',out:1,
+  water:[4,7,22,12],dock:[14,6,2,2],
+  furn:[[17,2,3,3,'boathouse'],[25,2,2,2,'willow'],[2,3,1,1,'tree'],[6,3,2,1,'bench'],[27,15,1,1,'rock']],
+  sits:[[7,4.3,'นั่งริมทะเลสาบดูแสงสะท้อนบนผิวน้ำ']]},
+ hagrid_hut:{num:22,th:'กระท่อมแฮกริดและแปลงฟักทอง',en:"Hagrid's Hut & Pumpkin Patch",w:22,h:16,floor:'grass',wall:'#5d7148',out:1,
+  furn:[[3,3,4,3,'hut'],[12,3,3,2,'pumpkins'],[16,3,3,2,'pumpkins'],[12,10,3,2,'pumpkins'],[3,12,1,1,'tree'],[18,12,1,1,'tree'],[8,10,2,1,'bench']],
+  sits:[[9,11.3,'จิบชากับร็อคเค้กแข็งโป๊กของแฮกริด']]},
+ quidditch:{num:23,th:'สนามควิดดิชและลานโล่งในป่าต้องห้าม',en:'Quidditch Pitch & Forbidden Forest Clearing',w:36,h:22,floor:'grass',wall:'#4f6a3a',out:1,
+  furn:[[3,9,1,3,'goal'],[22,9,1,3,'goal'],[5,1,16,1,'stands'],[11,9,4,4,'rug'],[25,1,1,7,'treeline'],[25,14,1,7,'treeline'],[28,3,1,1,'bigtree'],[33,4,1,1,'bigtree'],[28,17,1,1,'bigtree'],[33,16,1,1,'bigtree'],[30,10,2,2,'mushrooms'],[31,5,1,1,'mistletoe']],
+  sits:[[8,16,'นั่งบนอัฒจันทร์ดูซ้อมบินควิดดิช'],[29.5,13,'นั่งเงียบๆ ให้ลูกเธสตรอลเข้ามาใกล้']]},
+ hogsmeade:{num:24,th:'หมู่บ้านฮอกส์มี้ด',en:'Hogsmeade Village',w:26,h:18,floor:'cobble',wall:'#5c6b7a',out:1,village:1,
+  furn:[[2,1,3,2,'house'],[9,1,5,2,'house'],[18,1,2,2,'house'],[11,8,2,2,'lamp'],[4,12,1,1,'tree'],[21,13,1,1,'tree'],[15,13,2,1,'bench'],[7,13,2,1,'stall']],
+  sits:[[16,14.3,'นั่งม้านั่งชมหิมะและผู้คนในหมู่บ้าน']]},
+ three_broomsticks:{sub:'hogsmeade',th:'ร้านไม้กวาดสามอัน (ฮอกส์มี้ด)',en:'The Three Broomsticks',w:16,h:12,floor:'wood',wall:'#7a5236',light:'fire',
+  furn:[[1,1,6,1,'counter'],[11,1,3,1,'fire'],[3,5,2,2,'table'],[10,5,2,2,'table'],[3,8,2,2,'table'],[12,9,1,1,'barrel']],
+  sits:[[5.5,6,'จิบบัตเตอร์เบียร์ฟองนุ่มกับลูน่า'],[12.6,6,'ผิงไฟจิบบัตเตอร์เบียร์อุ่นๆ']]},
+ honeydukes:{sub:'hogsmeade',th:'ร้านฮันนี่ดุ๊กส์ (ฮอกส์มี้ด)',en:'Honeydukes Sweetshop',w:14,h:11,floor:'candy',wall:'#c56f8f',light:'candles',
+  furn:[[1,1,4,1,'candyshelf'],[8,1,5,1,'candyshelf'],[3,5,2,1,'candytable'],[9,5,2,1,'candytable'],[1,4,1,3,'candyshelf']],
+  sits:[[6.5,7,'ชิมกบช็อกโกแลตและหาการ์ดพ่อมดหายาก']]},
+ zonkos:{sub:'hogsmeade',th:'ร้านตลกซองโก้ (ฮอกส์มี้ด)',en:"Zonko's Joke Shop",w:14,h:11,floor:'candy',wall:'#5a7a3a',light:'candles',
+  furn:[[1,1,4,1,'jokeshelf'],[8,1,5,1,'jokeshelf'],[4,5,2,1,'candytable'],[9,6,2,1,'candytable'],[12,4,1,3,'jokeshelf']],
+  sits:[[6.5,8,'ลองเป่าแตรตลกที่ส่งเสียงเป็ด']]}
+};
+const CONNS=[
+ ['entrance_hall','W',8,'great_hall','E',9],['entrance_hall','N',10,'grand_staircase','S',12],['entrance_hall','E',8,'courtyard','W',10],
+ ['entrance_hall','S',4,'slytherin_common','N',12],['entrance_hall','S',10,'potions','N',7],['entrance_hall','S',16,'kitchens','N',9],['kitchens','E',6,'hufflepuff_common','W',6],
+ ['grand_staircase','N',3,'gryffindor_common','S',8],['grand_staircase','N',8,'ravenclaw_common','S',8],['grand_staircase','N',13,'astronomy','S',8],
+ ['grand_staircase','N',18,'divination','S',7],['grand_staircase','N',22,'headmaster','S',8],['grand_staircase','W',5,'library','E',8],['grand_staircase','W',12,'charms','E',6],
+ ['grand_staircase','E',5,'transfiguration','W',6],['grand_staircase','E',12,'hospital','W',6],['grand_staircase','S',20,'dada','N',9],
+ ['courtyard','N',10,'quidditch','S',12],['courtyard','N',4,'owlery','S',6],['courtyard','E',6,'greenhouses','W',6],['courtyard','E',14,'hogsmeade','W',9],
+ ['courtyard','S',6,'black_lake','N',10],['courtyard','S',16,'hagrid_hut','N',8],['hagrid_hut','E',8,'quidditch','W',16],
+ ['hogsmeade','N',6,'three_broomsticks','S',7],['hogsmeade','N',16,'honeydukes','S',6],['hogsmeade','N',22,'zonkos','S',7]
+];
+/* ===================== DATA: 50 CHARACTERS ===================== */
+// look: hair colour, hs (hair style), eye, skin, gl (glasses), extra flags; cr = creature type
+// extra: [[buttonLabel, text, portraitLookOverride?]]   at: preferred spot in the zone   creature: pet/feed mechanics
+const SK={l:'#f6dcc6',m:'#e2b48f',d:'#8d5a3b',p:'#efe2f4'};
+function C(id,en,th,house,zone,look,lines,luna3,gift,extra,at,creature){return {id,en,th,house,zone,look,lines,luna3,gift,extra:extra||[],at:at||null,creature:creature||null};}
+const CHARACTERS=[
+C('harry','Harry Potter','แฮร์รี่ พอตเตอร์','G','gryffindor_common',{hair:'#1b1712',hs:'messy',eye:'#2f9e4a',skin:SK.l,gl:'round',scar:1},
+ ['เมื่อคืนฉันฝันว่าได้บินไฟร์โบลต์รอบหอดูดาวแหละ สบายดีจัง','วันที่ไม่มีอะไรต้องรีบแบบนี้ ฉันรอมานานมากเลยนะ'],
+ ['ลูน่า เธอยังเห็นเธสตรอลอยู่ใช่ไหม','ใช่จ้ะแฮร์รี่ พวกมันชอบเธอนะ เพราะเธอเข้าใจความเงียบ'],'กบช็อกโกแลต! ขอบใจนะ ถ้าได้การ์ดดัมเบิลดอร์จะให้เธอดูเป็นคนแรก'),
+C('ron','Ron Weasley','รอน วีสลีย์','G','great_hall',{hair:'#d2541c',hs:'short',eye:'#4a7fd0',skin:SK.l,freckles:1},
+ ['พุดดิ้งวันนี้อร่อยมาก ฉันเติมไปสามรอบแล้ว อย่าบอกเฮอร์ไมโอนี่นะ','หมากรุกพ่อมดไหม? ฉันจะเล่นเบาๆ ให้... นิดนึง'],
+ ['ลูน่า แว่นตาของเธอมองเห็นอะไรบ้างเนี่ย','ตอนนี้เห็นแร็กสเปิร์ตลอยรอบหัวเธอเต็มเลยจ้ะ รอน'],'ขนมสำหรับฉันเหรอ! เธอนี่เพื่อนที่ดีที่สุดเลย (รองจากแฮร์รี่นะ)'),
+C('hermione','Hermione Granger','เฮอร์ไมโอนี่ เกรนเจอร์','G','library',{hair:'#7a4a24',hs:'bushy',eye:'#7a4a24',skin:SK.l},
+ ['เธอรู้ไหมว่า "ประวัติศาสตร์ฮอกวอตส์" มีเชิงอรรถตั้ง 312 จุด','อ่านหนังสือริมหน้าต่างตอนฝนตกเป็นช่วงเวลาที่ดีที่สุดเลย'],
+ ['ลูน่า ไม่มีหลักฐานว่านาร์เกิลมีอยู่จริงนะ','ไม่มีหลักฐานว่าไม่มีด้วยนี่จ๊ะ เฮอร์ไมโอนี่'],'ปากกาขนนกใหม่! สวยมาก จะใช้จดบันทึกวิชาอักษรรูนโบราณเลย',null,[6,9]),
+C('neville','Neville Longbottom','เนวิลล์ ลองบัตท่อม','G','greenhouses',{hair:'#5b3d22',hs:'short',eye:'#6a8a5a',skin:SK.l},
+ ['ยินดีต้อนรับสู่เรือนกระจก 3! ต้นมิมบูเลีย มิมเบิลโทเนียของฉันออกดอกแล้วนะ','ศาสตราจารย์สเปราต์บอกว่าฉันมีมือเหมาะกับต้นไม้ ดีใจมากเลย'],
+ ['ลูน่า ต้นนี้ร้องเพลงได้ด้วยนะ','จริงด้วย มันร้องเพลงกล่อมแมลงวันกะพริบได้เพราะมากเลยเนวิลล์'],'โอ้ เมล็ดพันธุ์หายาก! ขอบคุณมากๆ ฉันจะปลูกไว้ในเรือนกระจก 3',null,[20,5]),
+C('ginny','Ginny Weasley','จินนี่ วีสลีย์','G','quidditch',{hair:'#d2441a',hs:'long',eye:'#8a5a2a',skin:SK.l,freckles:1},
+ ['ลมวันนี้กำลังดี เหมาะกับการซ้อมรับลูกควัฟเฟิลสุดๆ','ลูน่าพากย์ควิดดิชได้ฮาที่สุดในโลก จริงๆ นะ'],
+ ['ลูน่า แมตช์หน้าเธอพากย์ให้อีกนะ','ได้จ้ะจินนี่ ฉันจะเล่าเรื่องเมฆรูปร่างแปลกๆ ระหว่างเกมด้วย'],'ขอบคุณนะ! เดี๋ยวพาไปดูท่าบินวรอนสกีเป็นการตอบแทน',
+ [['💛 จินนี่กับลูน่า','จินนี่: "จำตอนที่เราอยู่ด้วยกันในกองทัพดัมเบิลดอร์ได้ไหม ลูน่า"\nลูน่า: "จำได้จ้ะ ตอนนั้นเป็นครั้งแรกที่ฉันมีเพื่อนจริงๆ"\nจินนี่: "ตอนนี้เธอมีเยอะเลยนะ และฉันก็เป็นหนึ่งในนั้นตลอดไป"\nลูน่า: "เธอทำให้ใจฉันอุ่นเหมือนบัตเตอร์เบียร์เลย จินนี่"']],[8,13]),
+C('fred','Fred Weasley','เฟร็ด วีสลีย์','G','courtyard',{hair:'#d8521a',hs:'short',eye:'#6a8ad0',skin:SK.l,freckles:1},
+ ['อยากลองลูกอมเลือดกำเดาไหม? ล้อเล่นๆ วันนี้ขอเป็นวันสงบ','จอร์จอยู่ที่ร้านซองโก้แน่ๆ หมอนั่นไม่เคยพลาดสินค้าใหม่'],
+ ['ลูน่า ถ้าเราทำพลุรูปสนอร์แคกได้ เธอจะซื้อไหม','ซื้อสิ แต่ต้องมีเขาที่ยู่ๆ ด้วยนะ เฟร็ด'],'ของขวัญ! ไม่มีระเบิดซ่อนอยู่ใช่ไหม... งั้นขอบใจมาก'),
+C('george','George Weasley','จอร์จ วีสลีย์','G','zonkos',{hair:'#d8521a',hs:'messy',eye:'#6a8ad0',skin:SK.l,freckles:1},
+ ['ฉันจอร์จนะ ไม่ใช่เฟร็ด... หรือเปล่านะ?','กำลังสำรวจตลาด สักวันเราจะเปิดร้านของตัวเองให้ซองโก้อาย'],
+ ['ลูน่า เธอแยกฉันกับเฟร็ดออกได้ไง','เพราะแร็กสเปิร์ตรอบหัวเธอบินช้ากว่านิดหน่อยจ้ะ จอร์จ'],'โอ้โห ใจดีจัง จะเก็บไว้เป็นทุนเปิดร้านตลกนะ'),
+C('draco','Draco Malfoy','เดรโก มัลฟอย','S','slytherin_common',{hair:'#ece6d0',hs:'slick',eye:'#9aa4b0',skin:SK.l},
+ ['ห-หา? ฉันไม่ได้รอเธออยู่นะ! แค่... นั่งตรงนี้พอดีเฉยๆ','อย่าบอกใครนะว่าฉันชอบมองปลาหมึกยักษ์ผ่านหน้าต่าง ไม่ได้ชอบมากหรอก แค่... นิดหน่อย'],
+ ['เลิฟกู๊ด... ก็... สวัสดี','สวัสดีจ้ะเดรโก หูเธอแดงนิดๆ นะ แร็กสเปิร์ตคงมาเยี่ยม'],'ห๊ะ ให้ฉัน? ไม่ได้อยากได้หรอกนะ! ...แต่จะเก็บไว้ก็ได้ (หันหน้าหนี) ขอบใจ'),
+C('cedric','Cedric Diggory','เซดริก ดิกกอรี่','H','black_lake',{hair:'#6a4524',hs:'short',eye:'#6a7a8a',skin:SK.l},
+ ['การเดินเล่นริมทะเลสาบตอนเช้าทำให้หัวใจปลอดโปร่งนะ','ฮัฟเฟิลพัฟเชื่อในความซื่อสัตย์และความเพียร ฉันภูมิใจในบ้านเรา'],
+ ['ลูน่า เธอเคยขี่เธสตรอลใช่ไหม','ใช่จ้ะเซดริก มันนุ่มกว่าที่คิดนะ'],'ขอบใจมาก เธอนี่ใจดีจริงๆ'),
+C('cho','Cho Chang','โช แชง','R','owlery',{hair:'#120e14',hs:'long',eye:'#3a2a24',skin:SK.l},
+ ['ฉันมาส่งจดหมายหาครอบครัว นกฮูกที่นี่น่ารักมาก','บางวันฉันก็ขึ้นมาที่นี่เพื่อดูวิวเงียบๆ จากหอนกฮูก'],
+ ['ลูน่า เธอไม่เหงาบ้างเหรอ','ไม่หรอกจ้ะโช ตอนนี้ฉันมีเพื่อนเยอะเลย'],'ขอบคุณจ้ะ น่ารักมาก'),
+C('dean','Dean Thomas','ดีน โธมัส','G','gryffindor_common',{hair:'#1a1410',hs:'buzz',eye:'#3a2414',skin:SK.d},
+ ['ฉันกำลังวาดภาพฮอกวอตส์ตอนพระอาทิตย์ตกในสมุดสเก็ตช์','ฟุตบอลมักเกิ้ลก็สนุกไม่แพ้ควิดดิชนะ เชื่อสิ'],
+ ['ลูน่า ภาพวาดในห้องเธอสวยมากเลยนะ','ขอบใจจ้ะดีน ฉันวาดเพื่อนๆ ด้วยความรักเลยล่ะ'],'สีน้ำชุดใหม่! ขอบคุณ จะวาดรูปเธอกับลูน่าให้นะ',
+ [['✏️ ดูสมุดสเก็ตช์','(ดีนเปิดสมุดให้ดู) มีภาพหอนาฬิกา ภาพแฮกริดกับฟักทองยักษ์ และ... ภาพเธอกับลูน่าเดินเล่นด้วยกัน! "ฉันแอบวาดไว้ ไม่ว่ากันนะ"']]),
+C('seamus','Seamus Finnigan','ชีมัส ฟินนิแกน','G','charms',{hair:'#c9a46a',hs:'short',eye:'#5a8ac0',skin:SK.l},
+ ['วันนี้ขนนกของฉันยังไม่ระเบิดเลย! ความก้าวหน้าชัดๆ','ถ้าได้ยินเสียงตูมจากห้องนี้ ไม่ใช่ฉันแน่นอน... อาจจะ'],
+ ['ลูน่า คาถาของฉันชอบระเบิดเพราะอะไรน่ะ','อาจเป็นเพราะไม้กายสิทธิ์เธอตื่นเต้นง่ายเหมือนเจ้าของจ้ะ ชีมัส'],'ขอบใจมาก! จะไม่เสกให้มันระเบิดนะ สัญญา'),
+C('parvati','Parvati Patil','ปาวาตี พาติล','G','gryffindor_common',{hair:'#15100c',hs:'braid',eye:'#4a2c1a',skin:SK.m},
+ ['ฉันกับปัทมาส่งจดหมายหากันทุกวันแม้จะอยู่ปราสาทเดียวกัน','ชาใบไม้วันนี้เป็นรูปหัวใจล่ะ!'],
+ ['ลูน่า เธอเชื่อเรื่องดูใบชาไหม','ฉันเชื่อว่าใบชาชอบให้คนมองนะ ปาวาตี'],'สร้อยข้อมือสวยมาก ขอบคุณนะ'),
+C('padma','Padma Patil','ปัทมา พาติล','R','ravenclaw_common',{hair:'#15100c',hs:'ponytail',eye:'#4a2c1a',skin:SK.m},
+ ['ปริศนาประตูเรเวนคลอวันนี้ยากมาก ฉันตอบไปสามรอบ','บางทีความเงียบก็ช่วยให้คิดอะไรออกนะ'],
+ ['ลูน่า ประตูถามว่าอะไรมาก่อน ไก่หรือไข่','วงกลมไม่มีจุดเริ่มต้นจ้ะ ปัทมา'],'ขอบคุณนะ ใจดีมากเลย'),
+C('lavender','Lavender Brown','ลาเวนเดอร์ บราวน์','G','divination',{hair:'#e8c66a',hs:'long',eye:'#6a9ad0',skin:SK.l,bow:'#ff8ab0'},
+ ['ศาสตราจารย์ทรีลอว์นีย์บอกว่าวันนี้ฉันจะเจอเรื่องดีๆ แล้วก็เจอเธอนี่แหละ','ลูกแก้วของฉันมีหมอกสีชมพู แปลว่าความรักใช่ไหม!'],
+ ['ลูน่า ดวงวันนี้ของเธอเป็นยังไง','ดวงบอกว่าฉันจะเจอสนอร์แคกเขายู่ยี่จ้ะ ลาเวนเดอร์'],'ว้าย น่ารักที่สุด! ขอบคุณนะ~'),
+C('colin','Colin Creevey','โคลิน ครีฟวีย์','G','courtyard',{hair:'#d8b06a',hs:'short',eye:'#5a8ad0',skin:SK.l,camera:1},
+ ['ขอถ่ายรูปหน่อยได้ไหม! แสงตรงหอนาฬิกาตอนนี้สวยมาก!','รูปพ่อมดขยับได้ด้วยนะ ส่งไปให้พ่อดูทีไรพ่อตื่นเต้นทุกที'],
+ ['ลูน่า ยิ้มหน่อย! หนึ่ง สอง สาม!','(ลูน่าทำหน้าเหมือนกำลังฟังเสียงลม) แชะ! สวยเหมือนภาพฝันเลยโคลิน'],'โอ้โห ฟิล์มใหม่! ขอบคุณมากๆ จะถ่ายรูปเธอเป็นรูปแรกเลย!',
+ [['📸 ถ่ายรูปด้วยกัน','แชะ! ✨ (แฟลชสว่างวาบ) "เยี่ยม! รูปนี้เธอ ลูน่า และหอนาฬิกาด้านหลัง จะล้างในห้องมืดแล้วเอามาให้นะ!"']],[8,15]),
+C('oliver','Oliver Wood','โอลิเวอร์ วู้ด','G','quidditch',{hair:'#5a3a22',hs:'short',eye:'#6a5a3a',skin:SK.l,robe:'#8a1414'},
+ ['ควิดดิชไม่ใช่แค่กีฬา มันคือศิลปะ! ...แต่วันนี้พักได้นะ','ฉันวาดแผนการเล่นไว้ 47 แบบ อยากดูไหม? เอ่อ ไว้ทีหลังก็ได้'],
+ ['ลูน่า พากย์คราวก่อนเธอพูดถึงโรคเกมขี้แพ้แทนคะแนน!','ก็ผู้เล่นคนนั้นดูเศร้ามากนี่จ๊ะ โอลิเวอร์'],'ขี้ผึ้งขัดไม้กวาดชั้นดี! เธอคือแฟนควิดดิชตัวจริง!',null,[14,16]),
+C('hannah','Hannah Abbott','ฮันนาห์ แอบบอต','H','hufflepuff_common',{hair:'#ecc46a',hs:'pigtail',eye:'#6a9ad0',skin:SK.l},
+ ['ห้องนั่งเล่นเราอบอุ่นเหมือนอยู่ในรังเลยว่าไหม','ฉันอยากเปิดร้านเล็กๆ อบอุ่นแบบไม้กวาดสามอันในอนาคต'],
+ ['ลูน่า เธอชอบกลิ่นขนมปังอบไหม','ชอบจ้ะฮันนาห์ มันเหมือนกลิ่นความสุข'],'ขอบคุณจ้ะ! จะแบ่งให้เพื่อนในบ้านด้วย'),
+C('ernie','Ernie Macmillan','เออร์นี่ แมคมิลแลน','H','hufflepuff_common',{hair:'#b98a4a',hs:'short',eye:'#5a6a8a',skin:SK.l},
+ ['ในฐานะพรีเฟ็คต์ ฉันยืนยันว่าวันนี้เป็นวันที่ดี','การบ้านทำครบแล้ว ขอนั่งพักอย่างสมเกียรติ'],
+ ['ลูน่า เธอทำการบ้านเสร็จหรือยัง','เสร็จแล้วจ้ะเออร์นี่ แต่นาร์เกิลขโมยไปครึ่งหนึ่ง'],'ขอขอบคุณอย่างเป็นทางการ!'),
+C('pansy','Pansy Parkinson','แพนซี่ พาร์กินสัน','S','slytherin_common',{hair:'#1a1418',hs:'bob',eye:'#3a3a2a',skin:SK.l},
+ ['แสงสีเขียวจากทะเลสาบทำให้ผิวฉันดูดีนะ ว่าไหม','ฉันไม่ได้ใจร้ายหรอก แค่... พูดตรง'],
+ ['เลิฟกู๊ด ต่างหูนั่นมันอะไร','ลูกพลัมเลื่อนลอยจ้ะแพนซี่ อยากได้สักคู่ไหม'],'อืม... ก็สวยดี ขอบใจ'),
+C('blaise','Blaise Zabini','เบลส ซาบินี','S','slytherin_common',{hair:'#120c08',hs:'buzz',eye:'#3a2414',skin:SK.d},
+ ['ความสงบคือความหรูหราที่แท้จริง','ฉันชอบอ่านกวีนิพนธ์ข้างหน้าต่างน้ำ'],
+ ['ลูน่า เธอนี่ไม่เหมือนใครเลย','ขอบใจจ้ะเบลส เธอก็เหมือนกัน'],'มีรสนิยมดีนี่ ขอบคุณ'),
+C('dumbledore','Albus Dumbledore','อัลบัส ดัมเบิลดอร์','N','headmaster',{hair:'#e8e8f0',hs:'long',eye:'#5ab0f0',skin:SK.l,gl:'half',beard:1,hat:'#5a3a9a',robe:'#6a3fa0',tall:1},
+ ['ลูกอมมะนาวไหม? ความหวานเล็กๆ ทำให้วันธรรมดาพิเศษได้เสมอ','ความสุขสามารถพบได้แม้ในยามมืดมิด หากเราจำได้ว่าต้องเปิดไฟ'],
+ ['มิสเลิฟกู๊ด วันนี้เธอเห็นอะไรน่าสนใจบ้างไหม','ฟอว์กส์กระซิบว่าคุณใส่ถุงเท้าคู่ใหม่ค่ะ ศาสตราจารย์'],'ถุงเท้าขนแกะ! เธอรู้ใจฉันจริงๆ ไม่มีใครให้ถุงเท้าฉันพอเลย'),
+C('mcgonagall','Minerva McGonagall','มิเนอร์วา มักกอนนากัล','N','transfiguration',{hair:'#3a3434',hs:'bun',eye:'#4a7a5a',skin:SK.l,gl:'square',hat:'#1d4a2a',robe:'#1d5a35',tall:1},
+ ['วันหยุดก็ควรพักผ่อนบ้าง ฉันอนุญาต','บิสกิตขิงอยู่ในกล่องลายสก็อตนะ หยิบไปได้หนึ่งชิ้น'],
+ ['มิสเลิฟกู๊ด เธอแปลงร่างหนูกลับหัวอีกแล้ว','มันดูมีความสุขกว่าค่ะ ศาสตราจารย์'],'บิสกิตขิง... ขอบใจมาก (ยิ้มนิดๆ)',
+ [['🐈 ขอลูบแมวลาย','(ฟุ่บ! ศาสตราจารย์กลายร่างเป็นแมวลายสีเทามีรอยรอบดวงตาเหมือนแว่น) ...เมี้ยว (ยอมให้ลูบหัวสามที แล้วครางเบาๆ อย่างสง่างาม)',{cr:'cat',hair:'#9a9488',eye:'#e0c040',tabby:1,spec:1}]]),
+C('snape','Severus Snape','เซเวอรัส สเนป','N','potions',{hair:'#121014',hs:'curtain',eye:'#121014',skin:'#ecdccc',robe:'#141218'},
+ ['...อย่าแตะหม้อนั่น','ยาที่ดีต้องการความอดทน ซึ่งนักเรียนส่วนใหญ่ไม่มี'],
+ ['มิสเลิฟกู๊ด ไม่ต้องเอาแว่นแปลกๆ มามองหม้อยา','มีแร็กสเปิร์ตตกลงไปในนั้นค่ะ ศาสตราจารย์'],'...สมุนไพรหายาก รับไว้ก็ได้',
+ [['🍀 เรียนเฟลิกซ์ เฟลิซิส','"ยาแห่งโชค... ต้องใช้เวลาหกเดือน ไข่ของแอชไวน เหง้าต้นสคิลล์ และความอดทนที่เธอไม่มี" (แต่เขาก็อธิบายต่ออีกนาน ราวกับแอบดีใจที่มีคนถาม)'],
+  ['☕ เรียนทำโกโก้ร้อน','"คนตามเข็มนาฬิกาเจ็ดรอบ ใส่อบเชยหนึ่งหยิบ... ห้ามเดือด" (ส่งแก้วให้) "ดื่มซะ อย่าบอกใครว่าฉันสอน"']]),
+C('flitwick','Filius Flitwick','ฟิเลียส ฟลิตวิก','N','charms',{hair:'#f0f0f0',hs:'wild',eye:'#3a3a3a',skin:SK.l,small:1,robe:'#2a3a7a',beard:1},
+ ['สะบัดและตวัด! สะบัดและตวัด! ดีมากๆ','วงประสานเสียงกบคางคกจะแสดงคืนนี้นะ ห้ามพลาด!'],
+ ['มิสเลิฟกู๊ด คาถาของเธอวันนี้สวยมาก','ขอบคุณค่ะศาสตราจารย์ ขนนกบอกว่ามันอยากบินอยู่แล้ว'],'โอ้! วิเศษมาก ขอบใจหนูนะ!'),
+C('sprout','Pomona Sprout','โพโมนา สเปราต์','N','greenhouses',{hair:'#9a8a7a',hs:'wild',eye:'#5a7a3a',skin:SK.l,hat:'#6a5a3a',robe:'#5a6a3a',stout:1},
+ ['ยินดีต้อนรับสู่เรือนกระจก 1 จ้ะ! วันนี้เราจะปลูกเมล็ดพันธุ์เรืองแสงกัน','ต้นไม้ก็ชอบให้คนคุยด้วยนะ ลองดูสิ'],
+ ['ลูน่า ฉันได้ยินว่าเธอปลูกแรดิชไว้ใช้เป็นต่างหู','ใช่ค่ะศาสตราจารย์ ลูกพลัมเลื่อนลอยสวยกว่าค่ะ'],'ปุ๋ยมังกรคุณภาพดี! ขอบใจมากจ้ะ',
+ [['🌱 ปลูกเมล็ดเรืองแสง','(คุณกดเมล็ดลงดินเบาๆ ... ต้นอ่อนแทงยอดขึ้นมาส่องแสงสีฟ้าอ่อนเหมือนหิ่งห้อย) "เก่งมากจ้ะ! มันจะส่องสว่างทุกคืนเลย"']],[4,5]),
+C('hagrid','Rubeus Hagrid','รูเบอัส แฮกริด','N','hagrid_hut',{hair:'#2a1a10',hs:'wild',eye:'#1a1a1a',skin:SK.m,beard:1,big:1,robe:'#5a3a24'},
+ ['อ้าว มาพอดีเลย! ร็อคเค้กเพิ่งออกจากเตา','บัคบีคอยู่ที่แปลงฟักทองนะ จำไว้ ต้องโค้งคำนับก่อนเสมอ!'],
+ ['ลูน่า หนูอยากเห็นเธสตรอลไหม','อยากมากค่ะแฮกริด พวกมันเป็นเพื่อนรักของหนู'],'โอ้ ให้ฉันเหรอ! (ซับน้ำตาด้วยผ้าเช็ดหน้าผืนยักษ์) ใจดีจริงๆ'),
+C('lupin','Remus Lupin','รีมัส ลูปิน','N','dada',{hair:'#8a7050',hs:'short',eye:'#8a7050',skin:SK.l,scarFace:1,robe:'#6a5e50'},
+ ['ช็อกโกแลตไหม? ช่วยได้เสมอ','โครงกระดูกมังกรข้างบนนั่นไม่กัดหรอก ฉันสัญญา'],
+ ['ลูน่า หนูไม่กลัวอะไรเลยใช่ไหม','กลัวค่ะ แต่ความกลัวก็เป็นเพื่อนได้นะคะศาสตราจารย์'],'ช็อกโกแลต! เธอรู้ใจฉันจริงๆ ขอบใจนะ',
+ [['🍫 รับช็อกโกแลต','(ลูปินหักช็อกโกแลตแท่งใหญ่ให้ชิ้นหนึ่ง) "กินซะ จะรู้สึกดีขึ้น... แม้วันนี้จะดีอยู่แล้วก็ตาม"']]),
+C('trelawney','Sybill Trelawney','ซีบิล ทรีลอว์นีย์','N','divination',{hair:'#c08a4a',hs:'wild',eye:'#5a8ab0',skin:SK.l,gl:'big',robe:'#9a6aa0',shawl:'#d0a0d0'},
+ ['ดวงจิตของฉันเห็น... เธอจะมีวันที่สงบสุข','ดวงดาวคืนนี้กระซิบชื่อเธอ ช่างลึกลับ'],
+ ['ลูกรัก ลูน่า เธอมีดวงตาภายใน','หนูแค่มองเห็นสิ่งที่คนอื่นไม่สนใจค่ะ ศาสตราจารย์'],'โอ้ ฉันเห็นในลูกแก้วแล้วว่าเธอจะให้สิ่งนี้! ขอบใจจ้ะ',
+ [['🔮 ดูใบชา','"อา... ใบชาเป็นรูปนกฮูกกับดวงจันทร์ แปลว่าเพื่อนเก่าจะส่งข่าวดีมา และ... คุกกี้!"']]),
+C('pomfrey','Poppy Pomfrey','ป็อปปี้ พอมฟรีย์','N','hospital',{hair:'#8a8a8a',hs:'bun',eye:'#4a6a8a',skin:SK.l,cap:1,robe:'#e8e8f0'},
+ ['พักผ่อนให้พอนะจ๊ะ ร่างกายต้องการการดูแล','ชาสมุนไพรร้อนๆ ช่วยได้ทุกอย่าง'],
+ ['มิสเลิฟกู๊ด อย่าเดินเท้าเปล่าในปราสาทอีกนะ','รองเท้าหนูหายไปเองค่ะ แต่ตอนนี้กลับมาแล้ว'],'โอ้ ขอบใจจ้ะ ช่างน่ารัก',null,[6,6]),
+C('pince','Irma Pince','เอียร์มา พินซ์','N','library',{hair:'#5a5050',hs:'bun',eye:'#4a4a4a',skin:SK.l,robe:'#3a2e3a',thin:1},
+ ['ชู่ว... ห้องสมุดต้องเงียบ','ถือหนังสือให้ดีๆ อย่าพับมุม'],
+ ['มิสเลิฟกู๊ด อย่าอ่านหนังสือกลับหัว','มันเล่าเรื่องได้ต่างออกไปค่ะ มาดาม'],'...ที่คั่นหนังสือ ดีมาก ขอบใจ'),
+C('filch','Argus Filch','อาร์กัส ฟิลช์','N','entrance_hall',{hair:'#6a6a5a',hs:'thin',eye:'#6a6a4a',skin:'#e0ccb8',robe:'#4a3e34'},
+ ['เช็ดเท้าก่อนเข้า! ...ก็ได้ วันนี้พื้นสะอาดอยู่แล้ว','มิสซิสนอร์ริสชอบให้เกาคางนะ ระวังอย่าให้แรง'],
+ ['เลิฟกู๊ด เธอทิ้งรองเท้าไว้ที่ทางเดินอีกแล้ว','ขอโทษค่ะคุณฟิลช์ มิสซิสนอร์ริสชอบมันนะคะ'],'ให้ฉัน? ...ไม่มีใครเคยให้อะไรฉันเลย ขอบใจ'),
+C('rosmerta','Madam Rosmerta','มาดามโรสเมอร์ตา','N','three_broomsticks',{hair:'#d8a050',hs:'curly',eye:'#4a7a9a',skin:SK.l,robe:'#a03a4a',apron:1},
+ ['บัตเตอร์เบียร์อุ่นๆ สองแก้วนะจ๊ะ ฟองนุ่มพิเศษ','ฝนตกแบบนี้ นั่งผิงไฟในร้านดีที่สุด'],
+ ['ลูน่าจ๋า เอาจุกก๊อกไปเพิ่มสร้อยไหม','ขอบคุณค่ะมาดาม สร้อยหนูจะยาวขึ้นอีกแล้ว'],'โอ้ น่ารักจัง ขอบใจจ้ะ บัตเตอร์เบียร์แก้วหน้าฟรีเลย',
+ [['🍺 สั่งบัตเตอร์เบียร์','(แก้วบัตเตอร์เบียร์ฟองนุ่มลอยมาวางตรงหน้า) "ระวังหนวดฟองนะจ๊ะ!" — ลูน่า: "เธอมีหนวดฟองแล้วล่ะ น่ารักดี"']]),
+C('dobby','Dobby','ด็อบบี้','N','kitchens',{hair:'#000',hs:'none',eye:'#3a8a3a',skin:'#c8b8a0',elf:1,small:1,socks:1},
+ ['ด็อบบี้เป็นเอลฟ์อิสระ! ด็อบบี้มีความสุขมาก!','ด็อบบี้อบพายกากน้ำตาลไว้ให้ อยากชิมไหม!'],
+ ['คุณหนูลูน่า! ด็อบบี้ถักถุงเท้าให้','สวยมากเลยด็อบบี้ ข้างหนึ่งสีม่วงข้างหนึ่งสีเหลือง เข้ากับฉันมาก'],'ถุงเท้า!!! ด็อบบี้ได้ถุงเท้า! ด็อบบี้จะเก็บไว้ตลอดไป!'),
+C('winky','Winky','วิงกี้','N','kitchens',{hair:'#000',hs:'none',eye:'#7a4ab0',skin:'#d0c0a8',elf:1,small:1,tea:1},
+ ['วิงกี้... วิงกี้ทำชาให้ไหมคะ','วิงกี้ดีใจที่มีคนมาเยี่ยมห้องครัว'],
+ ['คุณหนูลูน่าใจดีกับวิงกี้เสมอ','เพราะเธอเป็นเพื่อนนะวิงกี้ ไม่ใช่คนรับใช้'],'วิงกี้... วิงกี้ได้ของขวัญ! (สะอื้นด้วยความดีใจ)'),
+C('nick','Nearly Headless Nick','นิกหัวเกือบขาด','N','great_hall',{hair:'#d0d0e0',hs:'curly',eye:'#8a8aa0',skin:'#dde',ghost:1,ruff:1,robe:'#8a8ab0'},
+ ['ขอแนะนำตัว เซอร์นิโคลัส เดอ มิมซี่-พอร์พิงตัน','หัวของฉันยังติดอยู่ดี... เกือบหมด'],
+ ['มิสเลิฟกู๊ด เธอไม่กลัวผีเลยนะ','ผีเป็นเพื่อนที่ฟังเก่งที่สุดค่ะเซอร์นิโคลัส'],'โอ้ ผีรับของไม่ได้ แต่น้ำใจนี้ซึ้งถึงวิญญาณ'),
+C('greylady','The Grey Lady','สุภาพสตรีชุดเทา','N','ravenclaw_common',{hair:'#d8dce8',hs:'long',eye:'#9aa0b0',skin:'#e8ecf4',ghost:1,robe:'#a0a8c0'},
+ ['ปัญญาที่แท้จริงคือการรู้ว่าตนเองยังไม่รู้','หอคอยนี้เงียบสงบ... ฉันชอบ'],
+ ['เด็กน้อยเรเวนคลอ เธอใจดีกับคนที่ถูกลืม','เพราะหนูก็เคยถูกลืมเหมือนกันค่ะ คุณเฮเลนา'],'...ขอบใจ ความใจดีนี้ฉันจะจำไว้'),
+C('friar','The Fat Friar','บาทหลวงอ้วน','N','hufflepuff_common',{hair:'#c0c0c8',hs:'thin',eye:'#8a8aa0',skin:'#e8ecf4',ghost:1,stout:1,robe:'#a0a090'},
+ ['สันติสุขจงมีแด่เธอ เด็กน้อย','ให้อภัยกันเถิด แล้วโลกจะอบอุ่นขึ้น'],
+ ['ลูน่าหนู วันนี้สุขสบายดีไหม','สบายดีค่ะท่านบาทหลวง ขอบคุณที่ถาม'],'ขอบใจลูก พรจงอยู่กับเจ้า'),
+C('baron','The Bloody Baron','บารอนเลือด','N','astronomy',{hair:'#c8ccd8',hs:'curtain',eye:'#8a8aa0',skin:'#e0e4ec',ghost:1,chains:1,robe:'#8a90a8',beard:1},
+ ['...(โซ่กระทบกันเบาๆ) ดวงดาวไม่เคยตัดสินใคร','ข้ามาที่นี่เพราะมันเงียบ... เจ้าก็เช่นกันสินะ'],
+ ['เด็กสาวเรเวนคลอ... เจ้าไม่กลัวข้า','ท่านดูเหงามากกว่าน่ากลัวค่ะ ท่านบารอน'],'...ของขวัญ ข้าไม่ได้รับมาหลายร้อยปีแล้ว'),
+C('myrtle','Moaning Myrtle','เมอร์เทิลจอมคร่ำครวญ','N','hospital',{hair:'#3a3a3a',hs:'pigtail',eye:'#8a8aa0',skin:'#e0f0f0',ghost:1,gl:'round',robe:'#9ab0b0'},
+ ['ห้องน้ำพรีเฟ็คต์เป็นของฉันนะ! ...แต่เธอจะเล่นฟองสบู่ด้วยก็ได้','ไม่มีใครมาคุยกับฉันเลย... ยกเว้นเธอ'],
+ ['ลูน่า เธอเป็นคนเดียวที่ไม่หัวเราะเยาะฉัน','เธอเป็นผีที่ร้องเพลงเพราะนะเมอร์เทิล'],'ให้ฉันเหรอ? ...ไม่มีใครเคยให้ ฮือๆ ดีใจ',null,[17,9]),
+C('peeves','Peeves','พีฟส์','N','grand_staircase',{hair:'#ff7a2a',hs:'spiky',eye:'#ff4aa0',skin:'#f4e8ff',peeves:1,robe:'#e04a8a'},
+ ['พีฟส์ไม่ได้ทำอะไรเลยยย~ (บันไดขั้นนั้นหายไปเอง!)','อยากเล่นปริศนาไหม เจ้าตัวจิ๋ว? ฮี่ๆๆ'],
+ ['ลูนี่ เลิฟกู๊ด! ลูนี่ลอยลม!','สวัสดีจ้ะพีฟส์ หมวกเธอวันนี้กระดิ่งเยอะดีนะ'],'ของขวัญให้พีฟส์? ...ไม่มีระเบิดเหรอ? น่าเบื่อ! ...แต่ชอบนะ',
+ [['❓ ขอปริศนา 1','"อะไรเอ่ย ยิ่งเอาออกยิ่งใหญ่ขึ้น?" ...(พีฟส์หัวเราะ) "หลุม! ฮี่ๆๆ"'],['❓ ขอปริศนา 2','"อะไรเอ่ย มีบันไดแต่ไม่เคยอยู่ที่เดิม?" ...ลูน่า: "ฮอกวอตส์จ้ะ" พีฟส์: "ไม่ยุติธรรม! เธอโกง!"']],[6,13]),
+C('fatlady','The Fat Lady','สุภาพสตรีอ้วน (ภาพวาด)','N','gryffindor_common',{hair:'#7a4a2a',hs:'curly',eye:'#5a3a2a',skin:SK.l,cr:'painting',dress:'#e8a0c0'},
+ ['รหัสผ่าน? ...อ้อ เธออยู่ข้างในแล้วนี่ งั้นฟังฉันร้องเพลงแทนนะ ลา~ลา~','ไวโอเล็ตเพื่อนฉันในภาพวาดข้างๆ เพิ่งเอาไวน์มาให้ ห้ามบอกใคร'],
+ ['ลูน่า เลิฟกู๊ด แม้ไม่ใช่กริฟฟินดอร์ แต่เธอเข้ามาได้เสมอ','ขอบคุณค่ะคุณผู้หญิง เสียงร้องของคุณทำแก้วสั่นได้เลย'],'โอ้ ช่อดอกไม้สำหรับภาพวาดฉัน! ช่างมีมารยาท!',null,[8.5,9.5]),
+C('hedwig','Hedwig','เฮ็ดวิก','N','owlery',{cr:'owl',hair:'#f8f8f8',eye:'#f0c030'},
+ ['ฮู้... (เอียงคอมองเธออย่างสง่างาม)','(กระพือปีกขาวสะอาด แล้วจิกนิ้วเธอเบาๆ อย่างเอ็นดู)'],
+ ['ฮู้?','เฮ็ดวิกบอกว่าแฮร์รี่ลืมให้ขนมเธอเมื่อวานจ้ะ'],'(งับขนมนกฮูกอย่างพอใจ แล้วไซร้ขนให้เธอ) ฮู้~',null,[6.5,7],{pet:'(เกาหัวเฮ็ดวิกเบาๆ ขนนุ่มเหมือนหิมะ เธอหลับตาพริ้มอย่างพอใจ)',food:'ขนมนกฮูก'}),
+C('crookshanks','Crookshanks','ครุกแชงส์','N','library',{cr:'cat',hair:'#d8823a',eye:'#e0b030',flat:1},
+ ['เมี้ยว (นอนขดข้างเตาผิงห้องสมุด หน้าบี้ๆ ดูพอใจในชีวิต)','(หางฟูๆ ตวัดไปมา จ้องเธอเหมือนรู้ความลับ)'],
+ ['เพอร์ร...','ครุกแชงส์ฉลาดมาก เขารู้ว่าใครเป็นคนดีนะ'],'(เคี้ยวขนมแมวหงับๆ แล้วถูหัวกับขาเธอ) เพอร์ร์ร',null,[19,3],{pet:'(ลูบขนสีส้มฟูๆ ครุกแชงส์ครางเสียงดังเหมือนเครื่องยนต์จิ๋ว)',food:'ขนมแมว'}),
+C('fang','Fang','แฟง','N','hagrid_hut',{cr:'dog',hair:'#1e1a1c',eye:'#6a4a2a'},
+ ['โฮ่ง! (หางกระดิกจนตัวสั่น)','(น้ำลายยืดใส่รองเท้าเธอ... ด้วยความรัก)'],
+ ['โฮ่ง โฮ่ง!','แฟงตัวใหญ่แต่ขี้กลัวนะ เขาชอบซ่อนหลังแฮกริด'],'(งับบิสกิตสุนัขทีเดียวหมด แล้วเลียหน้าเธอ) โฮ่ง!',null,[8,8],{pet:'(เกาหลังหูแฟง เขานอนหงายท้องให้ลูบทันที)',food:'บิสกิตสุนัข'}),
+C('buckbeak','Buckbeak','บัคบีค','N','hagrid_hut',{cr:'hippogriff',hair:'#9a9aa4',eye:'#f08a2a'},
+ ['(ฮิปโปกริฟฟ์จ้องเธอด้วยตาสีส้มเข้ม... ต้องโค้งคำนับก่อนนะ)','(ขนปีกสีเทาเงินกระพือเบาๆ ในสายลม)'],
+ ['(บัคบีคโค้งตอบลูน่าทันที)','บัคบีคเป็นสุภาพบุรุษมากเลยจ้ะ'],'(งับปลาตายเข้าปากอย่างพอใจ) ครี้~',null,[13.5,6.5],{pet:'(ลูบคอขนนุ่มของบัคบีค เขาหลับตาและส่งเสียงครางเบาๆ)',food:'ปลาตาย',bow:1}),
+C('fawkes','Fawkes','ฟอว์กส์','N','headmaster',{cr:'phoenix',hair:'#d8301a',eye:'#1a1a1a'},
+ ['(ร้องเพลงฟีนิกซ์ไพเราะจนหัวใจอุ่นวาบ)','(ขนหางสีทองแดงส่องประกายเหมือนเปลวไฟ)'],
+ ['(ฟอว์กส์ร้องโน้ตเดียวยาวๆ)','เพลงนี้ทำให้ฉันคิดถึงแม่เลย... แต่เป็นความคิดถึงที่อุ่นนะ'],'(จิกเมล็ดพันธุ์ไฟอย่างนุ่มนวล ขนเปล่งแสงสีทอง)',null,[11.5,5],{pet:'(ลูบขนอุ่นๆ ของฟอว์กส์ น้ำตาฟีนิกซ์หยดหนึ่งเปล่งประกายแล้วระเหยไป)',food:'เมล็ดพันธุ์ไฟ'}),
+C('mrsnorris','Mrs Norris','มิสซิสนอร์ริส','N','entrance_hall',{cr:'cat',hair:'#7a6a5a',eye:'#e04a30',thin:1},
+ ['เมี้ยว... (จ้องเธอด้วยตาสีโคมไฟ)','(เดินวนรอบขาเธอเพื่อตรวจว่าไม่ได้ทำผิดกฎ)'],
+ ['เมี้ยว?','มิสซิสนอร์ริสบอกว่าวันนี้ไม่มีใครทำผิดกฎจ้ะ'],'(ตะครุบขนมแล้วคลอเคลียขา) เพอร์ร์',null,null,{pet:'(มิสซิสนอร์ริสยอมให้ลูบ... หนึ่งที แล้วเชิดหน้าเดินไปอย่างสง่า)',food:'ขนมแมว'}),
+C('trevor','Trevor','เทรเวอร์','N','greenhouses',{cr:'toad',hair:'#7a8a3a',eye:'#e0c030'},
+ ['อ๊บ... (นั่งนิ่งข้างกระถางต้นไม้)','(กระโดดหนีไปหนึ่งก้าว แล้วหันกลับมามอง)'],
+ ['อ๊บ!','เทรเวอร์หนีเนวิลล์บ่อยเพราะชอบผจญภัยจ้ะ ไม่ใช่เพราะไม่รัก'],'(แลบลิ้นจับแมลงวันกะพริบอย่างแม่นยำ) อ๊บ!',null,[3,9.5],{pet:'(ลูบหลังเทรเวอร์เบาๆ ผิวเย็นและลื่น เขาพองคอด้วยความพอใจ)',food:'แมลงวันกะพริบ'}),
+C('thestrals','Baby Thestrals','ลูกเธสตรอล','N','quidditch',{cr:'thestral',hair:'#1a1a22',eye:'#e8f0ff'},
+ ['(ลูกเธสตรอลตัวน้อยกางปีกหนังบางๆ แล้วเดินโยกเยกเข้ามาใกล้)','(ดวงตาขาวว่างเปล่าแต่อ่อนโยน มันดมมือเธอเบาๆ)'],
+ ['(ลูกเธสตรอลซุกหัวกับลูน่า)','ดีใจที่เธอมองเห็นพวกเขานะ... หรือถ้ามองไม่เห็น เขาก็ยังอยู่ตรงนี้อยู่ดี'],'(เคี้ยวเนื้อสดอย่างหิวโหย แล้วสะบัดหางพอใจ)',null,[30,13],{pet:'(ลูบหัวลูกเธสตรอล ขนบางนุ่มเหมือนกำมะหยี่ มันเอียงหัวพิงมือเธอ)',food:'เนื้อสด'})
+];
+/* ===================== LUNA: CONTEXT DIALOGUE ===================== */
+const LUNA_LOOK={hair:'#f3ead0',hs:'luna',eye:'#8fb3c9',skin:SK.l,spectre:1,radish:1,cork:1,quibbler:1};
+const LUNA_ZONE={
+ great_hall:'พุดดิ้งวันนี้ดูเหมือนจะมีความสุขเป็นพิเศษนะ ฉันว่ามันอยากถูกกินช้าๆ',
+ entrance_hall:'บันไดหินอ่อนนี่เย็นสบายเวลาเดินเท้าเปล่านะ ลองไหม',
+ grand_staircase:'บันไดชอบเปลี่ยนทางเพราะมันเบื่อน่ะ ฉันเข้าใจมันนะ ระวังพีฟส์ด้วยล่ะ',
+ gryffindor_common:'ห้องนี้อบอุ่นเหมือนกอดของสิงโตตัวใหญ่ใจดีเลย',
+ ravenclaw_common:'เพดานดาวของเรา... บางดวงฉันแอบตั้งชื่อตามเพื่อนๆ แล้วนะ รวมถึงเธอด้วย',
+ hufflepuff_common:'ที่นี่กลิ่นเหมือนขนมปังกับดินหลังฝนตก ฉันชอบมาก',
+ slytherin_common:'ถ้ารอดีๆ ปลาหมึกยักษ์จะโบกหนวดทักทายผ่านหน้าต่างนะ',
+ library:'หนังสือในเขตหวงห้ามบางเล่มแค่เหงาเท่านั้นเองนะ ครุกแชงส์ชอบนอนเฝ้าพวกมัน',
+ charms:'ขนนกลอยได้เพราะมันฝันว่าเป็นนกน่ะ ฉันเชื่ออย่างนั้น',
+ transfiguration:'ศาสตราจารย์มักกอนนากัลแอบแปลงร่างเป็นแมวมาฟังเรางีบหลับนะ',
+ potions:'ไอระเหยจากหม้อยาบางทีก็วาดรูปสัตว์ที่ยังไม่มีใครค้นพบด้วยล่ะ',
+ dada:'โครงกระดูกมังกรข้างบนคงฝันถึงตอนที่ยังบินได้อยู่แน่ๆ',
+ divination:'กลิ่นธูปที่นี่ทำให้แร็กสเปิร์ตง่วงนอน เราเลยคิดอะไรได้ชัดขึ้น',
+ headmaster:'ภาพวาดอาจารย์ใหญ่ทุกคนแกล้งหลับ แต่จริงๆ ฟังเราอยู่นะ',
+ hospital:'มาดามพอมฟรีย์รักษาได้ทุกอย่างยกเว้นการถูกนาร์เกิลขโมยรองเท้า ส่วนห้องน้ำพรีเฟ็คต์มีฟองสบู่สีรุ้งด้วย',
+ kitchens:'ต้องจี้ลูกแพร์ในภาพวาดถึงจะเข้ามาได้นะ ลูกแพร์หัวเราะคิกคักน่ารักมาก',
+ courtyard:'ระฆังหอนาฬิกาดังเหมือนหัวใจของปราสาทเต้นเลย',
+ astronomy:'ดาวทุกดวงคือแสงที่เดินทางมาไกลมากเพื่อมาเจอเรา น่ารักออก',
+ owlery:'นกฮูกทุกตัวรู้ความลับของจดหมายแต่ไม่เคยบอกใคร มันน่ารักตรงนี้',
+ greenhouses:'เรือนกระจก 1 ปลอดภัย แต่เรือนกระจก 3 มีต้นไม้ที่ชอบกัดนิดหน่อยนะ',
+ black_lake:'ระวังต้นวิลโลว์จอมหวดนะ เขาไม่ได้ใจร้ายหรอก แค่ไม่ชอบให้ใครมาใกล้',
+ hagrid_hut:'ฟักทองของแฮกริดโตเร็วมาก ฉันว่ามีคาถาช่วยนิดๆ อย่าลืมโค้งให้บัคบีคนะ',
+ quidditch:'ข้างหลังสนามคือลานโล่งในป่า... ลูกเธสตรอลกำลังแอบมองเราอยู่ อย่าตกใจนะ พวกมันอ่อนโยน',
+ hogsmeade:'หมู่บ้านนี้มีกลิ่นขนมกับควันไฟเตาผิง เหมือนวันเกิดเลย',
+ three_broomsticks:'บัตเตอร์เบียร์ช่วยไล่แร็กสเปิร์ตออกจากหัวได้นะ ลองดื่มสิ',
+ honeydukes:'ถ้าเจอการ์ดกบช็อกโกแลตของคุณพ่อฉันบอกด้วยนะ ล้อเล่นจ้ะ ยังไม่มีหรอก',
+ zonkos:'ฉันชอบแตรที่ร้องเหมือนเป็ด มันทำให้ทุกคนหัวเราะ'
+};
+const LUNA_TIME={morning:'แสงเช้าทำให้แร็กสเปิร์ตบินช้าลง เราเลยคิดอะไรได้ชัดขึ้น',afternoon:'ตอนบ่ายเหมาะกับการงีบใต้ต้นไม้ที่สุดเลย',sunset:'แสงสีทองตอนนี้ทำให้ปราสาทดูเหมือนกำลังยิ้มอยู่',night:'เทียนลอยคืนนี้สวยจัง บางเล่มฉันว่ามันกำลังเต้นรำนะ'};
+const LUNA_WEATHER={clear:'ท้องฟ้าใสแบบนี้ คงมีสนอร์แคกเขายู่ยี่ออกมาอาบแดดแน่ๆ',rain:'เสียงฝนเหมือนเพลงกล่อมของนกเรนโบว์เลย ฟังสิ',snow:'เกล็ดหิมะแต่ละเกล็ดไม่ซ้ำกันเลย เหมือนพวกเราไง',aurora:'แสงเหนือเวทมนตร์... ฉันว่ามันคือความฝันของดวงดาวที่ล้นออกมา'};
+const LUNA_IDLE=['วันนี้ก้อนเมฆรูปร่างเหมือนสนอร์แคกเขายู่ยี่เลยนะ~','ฉันได้ยินเสียงนาร์เกิลกระซิบอยู่แถวนี้','ลมพัดเย็นสบายดีจัง','เธออยากอ่านควิบเบลอร์ไหม ฉันถือกลับหัวให้ได้นะ','สร้อยจุกก๊อกของฉันส่งเสียงกรุ๊งกริ๊งเวลาฉันมีความสุข','เดินช้าๆ ก็ได้นะ เราไม่ต้องรีบไปไหนเลย','ฉันดีใจที่มีเธออยู่ข้างๆ','แร็กสเปิร์ตบินออกไปจากหัวเธอแล้วล่ะ ดีจัง','ฮัมเพลง~ ลา ลา ลู~','เธอว่าดวงจันทร์เหงาไหม ฉันว่าเรามาเป็นเพื่อนมันกันเถอะ'];
+const LUNA_SIT=['ช่วงเวลาแบบนี้แหละ ที่ทำให้ฉันรู้สึกว่าไม่ได้อยู่คนเดียว','เงียบๆ ด้วยกันแบบนี้ก็ดีนะ','ฉันจะจำวันนี้ไว้ในสมุดบันทึกเลย'];
+
+/* ===================== ENGINE CORE ===================== */
+const T=48, R=0.3;
+const cv=document.getElementById('game'), ctx=cv.getContext('2d');
+let VW=0,VH=0,DPR=1;
+function resize(){DPR=Math.min(2,window.devicePixelRatio||1);VW=window.innerWidth;VH=window.innerHeight;cv.width=VW*DPR;cv.height=VH*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+window.addEventListener('resize',resize);resize();
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+function hash(x,y){let h=(x*374761393+y*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967296;}
+
+/* --- build doors, validate zones --- */
+const ZONE_IDS=Object.keys(ZONES);const MAIN_ZONE_IDS=ZONE_IDS.filter(id=>!ZONES[id].sub);
+for(const id of ZONE_IDS){const z=ZONES[id];z.id=id;z.doors=[];z.furn=z.furn.map(f=>({x:f[0],y:f[1],w:f[2],h:f[3],k:f[4],label:f[5]||'',solid:!['rug','stairs','torch','window','banner','portrait','sign','skeleton','clock'].includes(f[4])}));}
+for(const c of CONNS){ZONES[c[0]].doors.push({side:c[1],pos:c[2],to:c[3]});ZONES[c[3]].doors.push({side:c[4],pos:c[5],to:c[0]});}
+function doorTrigger(z,d){ // returns center point at the inner edge
+  if(d.side==='N')return{x:d.pos+.5,y:1};if(d.side==='S')return{x:d.pos+.5,y:z.h-1};
+  if(d.side==='W')return{x:1,y:d.pos+.5};return{x:z.w-1,y:d.pos+.5};}
+function doorSpawn(z,d){ // safe offset: 2.2 tiles inside the room
+  const t=doorTrigger(z,d),o=2.2;
+  if(d.side==='N')return{x:t.x,y:t.y+o};if(d.side==='S')return{x:t.x,y:t.y-o};
+  if(d.side==='W')return{x:t.x+o,y:t.y};return{x:t.x-o,y:t.y};}
+function rectHit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+for(const id of ZONE_IDS){const z=ZONES[id];
+  // keep a 2.5-tile corridor in front of every door free of solid furniture
+  z.furn=z.furn.filter(f=>{if(!f.solid)return true;for(const d of z.doors){const t=doorTrigger(z,d);
+    const cor=(d.side==='N'||d.side==='S')?{x:t.x-1.2,y:d.side==='N'?1:z.h-3.6,w:2.4,h:2.6}:{x:d.side==='W'?1:z.w-3.6,y:t.y-1.2,w:2.6,h:2.4};
+    if(rectHit(f,cor))return false;}return true;});
+  z.solids=z.furn.filter(f=>f.solid);
+  if(z.water){z.waterR={x:z.water[0],y:z.water[1],w:z.water[2],h:z.water[3]};}
+  z.center=findFree(z,z.w/2,z.h/2+1);
+}
+function solidAt(z,x,y,r,boat){
+  if(x-r<1||y-r<1||x+r>z.w-1||y+r>z.h-1)return true;
+  for(const f of z.solids){if(x+r>f.x&&x-r<f.x+f.w&&y+r>f.y&&y-r<f.y+f.h)return true;}
+  if(z.waterR&&!boat){const w=z.waterR;if(x+r>w.x&&x-r<w.x+w.w&&y+r>w.y&&y-r<w.y+w.h)return true;}
+  if(z.waterR&&boat){const w=z.waterR;if(!(x-r>w.x-0.6&&x+r<w.x+w.w+0.6&&y-r>w.y-0.6&&y+r<w.y+w.h+0.6))return true;}
+  return false;}
+function findFree(z,x,y,boat){if(!solidAt(z,x,y,R+.1,boat))return{x,y};
+  for(let rad=0.5;rad<30;rad+=0.5)for(let a=0;a<16;a++){const nx=x+Math.cos(a/16*Math.PI*2)*rad,ny=y+Math.sin(a/16*Math.PI*2)*rad;if(!solidAt(z,nx,ny,R+.1,boat))return{x:nx,y:ny};}
+  return{x:z.w/2,y:z.h/2};}
+for(const id of ZONE_IDS){const z=ZONES[id];z.sits=z.sits.map(s=>{const p=findFree(z,s[0],s[1]);return{x:p.x,y:p.y,act:s[2]};});}
+
+/* --- state --- */
+const SAVE_KEY='hogwarts_cozy_v1';
+let save={};try{save=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');}catch(e){save={};}
+const player={name:save.name||'',house:save.house||'R',hs:save.hs||'short',hair:save.hair||'#5a3a22',x:0,y:0,dir:{x:0,y:1},walk:0,moving:false,sit:null,boat:false};
+const luna={x:0,y:0,walk:0,moving:false,dir:{x:0,y:1},bubble:null,bubbleT:0,nextIdle:rnd(20,30)};
+const friend=save.friend||{};
+let zone=ZONES.entrance_hall, keysPressed={}, uiOpen=null, clickTarget=null, clickNpc=null, trackId=null;
+let timeIdx=save.timeIdx||0, autoTime=save.autoTime!==false, timeClock=0, weather=save.weather||'clear';
+const TIMES=['morning','afternoon','sunset','night'],TIME_TH={morning:'☀️ เช้าแสงอุ่น',afternoon:'🌤️ บ่ายสดใส',sunset:'🌇 แสงสีทองยามเย็น',night:'🌙 ค่ำคืนประดับดาว'};
+const WEATHERS=['clear','rain','snow','aurora'],WEATHER_TH={clear:'ฟ้าใส',rain:'ฝนพรำ',snow:'หิมะโปรย',aurora:'แสงเหนือเวทมนตร์'};
+let spellLight=0, doorCooldown=0, sitTimer=0;
+function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({name:player.name,house:player.house,hs:player.hs,hair:player.hair,friend,timeIdx,autoTime,weather}));}catch(e){}}
+
+/* --- NPC instances --- */
+const NPCS=CHARACTERS.map((c,i)=>({c,zone:c.zone,hx:0,hy:0,x:0,y:0,tx:0,ty:0,wait:rnd(1,5),walk:0,moving:false,dir:{x:0,y:1},phase:Math.random()*6}));
+(function placeNPCs(){const byZone={};for(const n of NPCS)(byZone[n.zone]=byZone[n.zone]||[]).push(n);
+  for(const zid in byZone){const z=ZONES[zid],list=byZone[zid];list.forEach((n,i)=>{const a=i/list.length*Math.PI*2+0.4;
+    const p=n.c.at?findFree(z,n.c.at[0],n.c.at[1]):findFree(z,z.w/2+Math.cos(a)*z.w*0.28,z.h/2+Math.sin(a)*z.h*0.28);n.hx=n.x=n.tx=p.x;n.hy=n.y=n.ty=p.y;});}})();
+function hearts(id){const p=friend[id]||0;return Math.min(5,1+Math.floor(p/3));}
+function heartStr(id){const h=hearts(id);return '♥'.repeat(h)+'♡'.repeat(5-h);}
+
+/* ===================== PROCEDURAL ANIME DRAWING ===================== */
+function shade(hex,amt){let c=hex.replace('#','');if(c.length===3)c=c.split('').map(x=>x+x).join('');const n=parseInt(c,16);let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt;r=clamp(r,0,255);g=clamp(g,0,255);b=clamp(b,0,255);return 'rgb('+r+','+g+','+b+')';}
+// Draws a chibi anime character centred at feet (x,y). s=scale (1 = sprite). opts: {walk,blink,face:'n'|'smile'|'happy', house, dirX, sitting}
+function drawChibi(g,x,y,s,L,o){
+  o=o||{};const house=HOUSES[o.house||'N'];const t=o.t||0;
+  const breathe=Math.sin(t*2.2)*0.6*s, step=Math.sin(o.walk||0);
+  const big=L.big?1.45:L.small?0.72:L.tall?1.12:1, S=s*big;
+  g.save();g.translate(x,y);if(L.ghost){g.globalAlpha=0.6;g.translate(0,-6*s+Math.sin(t*2)*3*s);}if(L.peeves){g.translate(0,-12*s+Math.sin(t*3)*4*s);}
+  // shadow
+  if(!L.ghost){g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(0,0,12*S,4*S,0,0,Math.PI*2);g.fill();}
+  if(L.cr){drawCreature(g,S,t,L);g.restore();return;}
+  if(L.centaur){ // horse body
+    g.fillStyle='#b88a5a';g.beginPath();g.ellipse(4*S,-12*S,16*S,8*S,0,0,Math.PI*2);g.fill();
+    g.fillStyle='#9a6e44';[-8,-2,10,16].forEach((lx,i)=>{g.fillRect((lx-2)*S,(-6+(i%2?step:-step)*2)*S,4*S,8*S);});
+    g.fillStyle=L.hair;g.beginPath();g.moveTo(20*S,-14*S);g.quadraticCurveTo(30*S,-8*S,26*S,0);g.lineTo(22*S,-10*S);g.fill();
+    g.translate(-8*S,-14*S);}
+  const robe=L.robe||'#26222e', robeD=shade(robe,-30);
+  const bodyTop=-26*S+breathe*0.3, bodyH=22*S;
+  // legs
+  if(!o.sitting&&!L.centaur){g.fillStyle='#2a2430';g.fillRect(-6*S,-6*S+step*1.5*S,4*S,6*S);g.fillRect(2*S,-6*S-step*1.5*S,4*S,6*S);
+    g.fillStyle='#1a1418';g.fillRect(-7*S,-1*S+step*1.5*S,6*S,2.5*S);g.fillRect(1*S,-1*S-step*1.5*S,6*S,2.5*S);}
+  // back hair (long styles)
+  const hy=-40*S+breathe, hr=15*S;
+  drawHairBack(g,L,S,hy,hr,t);
+  // body / robe
+  if(L.elf){g.fillStyle='#d8cfb8';g.beginPath();g.moveTo(-9*S,bodyTop+4*S);g.lineTo(9*S,bodyTop+4*S);g.lineTo(11*S,-4*S);g.lineTo(-11*S,-4*S);g.fill();}
+  else{const w=(L.stout?14:L.thin?9:11)*S;
+    g.fillStyle=robe;g.beginPath();g.moveTo(-w*0.75,bodyTop);g.lineTo(w*0.75,bodyTop);g.lineTo(w+Math.sin(t*3)*0.5*S,-4*S);g.lineTo(-w-Math.sin(t*3)*0.5*S,-4*S);g.closePath();g.fill();
+    g.fillStyle=robeD;g.fillRect(-0.8*S,bodyTop+4*S,1.6*S,bodyH-8*S);
+    if(!L.robe&&o.house){g.fillStyle=house.c1;g.fillRect(-w,-6.5*S,w*2,2.2*S);g.fillStyle=house.c2;g.fillRect(-w,-4.8*S,w*2,0.8*S);g.fillStyle=house.c1;g.beginPath();g.arc(-w*0.45,bodyTop+6*S,2.2*S,0,7);g.fill();}
+    if(L.apron){g.fillStyle='#f4efe4';g.fillRect(-6*S,bodyTop+6*S,12*S,bodyH-8*S);}
+    if(L.shawl){g.fillStyle=L.shawl;g.beginPath();g.moveTo(-w*0.8,bodyTop);g.lineTo(w*0.8,bodyTop);g.lineTo(0,bodyTop+10*S);g.fill();}
+    if(L.fur){g.fillStyle='#8a6a4a';g.fillRect(-w*0.8,bodyTop-1*S,w*1.6,4*S);}
+    // arms
+    g.fillStyle=robeD;g.beginPath();g.ellipse(-w*0.85,bodyTop+8*S,3*S,7*S,0.2+step*0.15,0,Math.PI*2);g.fill();g.beginPath();g.ellipse(w*0.85,bodyTop+8*S,3*S,7*S,-0.2-step*0.15,0,Math.PI*2);g.fill();
+    g.fillStyle=L.skin;g.beginPath();g.arc(-w*0.95,bodyTop+14*S,2.2*S,0,7);g.arc(w*0.95,bodyTop+14*S,2.2*S,0,7);g.fill();
+    // house scarf with flutter
+    if(o.house&&o.house!=='N'){const sw=Math.sin(t*4+(o.walk||0))*2*S;
+      g.fillStyle=house.c1;g.fillRect(-7*S,bodyTop-2*S,14*S,4*S);g.fillStyle=house.c2;g.fillRect(-3*S,bodyTop-2*S,2*S,4*S);g.fillRect(2*S,bodyTop-2*S,2*S,4*S);
+      g.fillStyle=house.c1;g.beginPath();g.moveTo(4*S,bodyTop+1*S);g.lineTo(8*S+sw,bodyTop+10*S);g.lineTo(4*S+sw,bodyTop+11*S);g.lineTo(2*S,bodyTop+2*S);g.fill();
+      g.fillStyle=house.c2;g.fillRect(5*S+sw*0.7,bodyTop+6*S,3*S,1.5*S);}
+    if(L.ruff){g.fillStyle='#f0f0ff';g.beginPath();g.ellipse(0,bodyTop,10*S,3.5*S,0,0,7);g.fill();}
+    if(L.cork){g.strokeStyle='#c9a26a';g.lineWidth=1*S;g.beginPath();g.arc(0,bodyTop-1*S,6*S,0.3,Math.PI-0.3);g.stroke();for(let i=0;i<5;i++){const a=0.5+i*0.5;g.fillStyle='#b88a52';g.fillRect(Math.cos(a)*6*S-1*S,bodyTop-1*S+Math.sin(a)*6*S,2*S,2.5*S);}}
+    if(L.deathly){g.strokeStyle='#222';g.lineWidth=0.8*S;g.beginPath();g.moveTo(0,bodyTop+2*S);g.lineTo(-3*S,bodyTop+7*S);g.lineTo(3*S,bodyTop+7*S);g.closePath();g.stroke();}
+    if(L.quibbler){g.save();g.translate(3*S,bodyTop+9*S);g.rotate(-0.15);g.fillStyle='#f6e27a';g.fillRect(-5*S,-6*S,10*S,12*S);g.fillStyle='#d24a8a';g.fillRect(-5*S,-6*S,10*S,3*S);g.fillStyle='#3a5ab0';g.font='bold '+(2.4*S)+'px sans-serif';g.textAlign='center';g.fillText('QUIB',0,-3.8*S);g.fillStyle='#7ab';g.beginPath();g.arc(0,2*S,2.5*S,0,7);g.fill();g.restore();
+      g.fillStyle=L.skin;g.beginPath();g.arc(-1*S,bodyTop+12*S,2*S,0,7);g.fill();}
+  }
+  // head
+  if(L.elf){g.fillStyle=L.skin;g.beginPath();g.moveTo(-12*S,hy);g.lineTo(-26*S,hy-8*S);g.lineTo(-11*S,hy+5*S);g.fill();g.beginPath();g.moveTo(12*S,hy);g.lineTo(26*S,hy-8*S);g.lineTo(11*S,hy+5*S);g.fill();}
+  g.fillStyle=L.skin;g.beginPath();g.ellipse(0,hy,hr,hr*0.95,0,0,Math.PI*2);g.fill();
+  // face
+  drawFace(g,L,S,hy,o);
+  drawHairFront(g,L,S,hy,hr,t);
+  if(L.beard){g.fillStyle=L.hair;g.beginPath();g.moveTo(-10*S,hy+4*S);g.quadraticCurveTo(0,hy+(L.big?30:26)*S,10*S,hy+4*S);g.quadraticCurveTo(0,hy+12*S,-10*S,hy+4*S);g.fill();}
+  if(L.mustache){g.fillStyle=shade(L.hair,-20);g.beginPath();g.ellipse(-3*S,hy+6.5*S,3.5*S,1.4*S,0.2,0,7);g.ellipse(3*S,hy+6.5*S,3.5*S,1.4*S,-0.2,0,7);g.fill();}
+  if(L.beardStubble){g.fillStyle='rgba(40,30,30,.25)';g.beginPath();g.ellipse(0,hy+8*S,7*S,4*S,0,0,7);g.fill();}
+  if(L.camera){g.fillStyle='#2a2a2a';g.fillRect(-5*S,-20*S,10*S,7*S);g.fillStyle='#8ab';g.beginPath();g.arc(0,-16.5*S,2.4*S,0,7);g.fill();g.fillStyle='#fff';g.fillRect(2.5*S,-19.5*S,2*S,1.2*S);}
+  if(L.chains){g.strokeStyle='rgba(200,200,220,.9)';g.lineWidth=1*S;for(let i=0;i<5;i++){g.beginPath();g.ellipse(-8*S+i*4*S,-14*S+Math.sin(i)*2*S,2*S,1.3*S,0,0,7);g.stroke();}g.fillStyle='rgba(180,40,50,.7)';g.beginPath();g.arc(3*S,-20*S,2*S,0,7);g.fill();}
+  if(L.socks){g.fillStyle='#b05ad0';g.fillRect(-7*S,-5*S,5*S,4*S);g.fillStyle='#ffd040';g.fillRect(2*S,-5*S,5*S,4*S);}
+  if(L.tea){g.fillStyle='#fff';g.fillRect(4*S,-16*S,5*S,4*S);g.strokeStyle='#fff';g.lineWidth=0.8*S;g.beginPath();g.arc(9.5*S,-14*S,1.4*S,-1.5,1.5);g.stroke();}
+  if(L.peeves){g.fillStyle='#ff4aa0';g.beginPath();g.moveTo(-hr,hy-hr*0.5);g.lineTo(-hr*1.4,hy-hr*1.7+Math.sin(t*4)*2*S);g.lineTo(0,hy-hr*0.9);g.fill();g.fillStyle='#ffd040';g.beginPath();g.moveTo(hr,hy-hr*0.5);g.lineTo(hr*1.4,hy-hr*1.7+Math.cos(t*4)*2*S);g.lineTo(0,hy-hr*0.9);g.fill();g.fillStyle='#ffe066';g.beginPath();g.arc(-hr*1.4,hy-hr*1.7+Math.sin(t*4)*2*S,2*S,0,7);g.arc(hr*1.4,hy-hr*1.7+Math.cos(t*4)*2*S,2*S,0,7);g.fill();g.fillStyle='#8a2a6a';g.beginPath();g.moveTo(-4*S,hy+hr);g.lineTo(0,hy+hr+3*S);g.lineTo(4*S,hy+hr);g.lineTo(0,hy+hr+6*S);g.fill();}
+  if(L.hat){g.fillStyle=L.hat;g.beginPath();g.ellipse(0,hy-hr*0.7,hr*1.3,hr*0.35,0,0,7);g.fill();g.beginPath();g.moveTo(-hr*0.8,hy-hr*0.75);g.quadraticCurveTo(0,hy-hr*2.2,hr*0.9+Math.sin(t)*2*S,hy-hr*2.4);g.lineTo(hr*0.8,hy-hr*0.75);g.fill();if(L.stars){g.fillStyle='#ffe58a';g.fillRect(-2*S,hy-hr*1.3,2*S,2*S);}}
+  if(L.cap){g.fillStyle='#fff';g.fillRect(-hr*0.7,hy-hr*1.05,hr*1.4,hr*0.35);g.fillStyle='#d33';g.fillRect(-1.2*S,hy-hr*1.02,2.4*S,hr*0.3);}
+  if(L.bow){g.fillStyle=L.bow;g.beginPath();g.moveTo(8*S,hy-hr*0.8);g.lineTo(14*S,hy-hr*1.1);g.lineTo(14*S,hy-hr*0.5);g.fill();}
+  if(L.spectre){g.save();g.translate(0,hy-hr*0.78);g.lineWidth=1.3*S;g.strokeStyle='#fff';g.fillStyle='rgba(255,130,200,.85)';g.beginPath();g.ellipse(-5.5*S,0,5*S,3.6*S,-0.15,0,7);g.fill();g.stroke();g.fillStyle='rgba(120,210,255,.85)';g.beginPath();g.ellipse(5.5*S,0,5*S,3.6*S,0.15,0,7);g.fill();g.stroke();g.fillStyle='rgba(255,255,255,.7)';g.fillRect(-7*S,-1.6*S,2*S,1*S);g.fillRect(4*S,-1.6*S,2*S,1*S);g.restore();}
+  if(L.radish){for(const sx of[-1,1]){const ex=sx*hr*0.98,ey=hy+3*S+Math.sin(t*3+sx)*0.6*S;g.strokeStyle='#4a9a3a';g.lineWidth=1*S;g.beginPath();g.moveTo(ex,ey);g.lineTo(ex,ey+2*S);g.stroke();g.fillStyle='#ff5a2a';g.beginPath();g.ellipse(ex,ey+4.5*S,2.2*S,2.8*S,0,0,7);g.fill();g.fillStyle='#ffd0b0';g.fillRect(ex-0.5*S,ey+3.5*S,1*S,1*S);}}
+  g.restore();
+}
+function drawCreature(g,S,t,L){const b=Math.sin(t*2.4)*0.8*S;g.lineJoin='round';
+  switch(L.cr){
+  case'owl':g.fillStyle='#6a4a2a';g.fillRect(-12*S,-2*S,24*S,3*S);g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-14*S+b,10*S,13*S,0,0,7);g.fill();g.beginPath();g.arc(0,-27*S+b,9*S,0,7);g.fill();
+    g.fillStyle='#2a2a2a';for(const p of[[-4,-10],[3,-14],[-2,-6],[5,-8]])g.fillRect(p[0]*S,p[1]*S+b,1.6*S,1*S);
+    g.fillStyle=L.eye;g.beginPath();g.arc(-3.6*S,-28*S+b,3*S,0,7);g.arc(3.6*S,-28*S+b,3*S,0,7);g.fill();g.fillStyle='#111';g.beginPath();g.arc(-3.6*S,-28*S+b,1.5*S,0,7);g.arc(3.6*S,-28*S+b,1.5*S,0,7);g.fill();g.fillStyle='#fff';g.fillRect(-4.6*S,-29.5*S+b,1*S,1*S);g.fillRect(2.6*S,-29.5*S+b,1*S,1*S);
+    g.fillStyle='#3a3a3a';g.beginPath();g.moveTo(-1.5*S,-25*S+b);g.lineTo(1.5*S,-25*S+b);g.lineTo(0,-22*S+b);g.fill();break;
+  case'cat':{const body=L.hair;g.fillStyle=body;g.beginPath();g.ellipse(0,-7*S,11*S,6.5*S,0,0,7);g.fill();g.beginPath();g.arc(9*S,-15*S+b,L.flat?7.5*S:6.5*S,0,7);g.fill();
+    g.beginPath();g.moveTo(4*S,-19*S+b);g.lineTo(5.5*S,-26*S+b);g.lineTo(9*S,-20*S+b);g.moveTo(10*S,-20*S+b);g.lineTo(13.5*S,-26*S+b);g.lineTo(15*S,-18*S+b);g.fill();
+    g.strokeStyle=body;g.lineWidth=(L.flat?4:2.4)*S;g.lineCap='round';g.beginPath();g.moveTo(-10*S,-8*S);g.quadraticCurveTo(-18*S,-16*S+Math.sin(t*3)*3*S,-13*S,-23*S);g.stroke();
+    if(L.tabby){g.strokeStyle='rgba(40,40,40,.5)';g.lineWidth=1.2*S;for(let i=0;i<4;i++){g.beginPath();g.moveTo(-6*S+i*4*S,-13*S);g.lineTo(-7*S+i*4*S,-3*S);g.stroke();}}
+    if(L.spec){g.strokeStyle='#333';g.lineWidth=0.9*S;g.strokeRect(5.5*S,-17.5*S+b,3.5*S,3*S);g.strokeRect(10*S,-17.5*S+b,3.5*S,3*S);}
+    g.fillStyle=L.eye;g.beginPath();g.ellipse(7.2*S,-16*S+b,1.5*S,1.8*S,0,0,7);g.ellipse(11.7*S,-16*S+b,1.5*S,1.8*S,0,0,7);g.fill();g.fillStyle='#111';g.fillRect(6.9*S,-17.2*S+b,0.6*S,2.4*S);g.fillRect(11.4*S,-17.2*S+b,0.6*S,2.4*S);
+    g.fillStyle='#ff9aa8';g.beginPath();g.arc(9.5*S,-13.2*S+b,0.9*S,0,7);g.fill();break;}
+  case'dog':g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-12*S,16*S,9*S,0,0,7);g.fill();for(const lx of[-11,-5,6,12])g.fillRect(lx*S,-6*S,4*S,6*S);
+    g.beginPath();g.arc(15*S,-22*S+b,8.5*S,0,7);g.fill();g.beginPath();g.ellipse(21*S,-19*S+b,5*S,4*S,0,0,7);g.fill();g.fillStyle='#2e2a2c';g.beginPath();g.ellipse(9*S,-19*S+b,3*S,7*S,0.3,0,7);g.ellipse(20*S,-20*S+b,3*S,7*S,-0.3,0,7);g.fill();
+    g.fillStyle='#fff';g.beginPath();g.arc(13*S,-24*S+b,1.8*S,0,7);g.arc(18*S,-24*S+b,1.8*S,0,7);g.fill();g.fillStyle='#111';g.beginPath();g.arc(13.3*S,-23.8*S+b,1*S,0,7);g.arc(18.3*S,-23.8*S+b,1*S,0,7);g.arc(24.5*S,-20*S+b,1.4*S,0,7);g.fill();
+    g.fillStyle='#ff7a9a';g.fillRect(21*S,-16*S+b,2.5*S,4*S+Math.abs(b));g.strokeStyle=L.hair;g.lineWidth=3*S;g.beginPath();g.moveTo(-15*S,-14*S);g.lineTo(-20*S,-20*S+Math.sin(t*10)*3*S);g.stroke();break;
+  case'hippogriff':g.fillStyle=L.hair;g.beginPath();g.ellipse(-2*S,-16*S,17*S,9*S,0,0,7);g.fill();g.fillStyle='#7a7a84';for(const lx of[-14,-8,6,12])g.fillRect(lx*S,-9*S,3.5*S,9*S);
+    g.fillStyle='#b0b0ba';g.beginPath();g.moveTo(-8*S,-22*S);g.quadraticCurveTo(-4*S,-36*S+b,10*S,-24*S);g.lineTo(-6*S,-14*S);g.fill();
+    g.fillStyle='#c8c8d0';g.beginPath();g.moveTo(10*S,-18*S);g.lineTo(14*S,-30*S+b);g.lineTo(20*S,-32*S+b);g.lineTo(18*S,-20*S);g.fill();g.beginPath();g.arc(19*S,-33*S+b,6*S,0,7);g.fill();
+    g.fillStyle='#d8b030';g.beginPath();g.moveTo(24*S,-35*S+b);g.lineTo(30*S,-32*S+b);g.lineTo(24*S,-30*S+b);g.fill();g.fillStyle=L.eye;g.beginPath();g.arc(21*S,-35*S+b,1.6*S,0,7);g.fill();
+    g.strokeStyle=L.hair;g.lineWidth=2.5*S;g.beginPath();g.moveTo(-18*S,-17*S);g.quadraticCurveTo(-24*S,-12*S,-22*S,-4*S);g.stroke();break;
+  case'phoenix':g.fillStyle='#d8a030';g.beginPath();g.moveTo(-2*S,-10*S);g.quadraticCurveTo(-14*S,0,-22*S+Math.sin(t*2)*2*S,6*S);g.lineTo(-18*S,0);g.quadraticCurveTo(-10*S,-4*S,-2*S,-12*S);g.fill();
+    g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-16*S+b,8*S,11*S,0.2,0,7);g.fill();g.beginPath();g.arc(3*S,-28*S+b,6*S,0,7);g.fill();g.fillStyle='#ff9a2a';g.beginPath();g.ellipse(-3*S,-15*S+b,4*S,8*S,0.4,0,7);g.fill();
+    g.fillStyle='#f0c040';for(let i=0;i<3;i++){g.beginPath();g.moveTo((1+i*2)*S,-32*S+b);g.lineTo((0+i*2)*S,-38*S+b);g.lineTo((3+i*2)*S,-33*S+b);g.fill();}
+    g.fillStyle='#e0b030';g.beginPath();g.moveTo(8*S,-29*S+b);g.lineTo(12*S,-27*S+b);g.lineTo(8*S,-26*S+b);g.fill();g.fillStyle='#111';g.beginPath();g.arc(5*S,-29*S+b,1.2*S,0,7);g.fill();
+    if(Math.random()<0.08&&typeof spawnP==='function'&&g===ctx){}break;
+  case'toad':g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-5*S,9*S,6*S+b*0.3,0,0,7);g.fill();g.fillStyle=shade(L.hair,30);g.beginPath();g.ellipse(0,-3*S,6*S,3*S,0,0,7);g.fill();
+    g.fillStyle=L.eye;g.beginPath();g.arc(-4*S,-10*S,2.4*S,0,7);g.arc(4*S,-10*S,2.4*S,0,7);g.fill();g.fillStyle='#111';g.fillRect(-5*S,-10.4*S,2*S,0.9*S);g.fillRect(3*S,-10.4*S,2*S,0.9*S);
+    g.strokeStyle='#3a4a1a';g.lineWidth=0.8*S;g.beginPath();g.arc(0,-6*S,3*S,0.3,Math.PI-0.3);g.stroke();break;
+  case'thestral':g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-14*S,12*S,6*S,0,0,7);g.fill();g.fillStyle='#2a2a34';for(const lx of[-9,-4,4,8])g.fillRect(lx*S,-9*S,2*S,9*S);
+    g.strokeStyle='#3a3a48';g.lineWidth=0.7*S;for(let i=0;i<4;i++){g.beginPath();g.arc(-2*S+i*3*S,-14*S,4*S,0.5,2.5);g.stroke();}
+    g.fillStyle='rgba(40,40,56,.85)';const wf=Math.sin(t*3)*4*S;g.beginPath();g.moveTo(-2*S,-18*S);g.lineTo(-14*S,-30*S-wf);g.lineTo(-6*S,-24*S);g.lineTo(2*S,-30*S-wf);g.closePath();g.fill();
+    g.fillStyle=L.hair;g.beginPath();g.moveTo(8*S,-16*S);g.lineTo(13*S,-26*S+b);g.lineTo(17*S,-25*S+b);g.lineTo(12*S,-14*S);g.fill();g.beginPath();g.ellipse(17*S,-26*S+b,6*S,3.5*S,0.3,0,7);g.fill();
+    g.fillStyle=L.eye;g.beginPath();g.arc(17*S,-27.5*S+b,1.8*S,0,7);g.fill();g.fillStyle='rgba(220,240,255,.35)';g.beginPath();g.arc(17*S,-27.5*S+b,3.5*S,0,7);g.fill();break;
+  case'painting':g.fillStyle='#b8902a';g.fillRect(-20*S,-62*S,40*S,58*S);g.fillStyle='#4a3a5a';g.fillRect(-16*S,-58*S,32*S,50*S);
+    g.save();g.beginPath();g.rect(-16*S,-58*S,32*S,50*S);g.clip();const LL=Object.assign({},L,{cr:null,robe:L.dress,stout:1});drawChibi(g,0,-2*S,S*0.85,LL,{t:t,face:'happy'});g.restore();
+    g.strokeStyle='#e8c860';g.lineWidth=1.5*S;g.strokeRect(-18*S,-60*S,36*S,54*S);break;
+  }}
+
+function drawCatOld(g,S,t,L){g.fillStyle=L.hair;g.beginPath();g.ellipse(0,-7*S,10*S,6*S,0,0,7);g.fill();g.beginPath();g.arc(9*S,-14*S,6*S,0,7);g.fill();g.beginPath();g.moveTo(5*S,-18*S);g.lineTo(7*S,-24*S);g.lineTo(10*S,-19*S);g.moveTo(10*S,-19*S);g.lineTo(13*S,-24*S);g.lineTo(14*S,-17*S);g.fill();g.strokeStyle=L.hair;g.lineWidth=2*S;g.beginPath();g.moveTo(-9*S,-8*S);g.quadraticCurveTo(-16*S,-18*S+Math.sin(t*3)*3*S,-12*S,-22*S);g.stroke();g.fillStyle=L.eye;g.fillRect(7*S,-15*S,2*S,2*S);g.fillRect(11*S,-15*S,2*S,2*S);}
+function drawHairBack(g,L,S,hy,hr,t){g.fillStyle=L.hair;const sw=Math.sin(t*1.8)*1.5*S;
+  switch(L.hs){
+   case'long':g.beginPath();g.moveTo(-hr,hy);g.quadraticCurveTo(-hr*1.2,hy+hr*1.6,-hr*0.8+sw,hy+hr*2.1);g.lineTo(hr*0.8+sw,hy+hr*2.1);g.quadraticCurveTo(hr*1.2,hy+hr*1.6,hr,hy);g.fill();break;
+   case'luna':g.beginPath();g.moveTo(-hr*1.05,hy-2*S);for(let i=0;i<=8;i++){const yy=hy+i*hr*0.34;g.lineTo(-hr*1.1-Math.sin(i*1.4+t*2)*2.2*S,yy);}g.lineTo(hr*1.1+sw,hy+hr*2.8);for(let i=8;i>=0;i--){const yy=hy+i*hr*0.34;g.lineTo(hr*1.1+Math.sin(i*1.4+t*2+1)*2.2*S,yy);}g.fill();
+     g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1*S;g.beginPath();g.moveTo(-hr*0.9,hy+hr*0.5);g.quadraticCurveTo(-hr*1.2,hy+hr*1.5,-hr*0.9,hy+hr*2.4);g.stroke();break;
+   case'curtain':g.fillRect(-hr*1.05,hy-2*S,hr*2.1,hr*1.35);break;
+   case'bob':g.beginPath();g.ellipse(0,hy+2*S,hr*1.15,hr*1.05,0,0,7);g.fill();break;
+   case'bushy':for(let i=0;i<10;i++){const a=i/10*Math.PI*2;g.beginPath();g.arc(Math.cos(a)*hr*0.95,hy+Math.sin(a)*hr*0.8+hr*0.35,hr*0.55,0,7);g.fill();}break;
+   case'braid':case'pigtail':for(const sx of[-1,1]){g.beginPath();g.ellipse(sx*hr*1.0,hy+hr*0.9,hr*0.28,hr*0.75,sx*0.2+sw*0.02,0,7);g.fill();}if(L.hs==='pigtail'){g.fillStyle='#ff7aa8';g.fillRect(-hr*1.1,hy+hr*0.3,hr*0.25,hr*0.18);g.fillRect(hr*0.88,hy+hr*0.3,hr*0.25,hr*0.18);}break;
+   case'ponytail':g.beginPath();g.ellipse(hr*0.7+sw,hy+hr*0.6,hr*0.35,hr*1.0,-0.3,0,7);g.fill();break;
+   case'curly':for(let i=0;i<8;i++){g.beginPath();g.arc(-hr+i*hr*0.29,hy+hr*0.9+Math.sin(i)*2*S,hr*0.35,0,7);g.fill();}break;
+   case'wild':for(let i=0;i<9;i++){const a=Math.PI+i/8*Math.PI;g.beginPath();g.arc(Math.cos(a)*hr*1.05,hy+Math.sin(a)*hr*0.7+hr*0.4,hr*0.4,0,7);g.fill();}break;
+  }}
+function drawHairFront(g,L,S,hy,hr,t){if(L.hs==='none'||L.elf)return;g.fillStyle=L.hair;const hl='rgba(255,255,255,.28)';
+  g.beginPath();g.ellipse(0,hy-hr*0.32,hr*1.04,hr*0.72,0,Math.PI,0);g.fill(); // crown
+  switch(L.hs){
+   case'messy':case'spiky':for(let i=0;i<7;i++){const xx=-hr+i*hr/3;g.beginPath();g.moveTo(xx-3*S,hy-hr*0.5);g.lineTo(xx+(i%2?2:-2)*S,hy-hr*(i%2?0.05:0.15));g.lineTo(xx+4*S,hy-hr*0.5);g.fill();}
+     for(let i=0;i<5;i++){g.beginPath();g.moveTo(-hr*0.8+i*hr*0.4,hy-hr*0.9);g.lineTo(-hr*0.9+i*hr*0.4,hy-hr*1.25);g.lineTo(-hr*0.6+i*hr*0.4,hy-hr*0.95);g.fill();}break;
+   case'slick':g.beginPath();g.ellipse(-hr*0.1,hy-hr*0.55,hr*1.05,hr*0.42,-0.08,0,7);g.fill();break;
+   case'buzz':break;
+   case'thin':g.fillStyle=L.skin;g.beginPath();g.ellipse(0,hy-hr*0.62,hr*0.6,hr*0.3,0,0,7);g.fill();g.fillStyle=L.hair;break;
+   case'bun':g.beginPath();g.arc(0,hy-hr*1.05,hr*0.42,0,7);g.fill();g.beginPath();g.ellipse(0,hy-hr*0.5,hr*1.02,hr*0.38,0,0,7);g.fill();break;
+   case'bushy':case'wild':case'curly':for(let i=0;i<6;i++){g.beginPath();g.arc(-hr*0.8+i*hr*0.32,hy-hr*0.62,hr*0.32,0,7);g.fill();}break;
+   case'curtain':g.beginPath();g.moveTo(0,hy-hr*0.9);g.quadraticCurveTo(-hr*0.9,hy-hr*0.6,-hr*0.98,hy+hr*0.6);g.lineTo(-hr*0.7,hy-hr*0.2);g.fill();g.beginPath();g.moveTo(0,hy-hr*0.9);g.quadraticCurveTo(hr*0.9,hy-hr*0.6,hr*0.98,hy+hr*0.6);g.lineTo(hr*0.7,hy-hr*0.2);g.fill();break;
+   default:for(let i=0;i<5;i++){g.beginPath();g.moveTo(-hr*0.95+i*hr*0.45,hy-hr*0.55);g.quadraticCurveTo(-hr*0.8+i*hr*0.45,hy-hr*0.1,-hr*0.55+i*hr*0.45,hy-hr*0.55);g.fill();}
+     if(L.hs==='luna'||L.hs==='long'){g.beginPath();g.moveTo(-hr*0.98,hy-hr*0.3);g.quadraticCurveTo(-hr*1.15,hy+hr*0.5,-hr*0.85,hy+hr*0.9);g.lineTo(-hr*0.75,hy);g.fill();g.beginPath();g.moveTo(hr*0.98,hy-hr*0.3);g.quadraticCurveTo(hr*1.15,hy+hr*0.5,hr*0.85,hy+hr*0.9);g.lineTo(hr*0.75,hy);g.fill();}
+  }
+  g.strokeStyle=hl;g.lineWidth=1.4*S;g.beginPath();g.arc(-hr*0.15,hy-hr*0.45,hr*0.6,Math.PI*1.15,Math.PI*1.5);g.stroke();}
+function drawFace(g,L,S,hy,o){const blink=o.blink, ey=hy+1.5*S, ex=5.2*S;
+  if(o.back){return;}
+  for(const sx of[-1,1]){const x=sx*ex;
+    if(blink){g.strokeStyle='#2a1a1a';g.lineWidth=1.2*S;g.beginPath();g.arc(x,ey,2.6*S,0.2,Math.PI-0.2);g.stroke();continue;}
+    if(o.face==='happy'){g.strokeStyle='#2a1a1a';g.lineWidth=1.4*S;g.beginPath();g.arc(x,ey+1*S,2.8*S,Math.PI+0.3,-0.3);g.stroke();continue;}
+    g.fillStyle='#fff';g.beginPath();g.ellipse(x,ey,3.3*S,4.2*S,0,0,7);g.fill();
+    const grd=g.createLinearGradient(0,ey-4*S,0,ey+4*S);grd.addColorStop(0,shade(L.eye,-50));grd.addColorStop(1,shade(L.eye,40));
+    g.fillStyle=grd;g.beginPath();g.ellipse(x,ey+0.4*S,2.7*S,3.7*S,0,0,7);g.fill();
+    g.fillStyle='#1a1020';g.beginPath();g.ellipse(x,ey+0.6*S,1.3*S,1.9*S,0,0,7);g.fill();
+    g.fillStyle='#fff';g.beginPath();g.arc(x-1.1*S,ey-1.4*S,1.1*S,0,7);g.fill();g.beginPath();g.arc(x+1*S,ey+1.6*S,0.5*S,0,7);g.fill();
+    g.strokeStyle='#2a1a1a';g.lineWidth=1.1*S;g.beginPath();g.arc(x,ey,3.4*S,Math.PI+0.35,-0.35);g.stroke();}
+  // blush & mouth
+  g.fillStyle='rgba(255,120,140,.35)';g.beginPath();g.ellipse(-8*S,ey+4*S,2.4*S,1.2*S,0,0,7);g.ellipse(8*S,ey+4*S,2.4*S,1.2*S,0,0,7);g.fill();
+  g.strokeStyle='#8a3a3a';g.lineWidth=1*S;g.beginPath();
+  if(o.face==='happy'||o.face==='smile'){g.arc(0,ey+5*S,2*S,0.2,Math.PI-0.2);}else{g.moveTo(-1.3*S,ey+6.5*S);g.quadraticCurveTo(0,ey+7.3*S,1.3*S,ey+6.5*S);}g.stroke();
+  if(L.freckles){g.fillStyle='rgba(160,80,40,.5)';for(const p of[[-7,3],[-5,4],[-8,5],[7,3],[5,4],[8,5]])g.fillRect(p[0]*S,ey+p[1]*S,0.8*S,0.8*S);}
+  if(L.scar){g.strokeStyle='#b03a3a';g.lineWidth=0.9*S;g.beginPath();g.moveTo(1*S,hy-9*S);g.lineTo(-1*S,hy-6.5*S);g.lineTo(1.5*S,hy-6*S);g.lineTo(-0.5*S,hy-3.5*S);g.stroke();}
+  if(L.scarFace){g.strokeStyle='rgba(170,90,80,.6)';g.lineWidth=0.8*S;g.beginPath();g.moveTo(-9*S,hy-2*S);g.lineTo(-3*S,hy+6*S);g.stroke();}
+  if(L.gl){g.strokeStyle=L.gl==='half'?'#c9a24a':'#2a2a2a';g.lineWidth=1.1*S;
+    if(L.gl==='round'){g.beginPath();g.arc(-ex,ey,4.4*S,0,7);g.moveTo(ex+4.4*S,ey);g.arc(ex,ey,4.4*S,0,7);g.moveTo(-ex+4.4*S,ey);g.lineTo(ex-4.4*S,ey);g.stroke();}
+    else if(L.gl==='half'){g.beginPath();g.arc(-ex,ey+0.5*S,4*S,0,Math.PI);g.moveTo(ex+4*S,ey+0.5*S);g.arc(ex,ey+0.5*S,4*S,0,Math.PI);g.stroke();}
+    else if(L.gl==='square'){g.strokeRect(-ex-4*S,ey-3.5*S,8*S,7*S);g.strokeRect(ex-4*S,ey-3.5*S,8*S,7*S);}
+    else{g.lineWidth=1.6*S;g.fillStyle='rgba(200,230,255,.25)';g.beginPath();g.arc(-ex,ey,5.8*S,0,7);g.fill();g.stroke();g.beginPath();g.arc(ex,ey,5.8*S,0,7);g.fill();g.stroke();}}
+}
+function playerLook(){return{hair:player.hair,hs:player.hs,eye:'#6a4a3a',skin:SK.l};}
+/* ===================== PARTICLE POOL ===================== */
+const MAX_P=420;const POOL=[];for(let i=0;i<MAX_P;i++)POOL.push({on:false});
+function spawnP(type,x,y,vx,vy,life,size,color,screen){for(let i=0;i<MAX_P;i++){const p=POOL[i];if(!p.on){p.on=true;p.type=type;p.x=x;p.y=y;p.vx=vx;p.vy=vy;p.life=life;p.max=life;p.size=size;p.color=color;p.screen=!!screen;p.seed=Math.random()*6;return p;}}return null;}
+function activeCount(type){let n=0;for(const p of POOL)if(p.on&&(!type||p.type===type))n++;return n;}
+function clearWorldParticles(){for(const p of POOL)if(!p.screen)p.on=false;}
+let patronus=null;
+
+/* ===================== CAMERA ===================== */
+const cam={x:0,y:0};
+function updateCam(snap){const zw=zone.w*T,zh=zone.h*T;let tx=player.x*T-VW/2,ty=player.y*T-VH/2;
+  tx=zw<VW?(zw-VW)/2:clamp(tx,0,zw-VW);ty=zh<VH?(zh-VH)/2:clamp(ty,-40,zh-VH+20);
+  if(snap){cam.x=tx;cam.y=ty;}else{const k=Math.min(1,0.12*60*lastDt);cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*k;}}
+const W2S=(x,y)=>[x*T-cam.x,y*T-cam.y];
+function inView(px,py,m){return px>-m&&py>-m&&px<VW+m&&py<VH+m;}
+
+/* ===================== WORLD RENDERING ===================== */
+const FLOORS={stone:['#8d8580','#7f7772'],wood:['#9a6b45','#8c5f3c'],redrug:['#8e2f2a','#7d2824'],bluerug:['#2f4a86','#284076'],straw:['#b59a62','#a78c55'],white:['#d8d2cc','#cbc4bd'],cobble:['#9a958c','#8a857c'],soil:['#6e5a3e','#62502f'],grass:['#6fa04f','#659447'],forest:['#3f6a3a','#375d33'],candy:['#f2c2d4','#eab0c6']};
+function drawFloor(){const z=zone,f=FLOORS[z.floor]||FLOORS.stone;
+  const x0=Math.max(0,Math.floor(cam.x/T)),y0=Math.max(0,Math.floor(cam.y/T)),x1=Math.min(z.w-1,Math.ceil((cam.x+VW)/T)),y1=Math.min(z.h-1,Math.ceil((cam.y+VH)/T));
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const [px,py]=W2S(x,y);const h=hash(x,y);
+    g0.fillStyle=((x+y)&1)?f[0]:f[1];g0.fillRect(px,py,T+1,T+1);
+    if(z.floor==='wood'){g0.fillStyle='rgba(0,0,0,.12)';g0.fillRect(px,py+(h*T|0),T,1.5);}
+    else if(z.floor==='grass'||z.floor==='forest'){if(h>0.6){g0.fillStyle='rgba(30,70,20,.35)';g0.fillRect(px+h*30,py+h*20,2,6);g0.fillRect(px+h*36,py+h*24,2,5);}if(h>0.93){g0.fillStyle=pick2(['#fff','#ffd2e8','#fff19a'],x+y);g0.beginPath();g0.arc(px+h*40,py+20,2.5,0,7);g0.fill();}}
+    else if(z.floor==='cobble'||z.floor==='stone'){g0.strokeStyle='rgba(0,0,0,.12)';g0.strokeRect(px+.5,py+.5,T-1,T-1);}
+    else if(z.floor==='candy'&&h>0.7){g0.fillStyle='#fff';g0.fillRect(px+h*40,py+10,3,3);}}
+  // borders
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(x>0&&y>0&&x<z.w-1&&y<z.h-1)continue;if(isDoorTile(z,x,y))continue;const [px,py]=W2S(x,y);
+    if(z.out){g0.fillStyle=z.wall;g0.fillRect(px,py,T+1,T+1);g0.fillStyle=shade(z.wall,25);g0.beginPath();g0.arc(px+T/2,py+T/2,T*0.55,0,7);g0.fill();g0.fillStyle=shade(z.wall,45);g0.beginPath();g0.arc(px+T/2-6,py+T/2-8,T*0.25,0,7);g0.fill();}
+    else{g0.fillStyle=z.wall;g0.fillRect(px,py,T+1,T+1);g0.strokeStyle='rgba(0,0,0,.25)';g0.lineWidth=1;for(let r=0;r<3;r++){g0.beginPath();g0.moveTo(px,py+r*16+16);g0.lineTo(px+T,py+r*16+16);g0.stroke();const off=(r%2)*24;g0.beginPath();g0.moveTo(px+off+12,py+r*16);g0.lineTo(px+off+12,py+r*16+16);g0.stroke();}
+      if(y===0){g0.fillStyle='rgba(255,255,255,.08)';g0.fillRect(px,py+T-6,T,6);}}}
+  // doors
+  for(const d of z.doors){const t=doorTrigger(z,d);let [px,py]=W2S(t.x,t.y);const vert=d.side==='N'||d.side==='S';
+    g0.save();g0.translate(px,py);if(d.side==='S')g0.rotate(Math.PI);if(d.side==='W')g0.rotate(-Math.PI/2);if(d.side==='E')g0.rotate(Math.PI/2);
+    g0.fillStyle=z.out?'#6b5a3a':'#2a1a14';g0.fillRect(-T/2,-T,T,T);g0.fillStyle='rgba(255,210,120,.18)';g0.fillRect(-T/2+4,-T,T-8,T);
+    g0.strokeStyle='#c9a45a';g0.lineWidth=3;g0.beginPath();g0.moveTo(-T/2,0);g0.lineTo(-T/2,-T*0.6);g0.arc(0,-T*0.6,T/2,Math.PI,0);g0.lineTo(T/2,0);g0.stroke();g0.restore();
+    const lbl=ZONES[d.to].th;g0.font='bold 11px sans-serif';g0.textAlign='center';const lx=px+(d.side==='W'?28:d.side==='E'?-28:0),ly=py+(d.side==='N'?18:d.side==='S'?-12:-28);
+    g0.fillStyle='rgba(20,14,40,.7)';const tw=g0.measureText(lbl).width+10;g0.fillRect(lx-tw/2,ly-11,tw,15);g0.fillStyle='#f2d68a';g0.fillText(lbl,lx,ly);}
+  if(z.waterR)drawWater(z);
+}
+function pick2(a,i){return a[Math.abs(i)%a.length];}
+function isDoorTile(z,x,y){for(const d of z.doors){if((d.side==='N'&&y===0||d.side==='S'&&y===z.h-1)&&x===d.pos)return true;if((d.side==='W'&&x===0||d.side==='E'&&x===z.w-1)&&y===d.pos)return true;}return false;}
+function drawWater(z){const w=z.waterR;const [px,py]=W2S(w.x,w.y);const night=TIMES[timeIdx]==='night';
+  const gr=g0.createLinearGradient(0,py,0,py+w.h*T);gr.addColorStop(0,night?'#0d1838':'#1d3d5a');gr.addColorStop(1,night?'#050a1c':'#0c2238');
+  g0.fillStyle=gr;g0.beginPath();g0.roundRect?g0.roundRect(px,py,w.w*T,w.h*T,30):g0.rect(px,py,w.w*T,w.h*T);g0.fill();
+  // castle reflection
+  g0.save();g0.beginPath();g0.rect(px,py,w.w*T,w.h*T);g0.clip();g0.globalAlpha=0.28;g0.fillStyle=night?'#ffd77a':'#a0b4c8';
+  const cx=px+w.w*T*0.5;for(const [ox,hh,ww] of[[-180,120,40],[-120,170,34],[-60,110,60],[0,210,40],[60,140,50],[130,180,30],[190,100,44]]){g0.fillRect(cx+ox,py+4,ww,hh*(0.9+Math.sin(now*1.5+ox)*0.03));g0.beginPath();g0.moveTo(cx+ox-4,py+4+hh);g0.lineTo(cx+ox+ww/2,py+4+hh+30);g0.lineTo(cx+ox+ww+4,py+4+hh);g0.fill();}
+  g0.globalAlpha=1;g0.strokeStyle='rgba(255,255,255,.18)';g0.lineWidth=2;
+  for(let i=0;i<26;i++){const yy=py+((i*53+now*12)%(w.h*T)),xx=px+((i*137)%(w.w*T));g0.beginPath();g0.moveTo(xx,yy);g0.lineTo(xx+30+Math.sin(now+i)*10,yy);g0.stroke();}
+  g0.restore();
+  // dock
+  const d=z.dock;const [dx,dy]=W2S(d[0],d[1]);g0.fillStyle='#7a5a3a';g0.fillRect(dx,dy,d[2]*T,d[3]*T+20);g0.strokeStyle='#5a3f26';for(let i=0;i<5;i++){g0.beginPath();g0.moveTo(dx,dy+i*20);g0.lineTo(dx+d[2]*T,dy+i*20);g0.stroke();}
+  if(!player.boat){const [bx,by]=W2S(d[0]+1,d[1]+d[3]+0.9);drawBoat(bx,by);}}
+function drawBoat(x,y){g0.save();g0.translate(x,y+Math.sin(now*2)*2);g0.fillStyle='#6a4426';g0.beginPath();g0.moveTo(-34,-8);g0.quadraticCurveTo(0,22,34,-8);g0.closePath();g0.fill();g0.fillStyle='#8a5a32';g0.fillRect(-30,-11,60,5);g0.fillStyle='#ffd77a';g0.beginPath();g0.arc(30,-22,4,0,7);g0.fill();g0.strokeStyle='#5a3a20';g0.beginPath();g0.moveTo(30,-8);g0.lineTo(30,-18);g0.stroke();g0.restore();}
+function drawFurn(f){const [px,py]=W2S(f.x,f.y),w=f.w*T,h=f.h*T;if(!inView(px+w/2,py+h/2,Math.max(w,h)+60))return;const g=g0;const tt=now;
+  switch(f.k){
+   case'rug':g.fillStyle='rgba(140,40,60,.55)';g.fillRect(px,py,w,h);g.strokeStyle='#e0b23a';g.lineWidth=3;g.strokeRect(px+6,py+6,w-12,h-12);break;
+   case'stairs':for(let i=0;i<f.h*3;i++){g.fillStyle=i%2?'#7a6a62':'#8a7a72';g.fillRect(px,py+i*16,w,16);}g.fillStyle='rgba(0,0,0,.2)';g.fillRect(px,py,8,h);g.fillRect(px+w-8,py,8,h);g.fillStyle='#f2d68a';g.font='12px sans-serif';g.textAlign='center';g.fillText(f.label||'บันได',px+w/2,py+h/2+Math.sin(tt)*4);break;
+   case'longtable':case'table':case'hightable':case'desk':case'counter':case'candytable':{const top=f.k==='candytable'?'#f7d2e2':'#8a5a34';g.fillStyle='rgba(0,0,0,.25)';g.fillRect(px+4,py+8,w,h);g.fillStyle=shade(top,-25);g.fillRect(px,py+8,w,h-4);g.fillStyle=top;g.fillRect(px,py,w,h-6);
+     if(f.k==='longtable'||f.k==='hightable'){for(let i=0;i<Math.max(f.w,f.h)*1.5;i++){const vert=f.h>f.w;const ix=vert?px+w/2:px+20+i*30,iy=vert?py+16+i*30:py+h/2;if(ix>px+w-8||iy>py+h-8)break;g.fillStyle='#e8e0d0';g.beginPath();g.arc(ix,iy,6,0,7);g.fill();g.fillStyle=pick2(['#a0522d','#e0b23a','#7a3a1a','#d06a3a'],i);g.beginPath();g.arc(ix,iy,3.5,0,7);g.fill();}}
+     if(f.k==='candytable'){for(let i=0;i<8;i++){g.fillStyle=pick2(['#ff5a8a','#7ad0ff','#ffe066','#9af07a'],i);g.beginPath();g.arc(px+10+i*(w-20)/7,py+h/2-4,5,0,7);g.fill();}}
+     if(f.k==='counter'){for(let i=0;i<f.w;i++){g.fillStyle='#c98a3a';g.fillRect(px+12+i*T,py+6,10,14);g.fillStyle='#fff7e0';g.fillRect(px+12+i*T,py+4,10,4);}}
+     if(f.k==='desk'){g.fillStyle='#f4ecd8';g.fillRect(px+8,py+6,14,10);g.fillStyle='#fff';g.fillRect(px+w-20,py+4,3,14);}break;}
+   case'fire':g.fillStyle='#5a4a44';g.fillRect(px-6,py-14,w+12,h+14);g.fillStyle='#2a1a14';g.fillRect(px+8,py+2,w-16,h-6);for(let i=0;i<5;i++){const fx=px+16+i*(w-32)/4,fh=14+Math.sin(tt*9+i*2)*6;g.fillStyle='#ff7a1a';g.beginPath();g.ellipse(fx,py+h-10,6,fh*0.8,0,0,7);g.fill();g.fillStyle='#ffd34a';g.beginPath();g.ellipse(fx,py+h-8,3,fh*0.45,0,0,7);g.fill();}if(Math.random()<0.15)spawnP('ember',f.x+f.w/2+rnd(-0.4,0.4),f.y+0.7,rnd(-.2,.2),-rnd(.5,1),1.2,2,'#ffb34a');break;
+   case'sofa':g.fillStyle=zone.floor==='redrug'?'#b03a2a':zone.floor==='bluerug'?'#3a5ab0':zone.id==='slytherin_common'?'#2a6a4a':'#c9902a';g.fillRect(px,py,w,h);g.fillStyle='rgba(0,0,0,.2)';g.fillRect(px,py+h-10,w,10);g.fillStyle='rgba(255,255,255,.18)';g.fillRect(px+6,py+6,w-12,10);break;
+   case'shelf':case'candyshelf':g.fillStyle='#5a3a24';g.fillRect(px,py-16,w,h+16);for(let r=0;r<f.h*2+1;r++)for(let i=0;i<f.w*5;i++){g.fillStyle=f.k==='candyshelf'?pick2(['#ff7aa8','#7ad0ff','#ffe066','#b98aff','#9af07a'],i+r*3):pick2(['#8a2a2a','#2a4a8a','#2a6a3a','#8a6a2a','#5a2a6a'],i+r*3);g.fillRect(px+3+i*(w-6)/(f.w*5),py-12+r*24,(w-6)/(f.w*5)-2,18);}break;
+   case'statue':g.fillStyle='#8a8a92';g.fillRect(px+10,py+20,w-20,h-20);g.fillStyle='#a8a8b0';g.beginPath();g.arc(px+w/2,py+10,14,0,7);g.fill();g.fillRect(px+w/2-8,py-14,16,30);break;
+   case'hourglass':{const hc=zone.id==='entrance_hall'?['#b03a2a','#2a4ab0','#e0b23a','#2a8a4a']:['#e0b23a'];g.fillStyle='#5a4a34';g.fillRect(px+4,py-20,w-8,h+20);for(let i=0;i<4;i++){g.fillStyle=hc[i%hc.length];g.fillRect(px+8+i*9,py-14+(1-((i*37)%10)/10)*20,7,30);}break;}
+   case'torch':{const fx=px+w/2,fy=py+10;g.fillStyle='#4a3a2a';g.fillRect(fx-3,fy,6,14);g.fillStyle='#ff9a2a';g.beginPath();g.ellipse(fx,fy-4,5,9+Math.sin(tt*10)*2,0,0,7);g.fill();break;}
+   case'portrait':g.fillStyle='#c9a24a';g.fillRect(px+6,py+2,w-12,h-10);g.fillStyle='#3a5a4a';g.fillRect(px+10,py+6,w-20,h-18);drawChibi(g,px+w/2+Math.sin(tt+f.x)*3,py+h-12,0.45,{hair:'#ddd',hs:'wild',eye:'#333',skin:SK.l},{t:tt,face:'smile'});break;
+   case'window':case'banner':{if(f.k==='banner'){g.fillStyle='#8a1414';g.fillRect(px+8,py,w-16,h);g.fillStyle='#e0b23a';g.beginPath();g.moveTo(px+8,py+h);g.lineTo(px+w/2,py+h-12);g.lineTo(px+w-8,py+h);g.fill();break;}
+     g.fillStyle=zone.underwater?'#1f5a4a':'#5a7ab0';g.fillRect(px+4,py,w-8,h-6);g.strokeStyle='#c9a24a';g.lineWidth=2;g.strokeRect(px+4,py,w-8,h-6);if(zone.underwater){g.fillStyle='rgba(180,255,220,.3)';g.beginPath();g.arc(px+w/2+Math.sin(tt)*6,py+h/2,4,0,7);g.fill();}break;}
+   case'cauldron':g.fillStyle='#222';g.beginPath();g.ellipse(px+w/2,py+h/2+6,w*0.42,h*0.36,0,0,7);g.fill();g.fillStyle=pick2(['#7af07a','#b07aff','#ff7aa8','#7ad0ff'],f.x+f.y);g.beginPath();g.ellipse(px+w/2,py+h/2-2,w*0.34,h*0.14,0,0,7);g.fill();if(Math.random()<0.05)spawnP('bubble',f.x+0.5,f.y+0.4,0,-0.4,1.4,4,'rgba(200,255,200,.6)');break;
+   case'bed':g.fillStyle='#e8e4f0';g.fillRect(px,py,w,h);g.fillStyle='#fff';g.fillRect(px+4,py+4,w-8,16);g.fillStyle='#b8c8e0';g.fillRect(px,py+h*0.45,w,h*0.55);break;
+   case'telescope':g.strokeStyle='#5a4a3a';g.lineWidth=3;g.beginPath();g.moveTo(px+w/2,py+h);g.lineTo(px+w/2-10,py+h+6);g.moveTo(px+w/2,py+h);g.lineTo(px+w/2+10,py+h+6);g.stroke();g.save();g.translate(px+w/2,py+h-8);g.rotate(-0.7);g.fillStyle='#c9a24a';g.fillRect(-4,-30,8,34);g.restore();break;
+   case'perch':g.fillStyle='#6a4a2a';g.fillRect(px+w/2-3,py,6,h);g.fillRect(px+4,py+10,w-8,5);drawOwl(px+w/2,py+8,hash(f.x,f.y));break;
+   case'plant':case'mandrake':g.fillStyle='#a0603a';g.fillRect(px+12,py+h/2,w-24,h/2);g.fillStyle='#3a8a3a';for(let i=0;i<5;i++){g.beginPath();g.ellipse(px+w/2+Math.cos(i*1.3+Math.sin(tt)*0.1)*10,py+h/2-8,6,14,i*0.6,0,7);g.fill();}if(f.k==='mandrake'){g.fillStyle='#c9a07a';g.beginPath();g.arc(px+w/2,py+h/2-2,6,0,7);g.fill();}break;
+   case'books':g.fillStyle='#6a3a8a';g.fillRect(px,py,w,h);for(let i=0;i<6;i++){g.fillStyle=pick2(['#e0b23a','#7ad0ff','#ff7aa8'],i);g.fillRect(px+6+i*14,py+6-Math.abs(Math.sin(tt*2+i))*8,10,8);}break;
+   case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.2,cx=px+w/2,by=py+h;g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(cx,by,28*s,9*s,0,0,7);g.fill();g.fillStyle='#5a3a24';g.fillRect(cx-6*s,by-30*s,12*s,30*s);const col=weather==='snow'?['#dfe8ee','#c8d8e0']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
+     g.fillStyle=col[0];g.beginPath();g.arc(cx,by-46*s,26*s,0,7);g.fill();g.fillStyle=col[1];g.beginPath();g.arc(cx-12*s,by-40*s,16*s,0,7);g.arc(cx+12*s,by-52*s,15*s,0,7);g.fill();break;}
+   case'rock':g.fillStyle='#7a7a80';g.beginPath();g.ellipse(px+w/2,py+h/2,w*0.5,h*0.4,0,0,7);g.fill();break;
+   case'bench':case'stands':g.fillStyle='#7a5232';g.fillRect(px,py+h*0.3,w,h*0.4);g.fillStyle='#5a3a22';g.fillRect(px,py+h*0.7,w,6);if(f.k==='stands'){for(let i=0;i<f.w;i++){g.fillStyle=pick2(['#8a1414','#1c2f6e','#e8b923','#1d5c35'],i);g.fillRect(px+i*T,py,T-2,12);}}break;
+   case'fountain':g.fillStyle='#9a968e';g.beginPath();g.ellipse(px+w/2,py+h/2,w/2,h/2.4,0,0,7);g.fill();g.fillStyle='#4a8ab0';g.beginPath();g.ellipse(px+w/2,py+h/2,w/2-10,h/2.4-10,0,0,7);g.fill();g.fillStyle='#b0aaa0';g.fillRect(px+w/2-6,py+h/2-30,12,30);if(Math.random()<0.4)spawnP('drop',f.x+f.w/2,f.y+f.h/2-0.6,rnd(-.8,.8),-rnd(1,1.6),0.7,2.5,'rgba(200,230,255,.8)');break;
+   case'planter':g.fillStyle='#7a5232';g.fillRect(px,py,w,h);g.fillStyle='#4a3a22';g.fillRect(px+4,py+4,w-8,h-8);for(let i=0;i<f.w*2;i++){g.fillStyle=pick2(['#4a9a3a','#6aba4a','#3a7a3a'],i);g.beginPath();g.arc(px+12+i*22,py+h/2-6+Math.sin(tt*2+i)*2,9,0,7);g.fill();if(i%3===0){g.fillStyle=pick2(['#ff7aa8','#ffe066','#b98aff'],i);g.beginPath();g.arc(px+12+i*22,py+h/2-12,4,0,7);g.fill();}}break;
+   case'goal':for(let i=0;i<3;i++){g.strokeStyle='#e0d0a0';g.lineWidth=3;g.beginPath();g.moveTo(px+w/2,py+(i+1)*T);g.lineTo(px+w/2,py+i*T+16);g.stroke();g.beginPath();g.arc(px+w/2,py+i*T+8,10,0,7);g.stroke();}break;
+   case'house':{const hc=pick2(['#a86a4a','#8a6a9a','#6a8aa0','#b08a5a'],f.x);g.fillStyle=hc;g.fillRect(px,py-10,w,h+10);g.fillStyle=weather==='snow'?'#f4f8ff':'#5a3a4a';g.beginPath();g.moveTo(px-8,py-8);g.lineTo(px+w/2,py-50);g.lineTo(px+w+8,py-8);g.fill();g.fillStyle=TIMES[timeIdx]==='night'||TIMES[timeIdx]==='sunset'?'#ffd77a':'#aac8e0';for(let i=0;i<f.w;i++)g.fillRect(px+12+i*T,py+4,18,16);break;}
+   case'lamp':g.fillStyle='#2a2a2a';g.fillRect(px+w/2-3,py,6,h);g.fillStyle='#ffd77a';g.beginPath();g.arc(px+w/2,py,9,0,7);g.fill();break;
+   case'stall':g.fillStyle='#7a5232';g.fillRect(px,py+10,w,h-10);for(let i=0;i<6;i++){g.fillStyle=i%2?'#e8e0d0':'#c03a4a';g.fillRect(px+i*w/6,py-8,w/6,16);}break;
+   case'barrel':g.fillStyle='#8a5a32';g.beginPath();g.ellipse(px+w/2,py+h/2,w*0.36,h*0.44,0,0,7);g.fill();g.strokeStyle='#4a3a2a';g.lineWidth=2;g.beginPath();g.moveTo(px+10,py+h*0.35);g.lineTo(px+w-10,py+h*0.35);g.moveTo(px+10,py+h*0.65);g.lineTo(px+w-10,py+h*0.65);g.stroke();break;
+   case'hut':g.fillStyle='#8a7a6a';g.beginPath();g.ellipse(px+w/2,py+h*0.6,w/2,h*0.42,0,0,7);g.fill();g.fillStyle='#6a5a3a';g.beginPath();g.moveTo(px-6,py+h*0.4);g.quadraticCurveTo(px+w/2,py-50,px+w+6,py+h*0.4);g.fill();g.fillStyle='#4a2a1a';g.fillRect(px+w/2-14,py+h-38,28,36);g.fillStyle='#bbb';g.fillRect(px+w-40,py-30,12,30);if(Math.random()<0.1)spawnP('smoke',f.x+f.w-0.7,f.y-0.7,rnd(-.1,.1),-0.5,3,8,'rgba(220,220,220,.4)');break;
+   case'pumpkins':for(let i=0;i<4;i++){g.fillStyle='#e07a1a';g.beginPath();g.ellipse(px+20+i*(w-30)/3,py+h/2+(i%2)*14,18,14,0,0,7);g.fill();g.fillStyle='#3a6a2a';g.fillRect(px+18+i*(w-30)/3,py+h/2-16+(i%2)*14,4,6);}break;
+   case'mushrooms':for(let i=0;i<6;i++){const mx=px+10+(i*37)%w,my=py+10+(i*23)%h;g.fillStyle='#eee';g.fillRect(mx-2,my,4,8);g.fillStyle='#b04ad0';g.beginPath();g.arc(mx,my,7,Math.PI,0);g.fill();g.fillStyle='rgba(220,150,255,.5)';g.beginPath();g.arc(mx,my-2,10+Math.sin(tt*2+i)*2,0,7);g.fill();}break;
+   case'mistletoe':g.fillStyle='#5a3a24';g.fillRect(px+w/2-4,py-20,8,h+20);g.fillStyle='#3a8a4a';g.beginPath();g.arc(px+w/2,py-26,18,0,7);g.fill();g.fillStyle='#fff';for(let i=0;i<5;i++){g.beginPath();g.arc(px+w/2-10+i*5,py-24+(i%2)*6,2.5,0,7);g.fill();}break;
+   case'skeleton':{g.save();g.globalAlpha=0.85;g.strokeStyle='#efe6d0';g.lineWidth=4;g.beginPath();g.moveTo(px+20,py+h*0.5);for(let i=0;i<=10;i++)g.lineTo(px+20+i*(w-60)/10,py+h*0.5+Math.sin(i*0.6+tt*0.5)*6);g.stroke();
+     for(let i=1;i<9;i++){const rx=px+20+i*(w-60)/10;g.lineWidth=2;g.beginPath();g.moveTo(rx,py+h*0.5-16);g.quadraticCurveTo(rx+6,py+h*0.5,rx,py+h*0.5+16);g.stroke();}
+     g.fillStyle='#efe6d0';g.beginPath();g.moveTo(px+w-40,py+h*0.3);g.lineTo(px+w,py+h*0.45);g.lineTo(px+w-40,py+h*0.7);g.fill();g.fillStyle='#222';g.beginPath();g.arc(px+w-28,py+h*0.42,4,0,7);g.fill();
+     g.strokeStyle='#efe6d0';g.lineWidth=2;for(const sx of[-1,1]){g.beginPath();g.moveTo(px+w*0.45,py+h*0.5);g.lineTo(px+w*0.3,py+h*0.5+sx*(h*0.48));g.lineTo(px+w*0.6,py+h*0.5+sx*(h*0.4));g.stroke();}g.restore();break;}
+   case'roundtable':g.fillStyle='#6a2a4a';g.beginPath();g.ellipse(px+w/2,py+h/2+4,w*0.55,h*0.4,0,0,7);g.fill();g.fillStyle='#e0c0f0';g.beginPath();g.arc(px+w/2,py+h/2-6,9,0,7);g.fill();g.fillStyle='rgba(255,255,255,.6)';g.beginPath();g.arc(px+w/2-3,py+h/2-9,3,0,7);g.fill();break;
+   case'perchgold':g.fillStyle='#c9a24a';g.fillRect(px+w/2-3,py,6,h+6);g.fillRect(px+4,py+8,w-8,5);break;
+   case'instruments':g.fillStyle='#6a4a2a';g.fillRect(px+8,py+h/2,w-16,h/2);g.strokeStyle='#e0c060';g.lineWidth=2;g.beginPath();g.arc(px+w/2,py+h/2-6,10,tt%6.28,tt%6.28+4);g.stroke();g.fillStyle='#bfe6ff';g.beginPath();g.arc(px+w/2,py+h/2-6,3,0,7);g.fill();break;
+   case'partition':g.fillStyle='#e8e4dc';g.fillRect(px+w/2-5,py,10,h);break;
+   case'bathtub':{g.fillStyle='#e8ecf0';g.fillRect(px,py,w,h);g.fillStyle='#6ab0d8';g.fillRect(px+8,py+8,w-16,h-16);for(let i=0;i<10;i++){g.fillStyle=pick2(['rgba(255,180,220,.7)','rgba(180,230,255,.7)','rgba(255,255,180,.7)'],i);g.beginPath();g.arc(px+14+((i*47)%(w-28)),py+14+((i*31+tt*10)%(h-28)),6+Math.sin(tt*2+i)*2,0,7);g.fill();}break;}
+   case'clock':g.fillStyle='#8a7a6a';g.fillRect(px,py-30,w,h+30);g.fillStyle='#f4ecd8';g.beginPath();g.arc(px+w/2,py-4,26,0,7);g.fill();g.strokeStyle='#3a2a1a';g.lineWidth=3;g.beginPath();g.moveTo(px+w/2,py-4);g.lineTo(px+w/2+Math.cos(tt*0.2)*16,py-4+Math.sin(tt*0.2)*16);g.moveTo(px+w/2,py-4);g.lineTo(px+w/2+Math.cos(tt*0.02)*10,py-4+Math.sin(tt*0.02)*10);g.stroke();break;
+   case'sign':g.fillStyle='#7a5232';g.fillRect(px,py+8,w,22);g.fillStyle='#f2d68a';g.font='bold 12px sans-serif';g.textAlign='center';g.fillText(f.label,px+w/2,py+24);break;
+   case'glasswall':g.fillStyle='rgba(200,240,255,.35)';g.fillRect(px+w/2-4,py,8,h);g.strokeStyle='rgba(255,255,255,.6)';g.strokeRect(px+w/2-4,py,8,h);break;
+   case'pots':g.fillStyle='#b0603a';g.beginPath();g.moveTo(px+10,py+16);g.lineTo(px+w-10,py+16);g.lineTo(px+w-16,py+h);g.lineTo(px+16,py+h);g.fill();g.fillStyle='#4a9a3a';g.beginPath();g.arc(px+w/2,py+12,10,0,7);g.fill();break;
+   case'boathouse':g.fillStyle='#6a4a32';g.fillRect(px,py,w,h);g.fillStyle='#4a3a3a';g.beginPath();g.moveTo(px-8,py+4);g.lineTo(px+w/2,py-36);g.lineTo(px+w+8,py+4);g.fill();g.fillStyle='#2a1a14';g.fillRect(px+w/2-18,py+h-40,36,40);g.fillStyle='#ffd77a';g.fillRect(px+12,py+16,14,12);break;
+   case'willow':{const cx=px+w/2,by=py+h,sw=Math.sin(tt*1.5)*10;g.fillStyle='#4a3a24';g.fillRect(cx-10,by-60,20,60);g.strokeStyle='#4a3a24';g.lineWidth=6;g.beginPath();g.moveTo(cx,by-55);g.quadraticCurveTo(cx-40,by-90,cx-60+sw,by-40);g.moveTo(cx,by-55);g.quadraticCurveTo(cx+40,by-95,cx+62-sw,by-36);g.stroke();
+     g.fillStyle=weather==='snow'?'#dfe8ee':'#4a7a3a';g.beginPath();g.arc(cx,by-80,34,0,7);g.fill();g.fillStyle='#f2d68a';g.font='11px sans-serif';g.textAlign='center';g.fillText('วิลโลว์จอมหวด',cx,by+14);break;}
+   case'treeline':for(let i=0;i<f.h;i++){g.fillStyle=i%2?'#1f4a2a':'#2a5a32';g.beginPath();g.arc(px+w/2,py+i*T+T/2,T*0.75,0,7);g.fill();}break;
+   case'jokeshelf':g.fillStyle='#3a5a2a';g.fillRect(px,py-16,w,h+16);for(let i=0;i<f.w*3;i++){g.fillStyle=pick2(['#ff5a5a','#ffe066','#7ad0ff','#b0ff7a'],i);g.fillRect(px+4+i*(w-8)/(f.w*3),py-10+Math.abs(Math.sin(tt*3+i))*-4,(w-8)/(f.w*3)-3,14);}break;
+   default:g.fillStyle='#7a6a5a';g.fillRect(px,py,w,h);}
+}
+function drawOwl(x,y,h){const col=h>0.7?'#f4f4f4':h>0.35?'#8a6a4a':'#b09a7a';const g=g0;g.fillStyle=col;g.beginPath();g.ellipse(x,y,9,11,0,0,7);g.fill();g.fillStyle='#ffe066';g.beginPath();g.arc(x-4,y-4,3,0,7);g.arc(x+4,y-4,3,0,7);g.fill();g.fillStyle='#222';g.fillRect(x-5,y-5,2,2);g.fillRect(x+3,y-5,2,2);g.fillStyle='#e0a030';g.beginPath();g.moveTo(x-2,y);g.lineTo(x+2,y);g.lineTo(x,y+3);g.fill();}
+
+/* ===================== LIGHTING & ATMOSPHERE ===================== */
+const lightCv=document.createElement('canvas'),lg=lightCv.getContext('2d');
+const g0=ctx;
+function zoneLights(){const out=[];for(const f of zone.furn){if(['fire','torch','cauldron','lamp','mushrooms','house'].includes(f.k))out.push({x:f.x+f.w/2,y:f.y+f.h/2,r:f.k==='fire'?5:f.k==='house'?3:3.2,c:f.k==='mushrooms'?'200,140,255':f.k==='cauldron'?'140,255,170':'255,180,90'});}
+  if(!zone.out&&!out.length)out.push({x:zone.w/2,y:2,r:6,c:'255,200,120'});return out;}
+function darkness(){const t=TIMES[timeIdx];let a={morning:0.06,afternoon:0,sunset:0.22,night:0.62}[t];if(!zone.out&&!zone.outdoorSky)a=a*0.6+0.08;if(zone.dark)a+=0.18;if(weather==='rain')a+=0.1;return Math.min(0.8,a);}
+function tint(){return{morning:'255,214,170',afternoon:'255,255,255',sunset:'255,150,70',night:'20,24,70'}[TIMES[timeIdx]];}
+function drawLighting(){if(lightCv.width!==VW||lightCv.height!==VH){lightCv.width=VW;lightCv.height=VH;}
+  const t=TIMES[timeIdx],a=darkness();
+  // colour grade
+  if(t==='morning'){ctx.fillStyle='rgba(255,200,140,.10)';ctx.fillRect(0,0,VW,VH);}
+  if(t==='sunset'){const gr=ctx.createLinearGradient(0,0,0,VH);gr.addColorStop(0,'rgba(255,140,60,.28)');gr.addColorStop(1,'rgba(255,90,120,.12)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VH);}
+  // god rays through stained glass
+  if((t==='morning'||t==='afternoon'||t==='sunset')&&!zone.out&&weather!=='rain'){ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<4;i++){const x=((i*0.27+0.1)*zone.w*T)-cam.x,col=t==='sunset'?'255,170,90':pick2(['255,230,170','200,220,255','255,200,230'],i);const gr=ctx.createLinearGradient(x,0,x+220,VH);gr.addColorStop(0,'rgba('+col+',.16)');gr.addColorStop(1,'rgba('+col+',0)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(x,-cam.y);ctx.lineTo(x+60,-cam.y);ctx.lineTo(x+300+Math.sin(now*0.3+i)*20,VH);ctx.lineTo(x+160,VH);ctx.fill();}ctx.restore();}
+  if(a<=0.01)return;
+  lg.globalCompositeOperation='source-over';lg.clearRect(0,0,VW,VH);lg.fillStyle='rgba('+tint()+','+a+')';if(t!=='night')lg.fillStyle='rgba(20,16,40,'+a+')';lg.fillRect(0,0,VW,VH);
+  lg.globalCompositeOperation='destination-out';
+  const lights=zoneLights();if(spellLight>0)lights.push({x:player.x,y:player.y-0.5,r:5,c:'200,230,255'});
+  if(zone.candles||(!zone.out&&t==='night'))for(const c of candles)lights.push({x:c.x,y:c.y,r:1.4,c:'255,200,120'});
+  for(const L of lights){const [sx,sy]=W2S(L.x,L.y);const rr=L.r*T*(1+Math.sin(now*6+L.x)*0.03);if(!inView(sx,sy,rr))continue;const gr=lg.createRadialGradient(sx,sy,0,sx,sy,rr);gr.addColorStop(0,'rgba(0,0,0,.95)');gr.addColorStop(1,'rgba(0,0,0,0)');lg.fillStyle=gr;lg.fillRect(sx-rr,sy-rr,rr*2,rr*2);}
+  ctx.drawImage(lightCv,0,0,VW,VH);
+  ctx.save();ctx.globalCompositeOperation='lighter';for(const L of lights){if(L.r<2)continue;const [sx,sy]=W2S(L.x,L.y);const rr=L.r*T*0.7;if(!inView(sx,sy,rr))continue;const gr=ctx.createRadialGradient(sx,sy,0,sx,sy,rr);gr.addColorStop(0,'rgba('+L.c+','+(0.22*a+0.05)+')');gr.addColorStop(1,'rgba('+L.c+',0)');ctx.fillStyle=gr;ctx.fillRect(sx-rr,sy-rr,rr*2,rr*2);}ctx.restore();}
+let candles=[];
+function buildCandles(){candles=[];const n=zone.candles?60:(zone.out?0:18);for(let i=0;i<n;i++)candles.push({x:1.5+hash(i,3)*(zone.w-3),y:1.5+hash(i,7)*(zone.h-3),ph:hash(i,11)*6});}
+function drawCandles(){const show=zone.candles||(!zone.out&&TIMES[timeIdx]==='night');if(!show)return;for(const c of candles){const [sx,sy]=W2S(c.x,c.y-1.2+Math.sin(now*1.2+c.ph)*0.12);if(!inView(sx,sy,20))continue;ctx.fillStyle='#f6efe0';ctx.fillRect(sx-2.5,sy,5,14);ctx.fillStyle='rgba(255,200,90,.35)';ctx.beginPath();ctx.arc(sx,sy-4,9,0,7);ctx.fill();ctx.fillStyle='#ffd34a';ctx.beginPath();ctx.ellipse(sx,sy-4,2.5,4.5+Math.sin(now*12+c.ph),0,0,7);ctx.fill();}}
+function drawSky(){ // sky strip / stars for outdoor zones and astronomy tower
+  const t=TIMES[timeIdx];if(!(zone.out||zone.outdoorSky||zone.stars))return;
+  if(t==='night'||weather==='aurora'){ctx.save();for(let i=0;i<70;i++){const x=hash(i,1)*VW,y=hash(i,2)*VH*0.9,tw=0.5+0.5*Math.sin(now*2+i);ctx.fillStyle='rgba(255,255,240,'+(t==='night'?0.7:0.25)*tw+')';ctx.fillRect(x,y,2,2);}ctx.restore();}
+  if(weather==='aurora'){ctx.save();ctx.globalCompositeOperation='lighter';const al=t==='night'?0.35:0.14;for(let b=0;b<3;b++){ctx.beginPath();ctx.moveTo(0,VH*0.05+b*40);for(let x=0;x<=VW;x+=30)ctx.lineTo(x,VH*0.12+b*40+Math.sin(x*0.006+now*0.5+b)*40+Math.sin(x*0.015+now)*12);ctx.lineTo(VW,VH*0.45);ctx.lineTo(0,VH*0.45);ctx.closePath();const gr=ctx.createLinearGradient(0,0,0,VH*0.45);gr.addColorStop(0,'rgba('+(b===1?'160,90,255':'60,255,170')+','+al+')');gr.addColorStop(1,'rgba(60,255,170,0)');ctx.fillStyle=gr;ctx.fill();}ctx.restore();}}
+function weatherTick(dt){const outside=zone.out||zone.outdoorSky;
+  if(weather==='rain'){const n=outside?6:1;for(let i=0;i<n;i++)if(activeCount('rain')<160)spawnP('rain',rnd(0,VW+100),-10,-120,700,1.4,1,'rgba(180,200,255,.55)',true);}
+  if(weather==='snow'){if(Math.random()<(outside?0.9:0.15)&&activeCount('snow')<160)spawnP('snow',rnd(0,VW),-10,rnd(-15,15),rnd(30,60),12,rnd(1.5,3.5),'#fff',true);}
+  if(Math.random()<0.08&&activeCount('dust')<40)spawnP('dust',player.x+rnd(-8,8),player.y+rnd(-6,6),rnd(-.1,.1),-rnd(.05,.2),rnd(3,6),rnd(1,2.5),pick(['#fff6b0','#b0e0ff','#ffc0f0']));
+  if(zone.dark||TIMES[timeIdx]==='night'&&zone.out){if(Math.random()<0.05&&activeCount('firefly')<30)spawnP('firefly',player.x+rnd(-8,8),player.y+rnd(-6,6),rnd(-.3,.3),rnd(-.3,.3),rnd(4,7),2.5,'#d8ff7a');}}
+function updateParticles(dt){for(const p of POOL){if(!p.on)continue;p.life-=dt;if(p.life<=0){p.on=false;continue;}
+  if(p.type==='snow'){p.x+=(p.vx+Math.sin(now+p.seed)*12)*dt;p.y+=p.vy*dt;if(p.y>VH)p.on=false;continue;}
+  if(p.type==='rain'){p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>VH)p.on=false;continue;}
+  if(p.type==='drop'){p.vy+=4*dt;}if(p.type==='firefly'){p.vx+=rnd(-1,1)*dt;p.vy+=rnd(-1,1)*dt;}if(p.type==='feather'){p.vx=Math.sin(now*2+p.seed)*0.6;}
+  if(p.type==='flower'&&p.life<p.max-0.6){p.vx*=0.9;p.vy*=0.9;}
+  p.x+=p.vx*dt;p.y+=p.vy*dt;}}
+function drawParticles(screen){for(const p of POOL){if(!p.on||p.screen!==screen)continue;const fade=Math.min(1,p.life/Math.min(1,p.max*0.4));let x=p.x,y=p.y;if(!screen){[x,y]=W2S(p.x,p.y);if(!inView(x,y,30))continue;}
+  ctx.globalAlpha=fade;
+  if(p.type==='rain'){ctx.strokeStyle=p.color;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-3,y+14);ctx.stroke();}
+  else if(p.type==='flower'){ctx.fillStyle=p.color;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(x+Math.cos(i*1.256)*4,y+Math.sin(i*1.256)*4,3.2,0,7);ctx.fill();}ctx.fillStyle='#ffe066';ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill();}
+  else if(p.type==='feather'){ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(x,y,3,9,Math.sin(now*3+p.seed)*0.6,0,7);ctx.fill();}
+  else if(p.type==='nargle'){ctx.fillStyle=p.color;ctx.font='14px sans-serif';ctx.fillText('✦',x,y);}
+  else{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(x,y,p.size*(p.type==='smoke'?(2-p.life/p.max):1),0,7);ctx.fill();if(p.type==='firefly'||p.type==='spark'||p.type==='dust'){ctx.globalAlpha=fade*0.3;ctx.beginPath();ctx.arc(x,y,p.size*3,0,7);ctx.fill();}}
+  ctx.globalAlpha=1;}}
+/* ===================== AUDIO (procedural Web Audio) ===================== */
+const Audio={ac:null,master:null,muted:save.muted||false,next:0,step:0,rain:null,rainG:null,
+  init(){if(this.ac)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;this.ac=new AC();this.master=this.ac.createGain();this.master.gain.value=this.muted?0:0.55;this.master.connect(this.ac.destination);
+    const len=this.ac.sampleRate*2,buf=this.ac.createBuffer(1,len,this.ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;this.noise=buf;
+    const src=this.ac.createBufferSource();src.buffer=buf;src.loop=true;const f=this.ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1200;this.rainG=this.ac.createGain();this.rainG.gain.value=0;src.connect(f);f.connect(this.rainG);this.rainG.connect(this.master);src.start();
+    this.next=this.ac.currentTime+0.2;setInterval(()=>this.schedule(),120);}catch(e){this.ac=null;}},
+  setMute(m){this.muted=m;if(this.master)this.master.gain.setTargetAtTime(m?0:0.55,this.ac.currentTime,0.1);},
+  note(f,t,dur,vol,type){const a=this.ac,o=a.createOscillator(),o2=a.createOscillator(),g=a.createGain();o.type=type||'sine';o2.type='sine';o.frequency.value=f;o2.frequency.value=f*4.01;const g2=a.createGain();g2.gain.value=0.12;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(this.master);o.start(t);o2.start(t);o.stop(t+dur+0.05);o2.stop(t+dur+0.05);},
+  schedule(){if(!this.ac||this.ac.state!=='running')return;const night=TIMES[timeIdx]==='night';const beat=night?0.5:0.38;
+    const scale=[523.25,587.33,659.25,783.99,880,1046.5,1174.66];const prog=[[261.63,329.63,392],[220,261.63,329.63],[174.61,220,261.63],[196,246.94,293.66]];
+    while(this.next<this.ac.currentTime+0.5){const s=this.step,bar=Math.floor(s/8)%4;
+      if(s%8===0)prog[bar].forEach((f,i)=>this.note(f/2,this.next+i*0.06,2.6,0.05,'triangle'));
+      const motif=[0,2,4,2,5,4,2,1,0,4,3,2,4,6,5,4];if(Math.random()<0.85){const deg=(motif[s%16]+bar)%scale.length;this.note(scale[deg]*(night?0.5:1),this.next,1.4,0.07);}
+      if(s%4===2&&Math.random()<0.4)this.note(scale[(s+3)%7]*2,this.next+beat/2,0.8,0.025);
+      if(['fire'].includes((zone.light))&&Math.random()<0.35)this.crackle(this.next+Math.random()*beat);
+      this.step++;this.next+=beat;}
+    if(this.rainG)this.rainG.gain.setTargetAtTime(weather==='rain'?((zone.out||zone.outdoorSky)?0.16:0.06):0,this.ac.currentTime,0.5);},
+  crackle(t){const a=this.ac,s=a.createBufferSource();s.buffer=this.noise;const f=a.createBiquadFilter();f.type='highpass';f.frequency.value=2500;const g=a.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);s.connect(f);f.connect(g);g.connect(this.master);s.start(t,Math.random());s.stop(t+0.05);},
+  sfx(kind){if(!this.ac||this.ac.state!=='running')return;const t=this.ac.currentTime;
+    if(kind==='step'){const s=this.ac.createBufferSource();s.buffer=this.noise;const f=this.ac.createBiquadFilter();f.type='lowpass';f.frequency.value=zone.out?900:500;const g=this.ac.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.07);s.connect(f);f.connect(g);g.connect(this.master);s.start(t,Math.random());s.stop(t+0.08);}
+    else if(kind==='spell'){[784,988,1175,1568,1976].forEach((f,i)=>this.note(f,t+i*0.06,0.6,0.06));}
+    else if(kind==='door'){this.note(392,t,0.5,0.05,'triangle');this.note(523,t+0.1,0.6,0.05,'triangle');}
+    else if(kind==='talk'){this.note(880+Math.random()*200,t,0.12,0.04);}
+    else if(kind==='gift'){[523,659,784,1046].forEach((f,i)=>this.note(f,t+i*0.09,0.7,0.07));}}
+};
+
+/* ===================== ZONE CHANGE / MOVEMENT ===================== */
+function placeLunaNear(){const bx=player.x-player.dir.x*1.3+0.6,by=player.y-player.dir.y*1.3;const p=findFree(zone,bx,by);luna.x=p.x;luna.y=p.y;if(Math.hypot(luna.x-player.x,luna.y-player.y)<0.7){const q=findFree(zone,player.x+1,player.y);luna.x=q.x;luna.y=q.y;}}
+function changeZone(id,pos,silent){zone=ZONES[id];player.sit=null;player.boat=false;const p=findFree(zone,pos.x,pos.y);player.x=p.x;player.y=p.y;placeLunaNear();clickTarget=null;clickNpc=null;doorCooldown=0.5;clearWorldParticles();patronus=null;buildCandles();updateCam(true);
+  $('zoneName').textContent='📍 '+zone.th+' · '+zone.en;if(!silent){Audio.sfx('door');toast('✨ '+zone.th);}
+  if(Math.random()<0.6)setTimeout(()=>lunaBubble(LUNA_ZONE[zone.id]),900);}
+function unstuck(){player.sit=null;player.boat=false;const p=zone.center;player.x=p.x;player.y=p.y;placeLunaNear();clickTarget=null;updateCam(true);toast('🧭 รีเซ็ตตำแหน่งแล้ว');}
+function moveEntity(e,dx,dy,r,boat){let moved=false;if(dx&&!solidAt(zone,e.x+dx,e.y,r,boat)){e.x+=dx;moved=true;}if(dy&&!solidAt(zone,e.x,e.y+dy,r,boat)){e.y+=dy;moved=true;}return moved;}
+function checkDoors(){if(doorCooldown>0)return;for(const d of zone.doors){const t=doorTrigger(zone,d);let hit=false;
+  if(d.side==='N')hit=player.y<=1+R+0.06&&Math.abs(player.x-t.x)<0.75;if(d.side==='S')hit=player.y>=zone.h-1-R-0.06&&Math.abs(player.x-t.x)<0.75;
+  if(d.side==='W')hit=player.x<=1+R+0.06&&Math.abs(player.y-t.y)<0.75;if(d.side==='E')hit=player.x>=zone.w-1-R-0.06&&Math.abs(player.y-t.y)<0.75;
+  if(hit){const z2=ZONES[d.to];const back=z2.doors.find(b=>b.to===zone.id);changeZone(d.to,doorSpawn(z2,back));return;}}}
+// Allow walking into door gaps: clamp is the room interior, door trigger sits at the inner edge, so no wall gap collision needed.
+
+/* ===================== INPUT ===================== */
+const joy={x:0,y:0,on:false};
+function inputVec(){let x=0,y=0;const k=keysPressed;if(k.KeyW||k.ArrowUp)y-=1;if(k.KeyS||k.ArrowDown)y+=1;if(k.KeyA||k.ArrowLeft)x-=1;if(k.KeyD||k.ArrowRight)x+=1;if(joy.on){x+=joy.x;y+=joy.y;}const l=Math.hypot(x,y);if(l>1){x/=l;y/=l;}return{x,y};}
+window.addEventListener('keydown',e=>{Audio.init();if(Audio.ac&&Audio.ac.state==='suspended')Audio.ac.resume();
+  if(e.target&&e.target.tagName==='INPUT')return;
+  if(e.code==='Tab'){e.preventDefault();uiOpen==='dirM'?closeModal():openDirectory();return;}
+  if(e.code==='Escape'){closeModal();return;}
+  if(uiOpen){if(uiOpen==='dlg'&&(e.code==='KeyE'||e.code==='Space'||e.code==='Enter')){e.preventDefault();const b=$('dlgOpts').querySelector('button');if(b&&e.code!=='KeyE')b.click();else if(e.code==='KeyE')closeModal();}if(e.code==='KeyM'&&uiOpen==='mapM')closeModal();return;}
+  if(e.code==='KeyE'){interact();return;}if(e.code==='KeyL'){openLuna();return;}if(e.code==='KeyM'){openMap();return;}
+  if(/^Digit[1-4]$/.test(e.code)){castSpell(+e.code.slice(5)-1);return;}
+  if(e.code.startsWith('Arrow')||e.code==='Space')e.preventDefault();
+  keysPressed[e.code]=true;if(player.sit&&['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))standUp();clickTarget=null;});
+window.addEventListener('keyup',e=>{delete keysPressed[e.code];});
+window.addEventListener('blur',()=>{keysPressed={};joy.on=false;});
+function screenToWorld(sx,sy){return{x:(sx+cam.x)/T,y:(sy+cam.y)/T};}
+cv.addEventListener('pointerdown',e=>{Audio.init();if(Audio.ac&&Audio.ac.state==='suspended')Audio.ac.resume();if(uiOpen)return;const w=screenToWorld(e.clientX,e.clientY);
+  if(Math.hypot(w.x-luna.x,w.y-(luna.y-0.6))<0.7){openLuna();return;}
+  for(const n of NPCS){if(n.zone!==zone.id)continue;if(Math.hypot(w.x-n.x,w.y-(n.y-0.6))<0.75){clickNpc=n;clickTarget={x:n.x,y:n.y};standUp();return;}}
+  for(const s of zone.sits){if(Math.hypot(w.x-s.x,w.y-s.y)<0.6){clickTarget={x:s.x,y:s.y,sit:s};standUp();return;}}
+  clickNpc=null;clickTarget={x:w.x,y:w.y};standUp();spawnP('spark',w.x,w.y,0,-0.3,0.6,3,'#f2d68a');});
+// Virtual joystick
+(function(){const J=$('joy'),K=$('joyK');let id=null;function set(e){const r=J.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const l=Math.hypot(dx,dy),m=45;if(l>m){dx*=m/l;dy*=m/l;}K.style.transform='translate('+dx+'px,'+dy+'px)';joy.x=dx/m;joy.y=dy/m;joy.on=true;if(player.sit)standUp();clickTarget=null;}
+  J.addEventListener('pointerdown',e=>{Audio.init();id=e.pointerId;J.setPointerCapture(id);set(e);});J.addEventListener('pointermove',e=>{if(e.pointerId===id)set(e);});
+  const end=e=>{if(e.pointerId!==id)return;id=null;joy.on=false;joy.x=joy.y=0;K.style.transform='';};J.addEventListener('pointerup',end);J.addEventListener('pointercancel',end);})();
+if(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches||('ontouchstart' in window))document.body.classList.add('touch');
+window.addEventListener('touchstart',()=>document.body.classList.add('touch'),{once:true,passive:true});
+
+/* ===================== INTERACTION ===================== */
+function nearestNpc(maxD){let best=null,bd=maxD;for(const n of NPCS){if(n.zone!==zone.id)continue;const d=Math.hypot(n.x-player.x,n.y-player.y);if(d<bd){bd=d;best=n;}}return best;}
+function nearestSit(){let best=null,bd=1.3;for(const s of zone.sits){const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<bd){bd=d;best=s;}}return best;}
+function nearDock(){if(!zone.dock)return false;const d=zone.dock;return Math.hypot(player.x-(d[0]+1),player.y-(d[1]+d[3]))<2.2;}
+function interact(){if(player.sit){standUp();return;}
+  const n=nearestNpc(1.7);if(n){openDialogue(n);return;}
+  if(zone.waterR){if(player.boat){disembark();return;}if(nearDock()){player.boat=true;const w=zone.waterR;player.x=clamp(zone.dock[0]+1,w.x+0.5,w.x+w.w-0.5);player.y=w.y+0.8;toast('⛵ ล่องเรือบนทะเลสาบดำ (E เพื่อขึ้นฝั่ง)');lunaBubble('เรือลำนี้เคยพาเด็กปีหนึ่งข้ามทะเลสาบนะ ฉันจำคืนนั้นได้');return;}}
+  const s=nearestSit();if(s){sitDown(s);return;}
+  if(Math.hypot(luna.x-player.x,luna.y-player.y)<2){openLuna();return;}
+  toast('ไม่มีอะไรให้โต้ตอบใกล้ๆ ลองเดินไปหาเพื่อนหรือจุดนั่งพัก 🪑');}
+function disembark(){const w=zone.waterR;const tries=[{x:player.x,y:w.y-0.8},{x:player.x,y:w.y+w.h+0.8},{x:w.x-0.8,y:player.y},{x:w.x+w.w+0.8,y:player.y}];let best=tries[0],bd=1e9;for(const t of tries){const d=Math.hypot(t.x-player.x,t.y-player.y);if(d<bd){bd=d;best=t;}}player.boat=false;const p=findFree(zone,best.x,best.y);player.x=p.x;player.y=p.y;placeLunaNear();toast('ขึ้นฝั่งแล้ว');}
+function sitDown(s){player.sit=s;player.x=s.x;player.y=s.y;clickTarget=null;keysPressed={};sitTimer=0;toast('🪑 '+s.act);const q=findFree(zone,s.x+0.9,s.y);luna.x=q.x;luna.y=q.y;luna.sit=true;setTimeout(()=>{if(player.sit===s)lunaBubble(pick(LUNA_SIT));},1500);
+  if(zone.id==='astronomy'&&TIMES[timeIdx]!=='night')toast('💫 ลองเปลี่ยนเวลาเป็นกลางคืนเพื่อดูดาวสิ');}
+function standUp(){if(!player.sit)return;player.sit=null;luna.sit=false;}
+function lunaBubble(text){luna.bubble=text;luna.bubbleT=5.5;}
+
+/* ===================== DIALOGUE ===================== */
+let typeTimer=null;
+function typeText(s){clearInterval(typeTimer);const el=$('dlgText');let i=0;el.textContent='';const ch=Array.from(s);typeTimer=setInterval(()=>{i+=2;el.textContent=ch.slice(0,i).join('');if(i%6===0)Audio.sfx('talk');if(i>=ch.length)clearInterval(typeTimer);},22);}
+function drawPortrait(L,house,face){const p=$('portrait'),g=p.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,p.width,p.height);const H=HOUSES[house||'N'];
+  const gr=g.createLinearGradient(0,0,0,p.height);gr.addColorStop(0,shade(H.c1,40));gr.addColorStop(1,shade(H.c1,-30));g.fillStyle=gr;g.fillRect(0,0,p.width,p.height);
+  g.fillStyle='rgba(255,255,255,.12)';for(let i=0;i<14;i++){g.beginPath();g.arc(hash(i,5)*p.width,hash(i,9)*p.height,1+hash(i,2)*2.5,0,7);g.fill();}
+  const sc=L.cr==='painting'?2.9:L.cr?(['owl','toad','cat'].includes(L.cr)?4.4:3.2):L.big?2.9:L.small?4.6:3.9;const off=L.cr==='painting'?-10:L.cr==='toad'?-60:L.cr?-30:(L.big?60:L.small?20:72);drawChibi(g,p.width/2-(L.cr&&!['owl','toad','painting'].includes(L.cr)?30:0),p.height+off,sc,L,{t:now,face:face||'smile',house:house!=='N'?house:null});
+  g.strokeStyle='rgba(242,214,138,.8)';g.lineWidth=3;g.strokeRect(1.5,1.5,p.width-3,p.height-3);}
+function openModal(id){keysPressed={};joy.on=false;clickTarget=null;uiOpen=id;$(id).classList.add('show');}
+function closeModal(){if(!uiOpen)return;$(uiOpen).classList.remove('show');uiOpen=null;keysPressed={};clearInterval(typeTimer);}
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModal));
+['mapM','dirM','dlg'].forEach(id=>$(id).addEventListener('pointerdown',e=>{if(e.target===$(id))closeModal();}));
+function setOpts(list){const box=$('dlgOpts');box.innerHTML='';for(const [label,fn] of list){const b=document.createElement('button');b.className='btn';b.textContent=label;b.addEventListener('click',fn);box.appendChild(b);}}
+function openDialogue(n){const c=n.c;openModal('dlg');n.dir={x:player.x-n.x,y:player.y-n.y};let li=0,gifted=false,fed=false;
+  friend[c.id]=(friend[c.id]||0)+1;persist();
+  const head=()=>{$('dlgName').textContent=c.th+'  ·  '+c.en+(c.creature?'  (สัตว์วิเศษ/สัตว์เลี้ยง)':'  ('+HOUSES[c.house].th+')');$('dlgHearts').textContent=heartStr(c.id)+'  ความสนิท';};
+  const hearts3=()=>{for(let i=0;i<10;i++)spawnP('heart',n.x+rnd(-.4,.4),n.y-0.9,rnd(-.4,.4),-rnd(.4,1),1.4,4,'#ff8ab8');};
+  head();drawPortrait(c.look,c.house,'smile');typeText(c.lines[0]);
+  const opts=[['💬 คุยต่อ',()=>{li=(li+1)%c.lines.length;drawPortrait(c.look,c.house,li?'happy':'smile');typeText(c.lines[li]);}],
+    ['🌙 คุยสามคนกับลูน่า',()=>{drawPortrait(c.look,c.house,'happy');typeText(c.th+': "'+c.luna3[0]+'"\nลูน่า: "'+c.luna3[1]+'"');}]];
+  for(const ex of c.extra)opts.push([ex[0],()=>{drawPortrait(ex[2]||c.look,c.house,'happy');typeText(ex[1]);friend[c.id]=(friend[c.id]||0)+1;persist();head();if(ex[0].includes('📸'))for(let i=0;i<20;i++)spawnP('spark',player.x+rnd(-1.5,1.5),player.y-0.8+rnd(-1,1),0,0,0.5,5,'#ffffff');}]);
+  if(c.creature){const cr=c.creature;const bowKey=c.id+'_bowed';
+    const locked=()=>{if(cr.bow&&!friend[bowKey]){typeText('(บัคบีคขยับปีกขู่! ต้องโค้งคำนับและสบตาก่อนนะ อย่ากะพริบตา)');return true;}return false;};
+    if(cr.bow)opts.push(['🙇 โค้งคำนับ',()=>{if(friend[bowKey]){typeText('(บัคบีคพยักหน้ารับอย่างเป็นมิตร เขาจำเธอได้แล้ว)');return;}typeText('(คุณโค้งคำนับต่ำ สบตาไม่กะพริบ... สามวินาทีผ่านไป... บัคบีคค่อยๆ ย่อเข่าหน้าลงโค้งตอบ!) ตอนนี้ลูบและให้อาหารได้แล้ว');friend[bowKey]=1;friend[c.id]=(friend[c.id]||0)+2;persist();head();Audio.sfx('gift');hearts3();}]);
+    opts.push(['🤲 ลูบ',()=>{if(locked())return;drawPortrait(c.look,c.house,'happy');typeText(cr.pet);friend[c.id]=(friend[c.id]||0)+1;persist();head();hearts3();}]);
+    opts.push(['🍖 ให้อาหาร ('+cr.food+')',()=>{if(locked())return;if(fed){typeText('(อิ่มแล้ว ไว้มาใหม่นะ)');return;}fed=true;friend[c.id]=(friend[c.id]||0)+3;persist();head();Audio.sfx('gift');drawPortrait(c.look,c.house,'happy');typeText(c.gift);hearts3();}]);
+  }else opts.push(['🎁 ให้ของขวัญ',()=>{if(gifted){typeText('(ให้ไปแล้วรอบนี้ ไว้มาใหม่นะ)');return;}gifted=true;friend[c.id]=(friend[c.id]||0)+3;persist();head();Audio.sfx('gift');drawPortrait(c.look,c.house,'happy');typeText(c.gift);for(let i=0;i<14;i++)spawnP('spark',n.x,n.y-0.8,rnd(-1,1),rnd(-1.5,0),1.2,3,'#ff9ac8');}]);
+  opts.push(['👋 ลาก่อน',closeModal]);setOpts(opts);}
+function lunaContextLine(){const t=TIMES[timeIdx];let extra='';
+  if(zone.id==='quidditch'&&Math.hypot(player.x-31.5,player.y-5.5)<4.5)extra='\n\nอ๊ะ ระวังนะ ต้นมิสเซิลโทนั่นมีตัวนาร์เกิลชุกชุมเลย อย่ายืนใต้มันนานล่ะ';
+  return LUNA_ZONE[zone.id]+extra;}
+function openLuna(){openModal('dlg');$('dlgName').textContent='ลูน่า เลิฟกู๊ด · Luna Lovegood (เรเวนคลอ)';$('dlgHearts').textContent='♥♥♥♥♥  เพื่อนรักตลอดกาล';drawPortrait(LUNA_LOOK,'R','smile');typeText('อ้อ สวัสดีจ้ะ'+(player.name?' '+player.name:'')+'... '+lunaContextLine());
+  setOpts([['📍 ที่นี่',()=>{drawPortrait(LUNA_LOOK,'R','smile');typeText(lunaContextLine());}],
+   ['🕰️ ตอนนี้',()=>{drawPortrait(LUNA_LOOK,'R','happy');typeText(LUNA_TIME[TIMES[timeIdx]]);}],
+   ['☁️ อากาศ',()=>{drawPortrait(LUNA_LOOK,'R','smile');typeText(LUNA_WEATHER[weather]);}],
+   ['👓 ขอยืมสเปกตระสเปกส์',()=>{drawPortrait(LUNA_LOOK,'R','happy');typeText('ใส่แล้วมองรอบๆ สิ... เห็นแร็กสเปิร์ตสีชมพูฟ้าลอยอยู่ไหม? พวกมันไม่อันตรายหรอก แค่ทำให้หัวมึนนิดหน่อย');for(let i=0;i<24;i++)spawnP('nargle',player.x+rnd(-5,5),player.y+rnd(-4,3),rnd(-.3,.3),-rnd(.1,.4),rnd(3,6),3,pick(['#ff8fc8','#80d8ff']));}],
+   ['👋 เดินต่อกัน',closeModal]]);}
+
+/* ===================== SPELLS ===================== */
+const SPELLS=[{th:'ลูมอส',en:'Lumos'},{th:'วินการ์เดียม เลวิโอซา',en:'Wingardium Leviosa'},{th:'เอกซ์เปกโต พาโตรนุม',en:'Expecto Patronum'},{th:'ออร์คิเดียส',en:'Orchideous'}];
+function castSpell(i){Audio.init();Audio.sfx('spell');toast('🪄 '+SPELLS[i].th+'!');const px=player.x+player.dir.x*0.6,py=player.y-0.7;
+  for(let k=0;k<12;k++)spawnP('spark',px,py,rnd(-1,1),rnd(-1,1),0.8,2.5,'#fff6b0');
+  if(i===0){spellLight=spellLight>0?0:20;}
+  if(i===1){for(let k=0;k<16;k++)spawnP('feather',player.x+rnd(-2,2),player.y+rnd(-1,1),0,-rnd(.3,.7),rnd(3,5),3,'#fff');}
+  if(i===2){patronus={x:player.x,y:player.y-0.5,t:0,life:8};lunaBubble('ว้าว กระต่ายเงินของเธอ! ของฉันก็เป็นกระต่ายนะ เราเหมือนกันเลย');}
+  if(i===3){for(let k=0;k<26;k++){const a=Math.random()*7,r=rnd(0.6,2.4);spawnP('flower',player.x,player.y,Math.cos(a)*r*2,Math.sin(a)*r*2,rnd(8,14),3,pick(['#ff9ac8','#ffd1e8','#c9a0ff','#fff3a0','#9ad0ff']));}}}
+document.querySelectorAll('.spell').forEach(b=>b.addEventListener('click',()=>{castSpell(+b.dataset.s);}));
+
+/* ===================== MAP & DIRECTORY ===================== */
+function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';for(const id of ZONE_IDS){const z=ZONES[id];const ppl=NPCS.filter(n=>n.zone===id);const b=document.createElement('button');b.className='btn mapZ'+(id===zone.id?' on':'');
+  b.innerHTML='<b>'+(id===zone.id?'📍 ':'')+(z.num?z.num+'. ':'↳ ')+z.th+'</b><small>'+z.en+(z.sub?' — ภายในโซน 24':'')+'</small><small>👥 '+ppl.length+' คน: '+ppl.map(n=>n.c.th.split(' ')[0]).join(', ')+'</small>';
+  b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});grid.appendChild(b);}}
+let dirBuilt=false;
+function openDirectory(){openModal('dirM');const list=$('dirList');if(!dirBuilt){list.innerHTML='';for(const n of NPCS){const c=n.c;const item=document.createElement('div');item.className='dirItem';const m=document.createElement('canvas');m.width=58;m.height=68;
+    const Lk=c.look;drawChibi(m.getContext('2d'),Lk.cr&&!['owl','toad','painting'].includes(Lk.cr)?22:29,Lk.cr==='painting'?66:Lk.cr?62:Lk.big?100:84,Lk.cr==='painting'?0.95:Lk.cr?(Lk.cr==='toad'?2:1.15):Lk.big?1.05:Lk.small?1.7:1.45,Lk,{t:1,face:'smile',house:c.house!=='N'?c.house:null});
+    const info=document.createElement('div');info.style.flex='1';info.innerHTML='<b>'+c.th+'</b><br><span style="opacity:.75">'+c.en+' · '+HOUSES[c.house].th+'</span><br><span class="hearts" data-h="'+c.id+'"></span><br><span style="opacity:.75">📍 '+ZONES[c.zone].th+'</span>';
+    const bb=document.createElement('div');bb.className='b';const t=document.createElement('button');t.className='btn';t.textContent='🧭 นำทาง';t.onclick=()=>{trackId=c.id;closeModal();toast('🧭 กำลังนำทางไปหา '+c.th);};
+    const tp=document.createElement('button');tp.className='btn';tp.textContent='✨ วาร์ปไปหา';tp.onclick=()=>{closeModal();changeZone(n.zone,{x:n.x+1.1,y:n.y+0.3});};bb.append(t,tp);info.appendChild(bb);item.append(m,info);list.appendChild(item);}dirBuilt=true;}
+  list.querySelectorAll('[data-h]').forEach(el=>el.textContent=heartStr(el.dataset.h));}
+function nextDoorTo(target){if(zone.id===target)return null;const prev={},q=[zone.id];prev[zone.id]=null;while(q.length){const z=q.shift();if(z===target)break;for(const d of ZONES[z].doors){if(!(d.to in prev)){prev[d.to]=z;q.push(d.to);}}}
+  let cur=target;if(!(cur in prev))return null;while(prev[cur]!==zone.id)cur=prev[cur];return zone.doors.find(d=>d.to===cur);}
+
+/* ===================== HUD ===================== */
+function toast(msg){const el=document.createElement('div');el.className='toastMsg';el.textContent=msg;const box=$('toast');box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>el.remove(),2600);}
+function updateHud(){$('timeInfo').textContent=TIME_TH[TIMES[timeIdx]]+' · '+WEATHER_TH[weather];$('bAuto').classList.toggle('on',autoTime);$('bMute').textContent=Audio.muted?'🔇':'🔊';}
+$('bTime').onclick=()=>{timeIdx=(timeIdx+1)%4;timeClock=0;persist();updateHud();buildCandles();toast(TIME_TH[TIMES[timeIdx]]);};
+$('bAuto').onclick=()=>{autoTime=!autoTime;persist();updateHud();toast(autoTime?'⏳ เวลาเดินอัตโนมัติ':'⏸️ หยุดเวลาไว้');};
+$('bWeather').onclick=()=>{weather=WEATHERS[(WEATHERS.indexOf(weather)+1)%4];persist();updateHud();toast('☁️ '+WEATHER_TH[weather]);setTimeout(()=>lunaBubble(LUNA_WEATHER[weather]),600);};
+$('bMap').onclick=openMap;$('bDir').onclick=openDirectory;$('bLuna').onclick=openLuna;$('bUnstuck').onclick=unstuck;
+$('bMute').onclick=()=>{Audio.init();Audio.setMute(!Audio.muted);save.muted=Audio.muted;try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');s.muted=Audio.muted;localStorage.setItem(SAVE_KEY,JSON.stringify(s));}catch(e){}updateHud();};
+$('bSet').onclick=()=>openSetup();$('mE').onclick=()=>{Audio.init();interact();};$('mL').onclick=()=>{Audio.init();openLuna();};
+document.querySelectorAll('.hud button,#mBtns button').forEach(b=>b.addEventListener('pointerdown',e=>e.stopPropagation()));
+
+/* ===================== SETUP ===================== */
+const HAIRSTYLES=[['short','สั้น'],['messy','ยุ่งๆ'],['long','ยาว'],['bob','บ๊อบ'],['ponytail','หางม้า'],['braid','เปีย'],['bushy','ฟู'],['curly','หยิก']];
+const HAIRCOLS=['#1b1712','#5a3a22','#8a5a2a','#d2541c','#ecc46a','#f3ead0','#ff8ab8','#6a8ad0'];
+function openSetup(){openModal('setup');$('sName').value=player.name||'';const h=$('sHouse');h.innerHTML='';for(const k of['G','R','H','S']){const b=document.createElement('button');b.className='btn'+(player.house===k?' on':'');b.textContent=HOUSES[k].th;b.style.borderColor=HOUSES[k].c2;b.onclick=()=>{player.house=k;openSetup();};h.appendChild(b);}
+  const hs=$('sHair');hs.innerHTML='';for(const [k,l] of HAIRSTYLES){const b=document.createElement('button');b.className='btn'+(player.hs===k?' on':'');b.textContent=l;b.onclick=()=>{player.hs=k;openSetup();};hs.appendChild(b);}
+  const hc=$('sHairC');hc.innerHTML='';for(const c of HAIRCOLS){const b=document.createElement('div');b.className='sw'+(player.hair===c?' on':'');b.style.background=c;b.onclick=()=>{player.hair=c;openSetup();};hc.appendChild(b);}
+  const pv=$('sPrev').getContext('2d');pv.clearRect(0,0,120,140);drawChibi(pv,60,132,2.3,playerLook(),{t:now,face:'smile',house:player.house});}
+$('sName').addEventListener('input',e=>{player.name=e.target.value.trim();});
+$('sGo').onclick=()=>{player.name=$('sName').value.trim()||'นักเรียนใหม่';persist();closeModal();Audio.init();if(Audio.ac&&Audio.ac.state==='suspended')Audio.ac.resume();toast('ยินดีต้อนรับ '+player.name+' แห่งบ้าน'+HOUSES[player.house].th+' ✨');setTimeout(()=>lunaBubble('สวัสดีจ้ะ '+player.name+' ฉันลูน่า เดินเล่นด้วยกันนะ'),800);};
+
+/* ===================== UPDATE ===================== */
+let now=0,lastDt=1/60,last=performance.now(),stepT=0;
+function update(dt){now+=dt;doorCooldown=Math.max(0,doorCooldown-dt);if(spellLight>0)spellLight-=dt;
+  if(autoTime){timeClock+=dt;if(timeClock>120){timeClock=0;timeIdx=(timeIdx+1)%4;updateHud();buildCandles();persist();}}
+  // player
+  let v={x:0,y:0};if(!uiOpen&&!player.sit){v=inputVec();
+    if(!v.x&&!v.y&&clickTarget){const dx=clickTarget.x-player.x,dy=clickTarget.y-player.y,d=Math.hypot(dx,dy);const reach=clickNpc?1.3:0.12;
+      if(d<reach){if(clickNpc){openDialogue(clickNpc);clickNpc=null;}else if(clickTarget.sit)sitDown(clickTarget.sit);clickTarget=null;}else{v={x:dx/d,y:dy/d};}}}
+  const sp=player.boat?3.2:4.4;player.moving=!!(v.x||v.y);
+  if(player.moving){player.dir={x:v.x,y:v.y};const ox=player.x,oy=player.y;moveEntity(player,v.x*sp*dt,v.y*sp*dt,R,player.boat);player.walk+=dt*11;stepT-=dt;if(stepT<=0&&!player.boat){Audio.sfx('step');stepT=0.32;}
+    if(clickTarget&&Math.hypot(player.x-ox,player.y-oy)<sp*dt*0.15){clickTarget.stuck=(clickTarget.stuck||0)+dt;if(clickTarget.stuck>0.6){clickTarget=null;clickNpc=null;}}
+    if(!player.boat)checkDoors();if(player.boat&&weather!=='snow'&&Math.random()<0.3)spawnP('drop',player.x+rnd(-.5,.5),player.y+0.2,rnd(-.3,.3),0.2,0.8,2,'rgba(200,230,255,.6)');}
+  // luna companion (frame-rate independent smoothing)
+  updateLuna(dt);
+  // NPCs in current zone
+  for(const n of NPCS){if(n.zone!==zone.id)continue;const dp=Math.hypot(player.x-n.x,player.y-n.y);
+    if(dp<2.2){n.moving=false;n.dir={x:player.x-n.x,y:player.y-n.y};continue;}
+    n.wait-=dt;if(n.wait<=0&&!n.moving){const t=findFree(zone,n.hx+rnd(-2,2),n.hy+rnd(-1.5,1.5));n.tx=t.x;n.ty=t.y;n.moving=true;n.wait=rnd(3,8);}
+    if(n.moving){const dx=n.tx-n.x,dy=n.ty-n.y,d=Math.hypot(dx,dy);if(d<0.1){n.moving=false;}else{const s=Math.min(d,1.1*dt);if(!moveEntity(n,dx/d*s,dy/d*s,R)){n.moving=false;}n.walk+=dt*8;n.dir={x:dx,y:dy};}}}
+  if(patronus){patronus.t+=dt;patronus.life-=dt;const a=patronus.t*2.2;patronus.x=player.x+Math.cos(a)*1.8;patronus.y=player.y-0.3+Math.sin(a)*1.1;if(Math.random()<0.6)spawnP('spark',patronus.x,patronus.y-0.3,rnd(-.2,.2),rnd(-.2,.2),1,2.5,'#dff4ff');if(patronus.life<=0)patronus=null;}
+  // Luna idle bubble every 20-30s
+  luna.nextIdle-=dt;if(luna.nextIdle<=0){luna.nextIdle=rnd(20,30);if(!uiOpen)lunaBubble(Math.random()<0.5?pick(LUNA_IDLE):pick([LUNA_ZONE[zone.id],LUNA_TIME[TIMES[timeIdx]],LUNA_WEATHER[weather]]));}
+  if(luna.bubbleT>0)luna.bubbleT-=dt;
+  if(player.sit){sitTimer+=dt;if(sitTimer>4){sitTimer=0;spawnP('heart',player.x+0.45,player.y-1.6,0,-0.4,1.6,4,'#ff8ab8');}}
+  weatherTick(dt);updateParticles(dt);updateCam(false);
+  if(trackId){const n=NPCS.find(m=>m.c.id===trackId);if(n.zone===zone.id&&Math.hypot(n.x-player.x,n.y-player.y)<2){toast('🎉 เจอ '+n.c.th+' แล้ว! กด E เพื่อคุย');trackId=null;}}
+  const ti=$('trackInfo');if(trackId){const n=NPCS.find(m=>m.c.id===trackId);ti.style.display='';ti.innerHTML='🧭 '+n.c.th+' @ '+ZONES[n.zone].th+' <button class="btn" style="padding:1px 6px;font-size:11px" onclick="trackId=null">✕</button>';}else ti.style.display='none';}
+function updateLuna(dt){
+  if(player.boat){luna.x=player.x-0.55;luna.y=player.y+0.05;luna.moving=false;return;}
+  if(player.sit){luna.moving=false;luna.dir={x:-1,y:0};return;}
+  const side={x:-player.dir.y,y:player.dir.x};
+  let tx=player.x-player.dir.x*1.3+side.x*0.55,ty=player.y-player.dir.y*1.3+side.y*0.55;
+  if(solidAt(zone,tx,ty,R)){const p=findFree(zone,tx,ty);tx=p.x;ty=p.y;}
+  const dx=tx-luna.x,dy=ty-luna.y,d=Math.hypot(dx,dy),dp=Math.hypot(player.x-luna.x,player.y-luna.y);
+  if(dp>6){placeLunaNear();spawnP('spark',luna.x,luna.y-0.6,0,-0.5,1,3,'#cfe8ff');return;}
+  luna.moving=d>0.12;
+  if(luna.moving){const k=1-Math.exp(-dt*5);let mx=dx*k,my=dy*k;const maxs=(dp>2.5?6.5:4.8)*dt,l=Math.hypot(mx,my);if(l>maxs){mx*=maxs/l;my*=maxs/l;}
+    const ox=luna.x,oy=luna.y;moveEntity(luna,mx,my,R);const prog=Math.hypot(luna.x-ox,luna.y-oy);
+    if(prog<l*0.2&&d>0.6){luna.stuck=(luna.stuck||0)+dt;if(luna.stuck>1.0){luna.stuck=0;placeLunaNear();}}else luna.stuck=0;
+    luna.walk+=dt*10*Math.min(1,prog/(dt*3+1e-6));luna.dir={x:dx,y:dy};}
+  // anti-overlap: never stand on the player
+  const ddx=luna.x-player.x,ddy=luna.y-player.y,dd=Math.hypot(ddx,ddy);if(dd<0.75){const push=(0.75-dd);const nx=dd>0.01?ddx/dd:1,ny=dd>0.01?ddy/dd:0;moveEntity(luna,nx*push,ny*push,R);}}
+
+/* ===================== RENDER ===================== */
+function drawEntityLabel(x,y,text,col){ctx.font='bold 12px sans-serif';ctx.textAlign='center';const w=ctx.measureText(text).width+10;ctx.fillStyle='rgba(20,14,40,.65)';ctx.fillRect(x-w/2,y-12,w,16);ctx.fillStyle=col||'#fff';ctx.fillText(text,x,y);}
+function drawBubble(x,y,text){ctx.font='13px sans-serif';const words=Array.from(text);const lines=[];let cur='';for(const ch of words){if(ctx.measureText(cur+ch).width>220){lines.push(cur);cur='';}cur+=ch;}if(cur)lines.push(cur);
+  const w=Math.min(240,Math.max(...lines.map(l=>ctx.measureText(l).width))+20),h=lines.length*17+12;let bx=clamp(x-w/2,6,VW-w-6),by=y-h-14;
+  ctx.fillStyle='rgba(255,252,240,.95)';ctx.strokeStyle='#c9a0ff';ctx.lineWidth=2;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,w,h,12);else ctx.rect(bx,by,w,h);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-6,by+h);ctx.lineTo(x,by+h+9);ctx.lineTo(x+6,by+h);ctx.fill();
+  ctx.fillStyle='#3a2a5a';ctx.textAlign='left';lines.forEach((l,i)=>ctx.fillText(l,bx+10,by+20+i*17));}
+function render(){ctx.fillStyle=zone.out?'#2a3a2a':'#140f22';ctx.fillRect(0,0,VW,VH);
+  if(zone.out||zone.outdoorSky){const t=TIMES[timeIdx];const sky={morning:['#ffd8a8','#9ad0f0'],afternoon:['#7ac0f0','#c8ecff'],sunset:['#ff9a5a','#7a4a9a'],night:['#0a0f2a','#1a1a4a']}[t];const gr=ctx.createLinearGradient(0,0,0,VH);gr.addColorStop(0,sky[1]);gr.addColorStop(1,sky[0]);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VH);}
+  drawFloor();
+  for(const f of zone.furn)if(!f.solid)drawFurn(f);
+  for(const s of zone.sits){const [sx,sy]=W2S(s.x,s.y);if(!inView(sx,sy,30))continue;ctx.fillStyle='rgba(242,214,138,'+(0.25+Math.sin(now*3)*0.12)+')';ctx.beginPath();ctx.ellipse(sx,sy,16,6,0,0,7);ctx.fill();ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('🪑',sx,sy-4);}
+  // depth-sorted drawables (culling inside)
+  const list=[];for(const f of zone.furn)if(f.solid)list.push({y:f.y+f.h,f});
+  for(const n of NPCS)if(n.zone===zone.id)list.push({y:n.y,n});
+  list.push({y:luna.y,luna:1});list.push({y:player.y+0.01,player:1});list.sort((a,b)=>a.y-b.y);
+  const blink=(t,ph)=>((t+ph)%4.2)<0.12;
+  for(const it of list){
+    if(it.f){drawFurn(it.f);continue;}
+    if(it.n){const n=it.n;const [sx,sy]=W2S(n.x,n.y);if(!inView(sx,sy,120))continue;drawChibi(ctx,sx,sy,1,n.c.look,{t:now+n.phase,walk:n.moving?n.walk:0,blink:blink(now,n.phase),house:n.c.house!=='N'?n.c.house:null,face:'smile'});
+      const dp=Math.hypot(player.x-n.x,player.y-n.y);if(dp<3.2)drawEntityLabel(sx,sy-(n.c.look.cr==='painting'?72:n.c.look.cr?44:n.c.look.big?92:n.c.look.small?48:70),n.c.th+' '+heartStr(n.c.id).slice(0,hearts(n.c.id)),'#f2d68a');continue;}
+    if(it.luna){const [sx,sy]=W2S(luna.x,luna.y);drawChibi(ctx,sx,sy,1,LUNA_LOOK,{t:now+1.3,walk:luna.moving?luna.walk:0,blink:blink(now,1.3),house:'R',face:'smile',sitting:!!player.sit||player.boat});continue;}
+    if(it.player){const [sx,sy]=W2S(player.x,player.y);if(player.boat)drawBoat(sx-8,sy+6);drawChibi(ctx,sx,sy,1,playerLook(),{t:now,walk:player.moving?player.walk:0,blink:blink(now,0),house:player.house,face:'smile',sitting:!!player.sit||player.boat});
+      if(spellLight>0){ctx.fillStyle='rgba(220,240,255,.9)';ctx.beginPath();ctx.arc(sx+14,sy-30,4+Math.sin(now*8),0,7);ctx.fill();}
+      drawEntityLabel(sx,sy-74,player.name||'คุณ','#fff');}}
+  if(patronus){const [sx,sy]=W2S(patronus.x,patronus.y);ctx.save();ctx.globalAlpha=Math.min(1,patronus.life);ctx.shadowColor='#bfe6ff';ctx.shadowBlur=18;ctx.fillStyle='rgba(220,240,255,.9)';ctx.beginPath();ctx.ellipse(sx,sy,14,9,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(sx+12,sy-8,7,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(sx+12,sy-22,2.5,9,0.2,0,7);ctx.ellipse(sx+17,sy-21,2.5,9,0.5,0,7);ctx.fill();ctx.restore();}
+  drawParticles(false);drawCandles();
+  drawLighting();drawSky();drawParticles(true);
+  if(zone.underwater){ctx.fillStyle='rgba(40,140,110,.12)';ctx.fillRect(0,0,VW,VH);}
+  // prompts & bubble
+  if(!uiOpen){const [px,py]=W2S(player.x,player.y);let prompt='';const n=nearestNpc(1.7);if(player.sit)prompt='[E] ลุกขึ้น';else if(n)prompt='[E] คุยกับ '+n.c.th;else if(zone.waterR&&player.boat)prompt='[E] ขึ้นฝั่ง';else if(zone.waterR&&nearDock())prompt='[E] ล่องเรือ ⛵';else if(nearestSit())prompt='[E] '+nearestSit().act;
+    if(prompt)drawEntityLabel(px,py+26,prompt,'#bfe6ff');}
+  if(luna.bubbleT>0&&luna.bubble){const [lx,ly]=W2S(luna.x,luna.y);ctx.globalAlpha=Math.min(1,luna.bubbleT);drawBubble(lx,ly-72,'🌙 '+luna.bubble);ctx.globalAlpha=1;}
+  drawTrackArrow();}
+function drawTrackArrow(){if(!trackId)return;const n=NPCS.find(m=>m.c.id===trackId);let tx,ty;if(n.zone===zone.id){tx=n.x;ty=n.y-0.6;}else{const d=nextDoorTo(n.zone);if(!d)return;const t=doorTrigger(zone,d);tx=t.x;ty=t.y;}
+  const [sx,sy]=W2S(tx,ty),[px,py]=W2S(player.x,player.y-0.6);const a=Math.atan2(sy-py,sx-px);const r=60;ctx.save();ctx.translate(px+Math.cos(a)*r,py+Math.sin(a)*r);ctx.rotate(a);ctx.fillStyle='rgba(242,214,138,'+(0.7+Math.sin(now*5)*0.3)+')';ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-9);ctx.lineTo(-3,0);ctx.lineTo(-8,9);ctx.fill();ctx.restore();
+  if(inView(sx,sy,0)){ctx.strokeStyle='rgba(242,214,138,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,sy,22+Math.sin(now*4)*4,0,7);ctx.stroke();}}
+
+/* ===================== MAIN LOOP ===================== */
+let fpsAcc=0,fpsN=0,fps=60;
+function frame(ts){let dt=(ts-last)/1000;last=ts;if(!(dt>0))dt=1/60;dt=Math.min(dt,0.05);lastDt=dt;fpsAcc+=dt;fpsN++;if(fpsAcc>1){fps=fpsN/fpsAcc;fpsAcc=0;fpsN=0;}
+  try{update(dt);render();}catch(err){console.error(err);}requestAnimationFrame(frame);}
+window.__game={MAIN_ZONE_IDS,ZONES,CHARACTERS,NPCS,player,luna,get zone(){return zone;},changeZone,unstuck,castSpell,openDirectory,openMap,openLuna,closeModal,get fps(){return fps;},get uiOpen(){return uiOpen;},solidAt,doorSpawn,findFree,setTime:i=>{timeIdx=i;buildCandles();updateHud();},setWeather:w=>{weather=w;updateHud();}};
+changeZone('entrance_hall',{x:10,y:9},true);updateHud();
+if(!save.name)openSetup();else setTimeout(()=>lunaBubble('ยินดีต้อนรับกลับมาจ้ะ '+player.name+'~'),800);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
