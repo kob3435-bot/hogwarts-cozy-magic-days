@@ -95,6 +95,15 @@ body.rotated #rotHint{display:block;animation:rh 6s forwards}@keyframes rh{0%,70
 #zoneBanner.show{animation:zb 3.2s ease forwards}@keyframes zb{0%{opacity:0;transform:translate(-50%,-40%)}12%,75%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-55%)}}
 .toastMsg{font-size:15px!important}
 #zoneName{font-size:15px}
+.lbl{font-size:12px!important;padding:2px 8px!important;background:rgba(12,10,22,.6)!important;border-color:rgba(255,255,255,.15)!important;box-shadow:none!important}
+.lbl.blue{font-size:13px!important}
+.wlbl{font-size:13px;padding:2px 9px;background:rgba(12,10,22,.6);border:1px solid rgba(242,214,138,.6);box-shadow:none;font-weight:600}
+.wlbl.sign{border-color:rgba(185,164,224,.6);font-size:12.5px}
+.wlbl.mini{font-size:12px;padding:1px 4px;background:rgba(12,10,22,.35);border-color:rgba(255,255,255,.18)}
+@media (max-width:900px){.wlbl{font-size:12.5px}.wlbl.mini{font-size:11px}}
+#zoneBanner{top:58px!important;transform:translate(-50%,0)!important;padding:5px 16px!important;border-width:1px!important;border-radius:14px!important;background:rgba(12,10,22,.7)!important;box-shadow:none!important}
+#zoneBanner .zb1{font-size:clamp(16px,2.6vw,22px)!important}#zoneBanner .zb2{font-size:12px!important}
+#zoneBanner.show{animation:zb2 1.8s ease forwards!important}@keyframes zb2{0%{opacity:0}15%,70%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -114,7 +123,7 @@ body.rotated #rotHint{display:block;animation:rh 6s forwards}@keyframes rh{0%,70
     <button class="btn" id="bDir" title="ทำเนียบ (Tab)">📖 ทำเนียบ</button>
     <button class="btn" id="bLuna" title="คุยกับลูน่า (L)">🌙 ลูน่า</button>
     <button class="btn" id="bUnstuck" title="รีเซ็ตตำแหน่ง">🧭 Unstuck</button>
-    <button class="btn" id="bMute" title="เสียง">🔊</button>
+    <button class="btn" id="bTags" title="ป้ายชื่อ">🏷️ ใกล้ตัว</button><button class="btn" id="bMute" title="เสียง">🔊</button>
     <button class="btn" id="bSet" title="ตัวละคร">⚙️</button>
   </div>
 </div>
@@ -1351,19 +1360,23 @@ function render(){const dt=lastDt;ensurePlayer();
   trackPivot.visible=false;if(trackId){const n=NPCS.find(m=>m.c.id===trackId);let tx=null,ty=null;if(n.zone===zone.id){tx=n.x;ty=n.y;}else{const d=nextDoorTo(n.zone);if(d){const t=doorTrigger(zone,d);tx=t.x;ty=t.y;}}if(tx!=null){trackPivot.visible=true;trackPivot.position.set(player.x,1.95+Math.sin(now*5)*0.05,player.y);trackPivot.rotation.y=Math.atan2(tx-player.x,ty-player.y);}}
   updateCam(false);renderer.setRenderTarget(__rt);renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.render(postScene,postCam);
   for(const k in labelPool)labelPool[k].dataset.used='';
-  if(!uiOpen){const pl=labelEl('player','lbl');pl.textContent=player.name||'คุณ';placeLabel(pl,screenOf(player.x,player.y,1.55));
-    for(const n of NPCS){if(n.zone!==zone.id)continue;if(Math.hypot(player.x-n.x,player.y-n.y)<3.4){const el=labelEl('n_'+n.c.id,'lbl gold');el.textContent=n.c.th+' '+'♥'.repeat(hearts(n.c.id));const L=n.c.look;placeLabel(el,screenOf(n.x,n.y,L.big?2.15:L.cr==='hippogriff'||L.cr==='phoenix'?1.7:L.cr==='painting'?1.5:L.cr?0.9:L.small?1.15:1.6));}}
+  if(!uiOpen){const pp0=screenOf(player.x,player.y,0),pp1=screenOf(player.x,player.y,1.6);const PR={l:pp0.x-22,r:pp0.x+22,t:pp1.y-4,b:pp0.y+4};
+    const cover=(el)=>{const r=el.getBoundingClientRect(),o=toLocal(r.left,r.top),o2=toLocal(r.right,r.bottom);const l=Math.min(o.x,o2.x),rr=Math.max(o.x,o2.x),t=Math.min(o.y,o2.y),b=Math.max(o.y,o2.y);return l<PR.r&&rr>PR.l&&t<PR.b&&b>PR.t;};
+    const pl=labelEl('player','lbl');pl.textContent=player.name||'คุณ';if(TAGMODE==='all')placeLabel(pl,screenOf(player.x,player.y,1.55));else pl.dataset.used='';
+    for(const n of NPCS){if(n.zone!==zone.id)continue;const tgt=nearestNpc(1.7);const dd=Math.hypot(player.x-n.x,player.y-n.y);if(TAGMODE==='all'||(TAGMODE==='near'&&dd<5)||tgt===n){const el=labelEl('n_'+n.c.id,'lbl gold');el.textContent=n.c.th+' '+'♥'.repeat(hearts(n.c.id));const L=n.c.look;placeLabel(el,screenOf(n.x,n.y,L.big?2.15:L.cr==='hippogriff'||L.cr==='phoenix'?1.7:L.cr==='painting'?1.5:L.cr?0.9:L.small?1.15:1.6));el.style.opacity=cover(el)?0.3:(dd<2.5||tgt===n?1:0.8);}}
     let prompt='';const n=nearestNpc(1.7);if(player.sit)prompt='[E] ลุกขึ้น';else if(n)prompt='[E] คุยกับ '+n.c.th;else if(zone.waterR&&player.boat)prompt='[E] ขึ้นฝั่ง';else if(zone.waterR&&nearDock())prompt='[E] ล่องเรือ ⛵';else if(nearestSit())prompt='[E] '+nearestSit().act;
-    if(prompt){const el=labelEl('prompt','lbl blue');el.textContent=prompt;const p=screenOf(player.x,player.y,0);p.y+=36;placeLabel(el,p);}
-    // crisp DOM world labels (doors/signs) with overlap avoidance & on-screen clamp
+    if(prompt&&TAGMODE!=='off'||prompt&&nearestNpc(1.7)){const el=labelEl('prompt','lbl blue');el.textContent=prompt;const p=screenOf(player.x,player.y,0);p.y+=36;placeLabel(el,p);}
+    // world labels: full pill when near/hovered, else subtle marker; none off-screen
     const placed=[];const _wp=new THREE.Vector3();const M=6;
-    if(pl.offsetWidth)placed.push(pl.getBoundingClientRect());
     WL.forEach((o,i)=>{const w=o.userData.wl;o.getWorldPosition(_wp);_v.set(_wp.x,_wp.y,_wp.z).project(camera);if(_v.z>1||_v.z<-1)return;
-      let x=(_v.x+1)/2*VW,y=(1-_v.y)/2*VH;const off=x<-60||x>VW+60||y<-40||y>VH+40;if(off&&w.kind!=='door')return;
-      const el=labelEl('w_'+i,'wlbl '+w.kind);const txt=(w.kind==='door'?'🚪 '+w.text+' ➜':'🪧 '+w.text);if(el.textContent!==txt)el.textContent=txt;
-      el.style.display='block';const ew=el.offsetWidth,eh=el.offsetHeight;x=Math.max(M+ew/2,Math.min(VW-M-ew/2,x));y=Math.max(M+eh+44,Math.min(VH-M-70,y));
-      for(let k=0;k<8;k++){const r={l:x-ew/2,r:x+ew/2,t:y-eh,b:y};const hit=placed.find(q=>r.l<q.r+4&&r.r>q.l-4&&r.t<q.b+4&&r.b>q.t-4);if(!hit)break;y=hit.t-4>M+eh+44?hit.t-4:hit.b+eh+4;}
-      placed.push({l:x-ew/2,r:x+ew/2,t:y-eh,b:y});el.style.opacity=off?0.85:1;el.style.transform='translate('+(x|0)+'px,'+(y|0)+'px) translate(-50%,-100%)';});
+      let x=(_v.x+1)/2*VW,y=(1-_v.y)/2*VH;if(x<0||x>VW||y<30||y>VH-30)return;
+      const near=Math.hypot(player.x-_wp.x,player.y-_wp.z)<4.2,hov=hoverPt&&Math.hypot(hoverPt.x-x,hoverPt.y-y)<40;
+      const full=TAGMODE==='all'||(TAGMODE==='near'&&(near||hov))||(TAGMODE==='off'&&hov);
+      const el=labelEl('w_'+i,'wlbl '+w.kind+(full?'':' mini'));const cn='wlbl '+w.kind+(full?'':' mini');if(el.className!==cn)el.className=cn;const txt=full?(w.kind==='door'?'🚪 '+w.text+' ›':'🪧 '+w.text):(w.kind==='door'?'🚪':'🪧');if(el.textContent!==txt)el.textContent=txt;
+      el.style.display='block';const ew=el.offsetWidth,eh=el.offsetHeight;x=Math.max(M+ew/2,Math.min(VW-M-ew/2,x));
+      if(full)for(let k=0;k<6;k++){const r={l:x-ew/2,r:x+ew/2,t:y-eh,b:y};const hit=placed.find(q=>r.l<q.r+3&&r.r>q.l-3&&r.t<q.b+3&&r.b>q.t-3);if(!hit)break;y=hit.t-3;}
+      if(full)placed.push({l:x-ew/2,r:x+ew/2,t:y-eh,b:y});el.style.transform='translate('+(x|0)+'px,'+(y|0)+'px) translate(-50%,-100%)';
+      const ov=(x-ew/2<PR.r&&x+ew/2>PR.l&&y-eh<PR.b&&y>PR.t);el.style.opacity=ov?0.25:(full?0.95:0.55);});
     if(luna.bubbleT>0&&luna.bubble){const el=labelEl('luna','bubble3d');el.textContent='🌙 '+luna.bubble;el.style.opacity=Math.min(1,luna.bubbleT);placeLabel(el,screenOf(luna.x,luna.y,1.8));}}
   for(const k in labelPool)if(!labelPool[k].dataset.used)labelPool[k].style.display='none';}
 let poolGrp=null;const POOLTEX=canvasTex(64,64,g=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.45)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);});
@@ -1557,8 +1570,12 @@ function nextDoorTo(target){if(zone.id===target)return null;const prev={},q=[zon
   let cur=target;if(!(cur in prev))return null;while(prev[cur]!==zone.id)cur=prev[cur];return zone.doors.find(d=>d.to===cur);}
 
 /* ===================== HUD ===================== */
+let TAGMODE=localStorage.getItem('hcm_tagmode')||'near';const TAG_TH={all:'ทั้งหมด',near:'ใกล้ตัว',off:'ปิด'};
+function setTagBtn(){const b=document.getElementById('bTags');if(b)b.textContent='🏷️ '+TAG_TH[TAGMODE];}
+let hoverPt=null;window.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')hoverPt=toLocal(e.clientX,e.clientY);});
 function showBanner(){let b=document.getElementById('zoneBanner');if(!b){b=document.createElement('div');b.id='zoneBanner';(document.getElementById('rot')||document.body).appendChild(b);}
   b.innerHTML='<div class="zb1">✨ '+zone.th+'</div><div class="zb2">'+zone.en+(zone.num?' · โซน '+zone.num:'')+'</div>';b.classList.remove('show');void b.offsetWidth;b.classList.add('show');}
+setTimeout(()=>{setTagBtn();const b=document.getElementById('bTags');if(b)b.onclick=()=>{TAGMODE={all:'near',near:'off',off:'all'}[TAGMODE];localStorage.setItem('hcm_tagmode',TAGMODE);setTagBtn();toast('🏷️ ป้ายชื่อ: '+TAG_TH[TAGMODE]);};},0);
 function toast(msg){const el=document.createElement('div');el.className='toastMsg';el.textContent=msg;const box=$('toast');box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>el.remove(),2600);}
 function updateHud(){$('timeInfo').textContent=TIME_TH[TIMES[timeIdx]]+' · '+WEATHER_TH[weather];$('bAuto').classList.toggle('on',autoTime);$('bMute').textContent=Audio.muted?'🔇':'🔊';}
 $('bTime').onclick=()=>{timeIdx=(timeIdx+1)%4;timeClock=0;persist();updateHud();buildCandles();toast(TIME_TH[TIMES[timeIdx]]);};
