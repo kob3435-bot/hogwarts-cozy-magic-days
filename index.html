@@ -50,7 +50,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:#120d22;font-family:"S
 .dirItem canvas{flex:none;border-radius:10px;background:rgba(255,255,255,.08)}
 .dirItem .b{display:flex;gap:4px;margin-top:4px}
 .dirItem .btn{padding:3px 7px;font-size:11px}
-#mapGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+#mapGrid{display:block}
+.bigMap{position:relative;width:100%;aspect-ratio:100/72;border-radius:14px;overflow:hidden;border:1px solid rgba(242,214,138,.4);margin-bottom:10px}
+.bigMap svg{position:absolute;inset:0;width:100%;height:100%}
+.mapNode{position:absolute;transform:translate(-50%,-50%);background:rgba(20,14,40,.88);color:#fff;border:1px solid #b9a4e0;border-radius:8px;padding:1px 5px;font-size:10px;line-height:1.25;cursor:pointer;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;font-family:system-ui,"Noto Sans Thai",Tahoma,sans-serif}
+.mapNode i{font-style:normal;color:#f2d68a;margin-right:3px;font-weight:700}.mapNode em{font-style:normal;background:#c9a24a;color:#1a1422;border-radius:6px;padding:0 3px;margin-left:3px;font-size:9px}
+.mapNode.new{border-color:#7ad0a0}.mapNode.shop{border-color:#f2a0c0}.mapNode.here{background:#c9a24a;color:#1a1422;border-color:#fff;z-index:2}.mapNode.track{box-shadow:0 0 0 2px #7ad0ff;z-index:2}
+.mapNode:hover{z-index:3;max-width:none}
+.mapList{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+@media (max-width:700px){.mapNode{font-size:8.5px;padding:0 3px;max-width:78px}}
 .mapZ{padding:10px;border-radius:12px;text-align:left}
 .mapZ small{display:block;opacity:.75;font-size:11px;margin-top:3px}
 #bubbleLayer{position:fixed;inset:0;pointer-events:none;z-index:4}
@@ -159,7 +167,7 @@ body.rotated #rotHint{display:block;animation:rh 6s forwards}@keyframes rh{0%,70
   <canvas id="portrait" width="180" height="200"></canvas>
   <div style="flex:1;min-width:0"><div id="dlgName"></div><div class="hearts" id="dlgHearts"></div><div id="dlgText"></div><div id="dlgOpts"></div></div>
 </div></div>
-<div class="modal" id="mapM"><div class="card" style="width:min(860px,94vw)"><h2>🗺️ แผนที่ตัวกวน... เอ้ย แผนที่ฮอกวอตส์ <button class="btn" style="float:right" data-close="mapM">ปิด ✕</button></h2><div style="font-size:12px;opacity:.7;margin-bottom:8px">คลิกโซนเพื่อวาร์ป (เครือข่ายผงฟลู) • ตัวเลขคือจำนวนตัวละครที่อยู่ในโซนนั้น</div><div id="mapGrid"></div></div></div>
+<div class="modal" id="mapM"><div class="card" style="width:min(1100px,96vw)"><h2>🗺️ แผนที่ตัวกวน... เอ้ย แผนที่ฮอกวอตส์ <button class="btn" style="float:right" data-close="mapM">ปิด ✕</button></h2><div style="font-size:12px;opacity:.7;margin-bottom:8px">คลิกโซนเพื่อวาร์ป (เครือข่ายผงฟลู) • ตัวเลขคือจำนวนตัวละครที่อยู่ในโซนนั้น</div><div id="mapGrid"></div></div></div>
 <div class="modal" id="dirM"><div class="card" style="width:min(860px,94vw)"><h2>📖 สมุดทำเนียบฮอกวอตส์ (50 คน) <button class="btn" style="float:right" data-close="dirM">ปิด ✕</button></h2><div id="dirList"></div></div></div>
 <script type="module">
 "use strict";
@@ -441,6 +449,17 @@ C('thestrals','Baby Thestrals','ลูกเธสตรอล','N','quidditch',
 /* ===================== LUNA: CONTEXT DIALOGUE ===================== */
 const LUNA_LOOK={hair:'#f3ead0',hs:'luna',eye:'#8fb3c9',skin:SK.l,spectre:1,radish:1,cork:1,quibbler:1};
 const LUNA_ZONE={
+ room_of_requirement:'ห้องนี้รู้ใจเราเสมอเลยนะ วันนี้มันเสกเบาะนุ่มๆ ให้เรานั่งด้วย',seventh_corridor:'ถ้าเดินวนสามรอบแล้วนึกถึงสิ่งที่ต้องการ ประตูจะปรากฏนะ',
+ trophy_room:'ถ้วยรางวัลพวกนี้มีความทรงจำของคนเก่งๆ อยู่ข้างใน ฉันได้ยินพวกมันฮัมเพลงเบาๆ',dungeon_corridor:'ทางเดินใต้ดินเย็นๆ แบบนี้ แร็กสเปิร์ตไม่ชอบเลย หัวเลยโล่งดี',
+ kitchen_corridor:'จั๊กจี้ลูกแพร์สิ แล้วประตูห้องครัวจะเปิด มันหัวเราะน่ารักมาก',prefects_bathroom:'ฟองสบู่ที่นี่ใหญ่พอให้นาร์เกิลนั่งได้เลยนะ',
+ clock_tower:'เสียงเฟืองติ๊กต็อกเหมือนหัวใจของปราสาทเลย',bell_tower:'จากตรงนี้มองเห็นทะเลสาบระยิบระยับเหมือนเกล็ดปลาเงิน',wooden_bridge:'ลมบนสะพานพัดแรงดี ช่วยไล่ความกังวลไปได้',
+ viaduct:'สะพานหินนี้เก่ามาก มันเคยเห็นนักเรียนเดินผ่านเป็นพันๆ คน',stone_circle:'วงหินนี้เคยเป็นที่ที่นักเรียนรุ่นก่อนมานั่งคุยกัน ฉันชอบความเงียบของมัน',
+ boathouse:'เรือพวกนี้เคยพาปีหนึ่งข้ามทะเลสาบ มันยังจำเสียงตื่นเต้นได้',lake_shore:'ถ้าเงียบพอ อาจได้ยินเงือกร้องเพลงใต้น้ำนะ',whomping_willow:'อย่าเข้าใกล้มากนะ ต้นวิลโลว์อารมณ์ไม่ค่อยดีตอนลมแรง',
+ forest_trail:'ป่าลึกตรงนี้มีหิ่งห้อยกับเธสตรอล ฉันไม่กลัวหรอก พวกมันใจดี',centaur_glade:'เซนทอร์บอกว่าดาวอังคารสว่างคืนนี้ ฉันว่ามันแค่อยากอวดน่ะ',
+ hogsmeade_station:'รถไฟสีแดงนี่พาเรากลับบ้านและพากลับมาเสมอ',shrieking_overlook:'บ้านโหยหวนดูน่ากลัว แต่ฉันว่ามันแค่เหงาน่ะ',hogs_head:'ร้านนี้ฝุ่นเยอะ แต่เจ้าของใจดีกว่าที่คิดนะ',
+ puddifoots:'ทุกอย่างสีชมพูไปหมดเลย เหมือนอยู่ในหัวใจยักษ์',gladrags:'ฉันอยากได้ถุงเท้าที่ร้องเพลงคู่นั้นมาก',scrivenshafts:'ขนนกนี่เขียนเป็นสีรุ้งได้ เหมาะกับบทความควิบเบลอร์',
+ post_office:'นกฮูกตัวจิ๋วพวกนี้บินเร็วกว่าที่คิด แต่ชอบหลงทางนิดหน่อย',dervish_banges:'เครื่องมือพวกนี้หมุนติ้วๆ เวลามีนาร์เกิลอยู่ใกล้ๆ',
+ changing_rooms:'กลิ่นไม้กวาดกับโคลน... กลิ่นของวันแข่งขันเลย',stands_tower:'จากบนนี้มองเห็นป่าต้องห้ามทั้งผืนเลยนะ',
  great_hall:'พุดดิ้งวันนี้ดูเหมือนจะมีความสุขเป็นพิเศษนะ ฉันว่ามันอยากถูกกินช้าๆ',
  entrance_hall:'บันไดหินอ่อนนี่เย็นสบายเวลาเดินเท้าเปล่านะ ลองไหม',
  grand_staircase:'บันไดชอบเปลี่ยนทางเพราะมันเบื่อน่ะ ฉันเข้าใจมันนะ ระวังพีฟส์ด้วยล่ะ',
@@ -482,9 +501,143 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 function hash(x,y){let h=(x*374761393+y*668265263)|0;h=(h^(h>>>13))*1274126177|0;return ((h^(h>>>16))>>>0)/4294967296;}
 
+/* ===================== v6 WORLD EXPANSION ===================== */
+// enlarge outdoor grounds (original 24 zones keep ids/numbers/content)
+Object.assign(ZONES.courtyard,{w:32,h:28});Object.assign(ZONES.black_lake,{w:46,h:34});Object.assign(ZONES.hagrid_hut,{w:36,h:26});
+Object.assign(ZONES.quidditch,{w:48,h:30});Object.assign(ZONES.hogsmeade,{w:40,h:28});
+ZONES.hogsmeade.furn.push([26,1,4,2,'house'],[32,1,4,2,'house'],[3,22,5,2,'house'],[24,22,4,2,'house'],[30,22,5,2,'house'],[20,11,2,2,'lamp'],[30,12,2,2,'lamp'],[6,8,1,1,'lantern'],[35,8,1,1,'lantern'],[16,18,2,1,'stall'],[27,16,1,1,'barrel'],[28,16,1,1,'crate'],[10,17,1,1,'crate'],[36,18,1,1,'pine'],[2,16,1,1,'pine']);
+ZONES.black_lake.furn.push([34,4,1,1,'oak'],[38,9,1,1,'birch'],[40,24,1,1,'pine'],[30,27,1,1,'rock'],[8,26,3,1,'fence'],[18,28,1,1,'lantern'],[36,15,2,1,'bench']);
+ZONES.hagrid_hut.furn.push([24,5,3,2,'pumpkins'],[28,14,1,1,'oak'],[8,19,4,1,'fence'],[22,20,1,1,'lantern'],[30,20,2,2,'crate']);
+ZONES.courtyard.furn.push([24,8,1,1,'oak'],[26,18,2,1,'bench'],[5,22,1,1,'lantern'],[25,23,1,1,'lantern'],[14,22,3,1,'flowers'],[22,4,1,1,'armour']);
+ZONES.quidditch.furn.push([38,6,1,1,'pine'],[42,10,1,1,'pine'],[40,22,1,1,'oak'],[44,16,1,1,'pine'],[36,26,1,1,'birch'],[12,26,2,1,'bench']);
+const NZ={
+ room_of_requirement:{th:'ห้องต้องประสงค์',en:'Room of Requirement',w:22,h:16,floor:'wood',wall:'#5a4a6a',light:'fire',
+  furn:[[2,1,1,4,'shelf'],[19,1,1,4,'shelf'],[9,1,4,1,'fire'],[5,6,3,1,'sofa'],[14,6,3,1,'sofa'],[8,9,6,4,'rug'],[3,11,1,1,'cushion'],[18,11,1,1,'cushion'],[16,2,1,1,'mirror'],[4,3,1,1,'piano'],[12,13,2,1,'crate'],[2,13,1,1,'plant']],
+  sits:[[11,10,'ขอให้ห้องเสกโซฟานุ่มๆ แล้วนอนเล่นกับลูน่า'],[5.5,7.3,'ฝึกคาถาผู้พิทักษ์แบบสบายๆ']]},
+ seventh_corridor:{th:'ทางเดินชั้นเจ็ด',en:'Seventh-floor Corridor',w:28,h:10,floor:'stone',wall:'#6a6070',light:'torch',
+  furn:[[5,1,3,1,'tapestry','บาร์นาบัสผู้บ้องตื้นสอนโทรลล์เต้นบัลเลต์'],[15,1,1,1,'armour'],[20,1,1,1,'armour'],[10,7,1,1,'candelabra'],[24,7,1,1,'plant'],[2,4,1,1,'torch']],
+  sits:[[13,6,'เดินวนสามรอบหน้ากำแพงว่างๆ แล้วคิดถึงสิ่งที่อยาก']]},
+ trophy_room:{th:'ห้องถ้วยรางวัล',en:'Trophy Room',w:18,h:12,floor:'redrug',wall:'#6a5a4a',light:'candles',
+  furn:[[2,1,3,1,'trophycase'],[7,1,3,1,'trophycase'],[12,1,3,1,'trophycase'],[1,4,1,4,'trophycase'],[16,4,1,4,'trophycase'],[7,6,4,2,'rug'],[4,9,1,1,'armour'],[13,9,1,1,'armour']],
+  sits:[[9,8,'ส่องโล่บริการพิเศษของทอม ริดเดิ้ล... แล้วเดินหนีไปดูถ้วยควิดดิชแทน']]},
+ dungeon_corridor:{th:'ทางเดินใต้ดิน',en:'Dungeon Corridors',w:26,h:10,floor:'stone',wall:'#3a4038',light:'torch',
+  furn:[[4,1,1,1,'torch'],[11,1,1,1,'torch'],[18,1,1,1,'torch'],[7,7,1,1,'barrel'],[8,7,1,1,'crate'],[21,6,1,1,'cauldron'],[14,1,2,1,'banner'],[2,7,1,1,'armour']],
+  sits:[[16,6,'ฟังเสียงหยดน้ำในทางเดินใต้ดินเย็นๆ']]},
+ kitchen_corridor:{th:'ทางเดินภาพตะกร้าผลไม้',en:'Kitchen Corridor (Fruit-bowl Painting)',w:22,h:9,floor:'stone',wall:'#7a6a50',light:'torch',
+  furn:[[9,1,3,1,'fruitpaint'],[3,1,1,1,'torch'],[17,1,1,1,'torch'],[4,6,1,1,'barrel'],[5,6,1,1,'barrel'],[15,6,2,1,'crate'],[19,5,1,1,'plant']],
+  sits:[[10.5,5,'จั๊กจี้ลูกแพร์ในภาพจนมันหัวเราะคิกคัก']]},
+ prefects_bathroom:{th:'ห้องน้ำพรีเฟ็คต์',en:"Prefects' Bathroom",w:18,h:14,floor:'white',wall:'#8aa8b8',light:'candles',
+  furn:[[5,4,8,6,'bathtub'],[1,2,1,1,'plant'],[16,2,1,1,'plant'],[8,1,2,1,'portrait'],[2,11,2,1,'bench'],[14,11,1,1,'candelabra'],[15,1,1,1,'mirror']],
+  sits:[[9,11,'เป่าฟองสบู่สีรุ้งลอยฟ่องไปทั่วห้อง']]},
+ clock_tower:{th:'ภายในหอนาฬิกา',en:'Clock Tower Interior',w:18,h:14,floor:'wood',wall:'#6a5a4a',light:'candles',
+  furn:[[3,2,3,3,'gears'],[12,2,3,3,'gears'],[7,6,4,4,'gears'],[1,10,1,2,'crate'],[16,10,1,1,'lantern'],[8,1,2,1,'window']],
+  sits:[[9,11.5,'นั่งฟังเสียงเฟืองนาฬิกาติ๊กต็อก']]},
+ bell_tower:{th:'หอระฆัง',en:'Bell Tower',w:14,h:12,floor:'wood',wall:'#5a5a6a',light:'none',outdoorSky:1,
+  furn:[[5,4,4,4,'bell'],[1,1,1,1,'lantern'],[12,1,1,1,'lantern'],[2,9,2,1,'bench']],
+  sits:[[3,10,'มองวิวทะเลสาบจากหอระฆัง']]},
+ wooden_bridge:{th:'สะพานไม้',en:'Wooden Bridge',w:36,h:10,floor:'wood',wall:'#5a4a3a',out:1,
+  furn:[[2,2,32,1,'rail'],[2,7,32,1,'rail'],[8,3,1,1,'lantern'],[20,3,1,1,'lantern'],[30,6,1,1,'lantern']],
+  sits:[[17,5,'ยืนพิงราวสะพานชมหุบเขากับลูน่า']]},
+ viaduct:{th:'สะพานหินโค้ง (ไวอาดักต์)',en:'Viaduct Bridge',w:38,h:10,floor:'cobble',wall:'#8a8478',out:1,
+  furn:[[2,2,34,1,'rail'],[2,7,34,1,'rail'],[6,3,1,1,'lantern'],[18,6,1,1,'lantern'],[30,3,1,1,'lantern']],
+  sits:[[19,5,'ชมรถไฟฮอกวอตส์เอ็กซ์เพรสแล่นผ่านหุบเขาไกลๆ']]},
+ stone_circle:{th:'วงหินโบราณ',en:'Stone Circle',w:24,h:20,floor:'grass',wall:'#6a7a5a',out:1,
+  furn:[[11,3,1,1,'stone'],[16,5,1,1,'stone'],[18,10,1,1,'stone'],[16,15,1,1,'stone'],[11,16,1,1,'stone'],[6,15,1,1,'stone'],[4,10,1,1,'stone'],[6,5,1,1,'stone'],[2,2,1,1,'pine'],[21,2,1,1,'pine'],[20,17,1,1,'oak'],[9,9,5,3,'flowers']],
+  sits:[[11.5,8,'นั่งกลางวงหินดูเมฆลอยผ่าน']]},
+ boathouse:{th:'ภายในโรงเรือ',en:'Boathouse Interior',w:16,h:12,floor:'wood',wall:'#5a4a3a',light:'fire',
+  furn:[[3,4,4,5,'boatin'],[10,1,1,1,'lantern'],[13,2,1,3,'shelf'],[11,8,1,1,'barrel'],[12,8,1,1,'crate'],[9,10,2,1,'bench']],
+  sits:[[10,10.5,'นั่งฟังคลื่นกระทบท่าเรือไม้']]},
+ lake_shore:{th:'ริมทะเลสาบและจุดชมเงือก',en:'Lake Shore & Mermaid Viewing',w:34,h:24,floor:'grass',wall:'#4f6b4a',out:1,
+  water:[3,10,28,12],dock:[16,8,2,2],
+  furn:[[4,2,1,1,'birch'],[8,3,1,1,'rock'],[24,3,1,1,'oak'],[29,2,1,1,'pine'],[12,4,2,1,'bench'],[20,5,3,1,'flowers'],[2,7,1,1,'lantern']],
+  sits:[[13,5.3,'มองหาเงือกที่ว่ายผ่านแสงสะท้อนในน้ำ']]},
+ whomping_willow:{th:'ดงต้นวิลโลว์จอมหวด',en:'Whomping Willow Grove',w:26,h:20,floor:'grass',wall:'#4f6b4a',out:1,
+  furn:[[12,8,2,2,'willow'],[3,3,1,1,'oak'],[21,3,1,1,'oak'],[4,15,1,1,'pine'],[20,15,1,1,'birch'],[6,10,1,1,'rock'],[18,6,3,1,'fence']],
+  sits:[[4,6,'ยืนห่างๆ ดูต้นวิลโลว์หวดใบไม้ร่วง (ปลอดภัยไว้ก่อน)']]},
+ forest_trail:{th:'ทางเดินลึกในป่าต้องห้าม',en:'Forbidden Forest Deep Trail',w:40,h:24,floor:'forest',wall:'#2a4a2a',out:1,
+  furn:[[6,4,1,1,'bigtree'],[14,3,1,1,'pine'],[22,5,1,1,'bigtree'],[30,3,1,1,'pine'],[8,17,1,1,'bigtree'],[18,19,1,1,'pine'],[28,18,1,1,'bigtree'],[34,14,2,2,'mushrooms'],[12,11,2,2,'mushrooms'],[24,12,1,1,'rock'],[36,6,1,1,'lantern']],
+  sits:[[20,12,'ฟังเสียงป่ากระซิบ ตามหิ่งห้อยไปช้าๆ']]},
+ centaur_glade:{th:'ลานโล่งเซนทอร์',en:'Centaur Glade',w:26,h:20,floor:'grass',wall:'#2a4a2a',out:1,
+  furn:[[11,8,3,3,'stone'],[3,3,1,1,'bigtree'],[21,3,1,1,'bigtree'],[3,15,1,1,'pine'],[21,15,1,1,'pine'],[8,4,4,1,'flowers'],[16,14,2,2,'mushrooms']],
+  sits:[[12,13,'นอนดูดวงดาวที่เซนทอร์อ่านคำทำนาย']]},
+ hogsmeade_station:{th:'สถานีฮอกส์มี้ด (ฮอกวอตส์เอ็กซ์เพรส)',en:'Hogsmeade Station & Hogwarts Express',w:40,h:16,floor:'cobble',wall:'#5c6b7a',out:1,
+  furn:[[2,9,36,3,'train'],[2,6,36,2,'platform'],[6,3,2,1,'bench'],[18,3,2,1,'bench'],[30,3,2,1,'bench'],[12,3,1,1,'lantern'],[25,3,1,1,'lantern'],[36,2,1,1,'crate'],[35,2,1,1,'crate'],[22,1,2,1,'sign','ฮอกส์มี้ด']],
+  sits:[[19,4.3,'นั่งรอรถไฟพร้อมถือตั๋วชานชาลา 9¾']]},
+ shrieking_overlook:{th:'จุดชมวิวบ้านโหยหวน',en:'Shrieking Shack Overlook',w:26,h:18,floor:'grass',wall:'#6a6a5a',out:1,
+  furn:[[3,4,20,1,'fence'],[14,1,4,2,'shack'],[3,10,1,1,'oak'],[22,12,1,1,'pine'],[8,12,2,1,'bench'],[18,8,1,1,'rock']],
+  sits:[[9,13.3,'มองบ้านโหยหวนที่ว่ากันว่าผีสิงที่สุดในอังกฤษ']]},
+ hogs_head:{sub:'hogsmeade',th:'ร้านหัวหมูป่า (ฮอกส์มี้ด)',en:"The Hog's Head",w:14,h:11,floor:'wood',wall:'#4a3a2a',light:'fire',
+  furn:[[1,1,5,1,'counter'],[10,1,2,1,'fire'],[3,5,2,2,'table'],[9,6,2,2,'table'],[12,9,1,1,'barrel'],[1,8,1,1,'crate'],[7,1,1,1,'portrait']],
+  sits:[[4,7.2,'จิบชาร้อนในร้านที่ฝุ่นเยอะแต่อบอุ่น']]},
+ puddifoots:{sub:'hogsmeade',th:'ร้านน้ำชามาดามพุดดิฟุต (ฮอกส์มี้ด)',en:"Madam Puddifoot's Tea Shop",w:14,h:11,floor:'candy',wall:'#d88aa8',light:'candles',
+  furn:[[3,3,1,1,'teaset'],[7,3,1,1,'teaset'],[11,3,1,1,'teaset'],[3,7,1,1,'teaset'],[10,7,1,1,'teaset'],[1,1,1,1,'plant'],[12,1,1,1,'plant'],[6,1,2,1,'shopwin']],
+  sits:[[4.2,4.2,'จิบชาสีชมพูท่ามกลางคิวปิดตัวจิ๋ว']]},
+ gladrags:{sub:'hogsmeade',th:'ร้านแกลดแร็กส์ (ฮอกส์มี้ด)',en:'Gladrags Wizardwear',w:14,h:11,floor:'wood',wall:'#6a4a7a',light:'candles',
+  furn:[[2,2,1,1,'mannequin'],[5,2,1,1,'mannequin'],[8,2,1,1,'mannequin'],[11,2,1,1,'mannequin'],[1,5,1,3,'shelf'],[12,5,1,3,'shelf'],[5,6,4,2,'rug'],[10,8,1,1,'mirror']],
+  sits:[[7,8,'ลองถุงเท้าเรืองแสงที่ร้องเพลงได้']]},
+ scrivenshafts:{sub:'hogsmeade',th:'ร้านขนนกสคริฟเวนชาฟต์ (ฮอกส์มี้ด)',en:"Scrivenshaft's Quill Shop",w:14,h:11,floor:'wood',wall:'#5a6a7a',light:'candles',
+  furn:[[1,1,5,1,'counter'],[8,1,4,1,'shelf'],[4,5,2,1,'quills'],[9,5,2,1,'quills'],[1,6,1,3,'shelf'],[12,8,1,1,'plant']],
+  sits:[[7,8,'ลองเขียนชื่อด้วยขนนกที่เปลี่ยนสีหมึกได้']]},
+ post_office:{sub:'hogsmeade',th:'ที่ทำการไปรษณีย์ (ฮอกส์มี้ด)',en:'Hogsmeade Post Office',w:16,h:11,floor:'wood',wall:'#7a6a4a',light:'candles',
+  furn:[[1,1,14,1,'perch'],[2,4,1,1,'perch'],[5,4,1,1,'perch'],[10,4,1,1,'perch'],[13,4,1,1,'perch'],[6,7,4,1,'counter'],[1,8,1,1,'crate']],
+  sits:[[8,9,'ส่งจดหมายด้วยนกฮูกตัวจิ๋วที่บินเร็วที่สุด']]},
+ dervish_banges:{sub:'hogsmeade',th:'ร้านเดอร์วิชแอนด์แบงส์ (ฮอกส์มี้ด)',en:'Dervish & Banges',w:14,h:11,floor:'stone',wall:'#4a5a6a',light:'candles',
+  furn:[[1,1,4,1,'instruments'],[7,1,5,1,'shelf'],[3,5,1,1,'instruments'],[9,5,2,1,'crate'],[12,5,1,1,'telescope'],[1,7,1,2,'shelf']],
+  sits:[[7,8,'ดูเครื่องตรวจจับความลับที่หมุนติ้วๆ']]},
+ changing_rooms:{th:'ห้องแต่งตัวควิดดิช',en:'Quidditch Changing Rooms',w:16,h:11,floor:'wood',wall:'#6a4a3a',light:'candles',
+  furn:[[1,1,6,1,'locker'],[9,1,6,1,'locker'],[3,5,4,1,'bench'],[9,5,4,1,'bench'],[1,7,1,2,'broomrack'],[14,7,1,2,'broomrack'],[7,3,2,1,'banner']],
+  sits:[[5,5.6,'ฟังโอลิเวอร์อธิบายแผนการเล่นรอบที่ร้อย']]},
+ stands_tower:{th:'อัฒจันทร์หอคอยสนามควิดดิช',en:'Quidditch Stands Tower',w:20,h:12,floor:'wood',wall:'#8a2a2a',out:1,
+  furn:[[2,1,16,1,'stands'],[2,6,16,1,'stands'],[1,9,1,1,'banner'],[18,9,1,1,'banner'],[9,9,2,1,'crate']],
+  sits:[[10,4.5,'โบกธงเชียร์บ้านตัวเองบนอัฒจันทร์สูง']]}
+};
+let __nn=25;for(const id in NZ){const z=NZ[id];z.x6=1;if(!z.sub)z.num=__nn++;ZONES[id]=z;}
+CONNS.push(
+ ['grand_staircase','E',9,'seventh_corridor','W',5],['seventh_corridor','N',13,'room_of_requirement','S',11],['grand_staircase','W',9,'trophy_room','E',6],
+ ['potions','E',6,'dungeon_corridor','W',5],['kitchens','W',6,'kitchen_corridor','E',4],['hospital','E',6,'prefects_bathroom','W',7],
+ ['courtyard','N',20,'clock_tower','S',9],['clock_tower','N',7,'bell_tower','S',7],['clock_tower','E',7,'wooden_bridge','W',5],['wooden_bridge','E',5,'stone_circle','W',10],
+ ['stone_circle','S',12,'hagrid_hut','N',26],['courtyard','W',20,'viaduct','E',5],['viaduct','W',5,'hogsmeade_station','E',4],
+ ['black_lake','N',26,'boathouse','S',8],['black_lake','E',16,'lake_shore','W',5],['black_lake','W',16,'whomping_willow','E',10],
+ ['quidditch','E',12,'forest_trail','W',12],['forest_trail','E',12,'centaur_glade','W',10],['hogsmeade','S',6,'hogsmeade_station','N',30],
+ ['hogsmeade','E',10,'shrieking_overlook','W',9],['hogsmeade','S',14,'hogs_head','N',7],['hogsmeade','S',20,'puddifoots','N',7],['hogsmeade','E',18,'gladrags','W',5],
+ ['hogsmeade','N',28,'scrivenshafts','S',7],['hogsmeade','S',30,'post_office','N',8],['hogsmeade','N',34,'dervish_banges','S',7],
+ ['quidditch','S',22,'changing_rooms','N',8],['quidditch','N',32,'stands_tower','S',10]
+);
+// ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
+const NONSOLID_K=['rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
+(function dress(){const R=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+ const conn=CONNS;for(const id in ZONES){const z=ZONES[id];const doors=[];for(const c of conn){if(c[0]===id)doors.push([c[1],c[2]]);if(c[3]===id)doors.push([c[4],c[5]]);}
+  const occ=z.furn.map(f=>({x:f[0]-0.6,y:f[1]-0.6,w:f[2]+1.2,h:f[3]+1.2}));for(const s of(z.sits||[]))occ.push({x:s[0]-1.6,y:s[1]-1.6,w:3.2,h:3.2});
+  for(const c of CHARACTERS)if(c.zone===id&&c.at)occ.push({x:c.at[0]-1.5,y:c.at[1]-1.5,w:3,h:3});
+  if(z.water)occ.push({x:z.water[0]-1,y:z.water[1]-1,w:z.water[2]+2,h:z.water[3]+2});
+  const nearDoor=(x,y,r)=>doors.some(([s,p])=>{const t=s==='N'?[p+.5,0]:s==='S'?[p+.5,z.h]:s==='W'?[0,p+.5]:[z.w,p+.5];return Math.hypot(x+.5-t[0],y+.5-t[1])<r;});
+  const free=(x,y,w,h)=>x>=1&&y>=1&&x+w<=z.w-1&&y+h<=z.h-1&&!occ.some(o=>R(o,{x,y,w,h}));
+  const add=(f)=>{z.furn.push(f);occ.push({x:f[0]-0.3,y:f[1]-0.3,w:f[2]+0.6,h:f[3]+0.6});};
+  const out=z.out||z.outdoorSky;
+  if(!out){// north wall decor (non-solid), side walls armour/candelabra/plants (solid, hugging wall)
+   const deco=z.sub?['shopwin','portrait','window']:['tapestry','banner','portrait','window','tapestry'];
+   for(let x=2,i=0;x<z.w-3;x+=3,i++){if(nearDoor(x,0,2.5))continue;if(z.furn.some(f=>f[1]<=1&&x+1>f[0]&&x<f[0]+f[2]))continue;z.furn.push([x,1,1,1,deco[(i+id.length)%deco.length]]);}
+   const sideK=z.sub?['plant','crate','barrel']:['armour','candelabra','plant','armour'];
+   for(let y=3,i=0;y<z.h-2;y+=4,i++){for(const x of[1,z.w-2]){if(nearDoor(x,y,3.2))continue;if(free(x,y,1,1))add([x,y,1,1,sideK[(i+x)%sideK.length]]);}}
+   for(const [x,y] of[[1,z.h-2],[z.w-2,z.h-2]])if(!nearDoor(x,y,3.2)&&free(x,y,1,1))add([x,y,1,1,'plant']);
+   if(!z.furn.some(f=>f[4]==='rug')&&z.w>12){const rw=Math.min(6,z.w-8)|0,rx=(z.w-rw)/2|0,ry=(z.h/2|0)-1;if(free(rx,ry,rw,2))z.furn.push([rx,ry,rw,3,'rug']);}
+  }else{// outdoor: paths from doors to centre, scattered trees/rocks/flowers near edges, lanterns along paths
+   z.paths=[];const cx=z.w/2|0,cy=z.h/2|0;
+   for(const [s,p] of doors){let x=s==='W'?1:s==='E'?z.w-2:p,y=s==='N'?1:s==='S'?z.h-2:p;let g=0;while((x!==cx||y!==cy)&&g++<200){z.paths.push([x,y]);if((s==='N'||s==='S')?y!==cy:x===cx){y+=Math.sign(cy-y);}else x+=Math.sign(cx-x);}}
+   const onPath=(x,y,r)=>z.paths.some(p=>Math.abs(p[0]-x)<=r&&Math.abs(p[1]-y)<=r);
+   const forest=z.floor==='forest'||['quidditch','forest_trail','centaur_glade','whomping_willow','stone_circle','hagrid_hut'].includes(id);
+   const trees=forest?['pine','bigtreeI','oak','pine']:z.floor==='cobble'?['bush','oak']:['oak','birch','pine','bush'];
+   for(let y=1;y<z.h-1;y++)for(let x=1;x<z.w-1;x++){const h=hash(x*3+id.length,y*7+z.w);const edge=Math.min(x,y,z.w-1-x,z.h-1-y);
+     if(onPath(x,y,1)||nearDoor(x,y,3.5))continue;
+     if(edge<=2&&h<(forest?0.42:0.22)&&free(x,y,1,1)){add([x,y,1,1,trees[(h*97|0)%trees.length]]);continue;}
+     if(edge>2&&h<(forest?0.05:0.025)&&free(x,y,1,1)){add([x,y,1,1,h<0.012?'rockI':trees[(h*131|0)%trees.length]]);continue;}
+     if(h>0.93&&free(x,y,1,1)&&z.floor!=='cobble'){z.furn.push([x,y,1,1,h>0.975?'tuft':'flowers']);}}
+   z.paths.forEach((p,i)=>{if(i%9===4){const q=[p[0]+1,p[1]+1];if(free(q[0],q[1],1,1)&&!onPath(q[0],q[1],0))add([q[0],q[1],1,1,'lantern']);}});
+  }}})();
+
 /* --- build doors, validate zones --- */
-const ZONE_IDS=Object.keys(ZONES);const MAIN_ZONE_IDS=ZONE_IDS.filter(id=>!ZONES[id].sub);
-for(const id of ZONE_IDS){const z=ZONES[id];z.id=id;z.doors=[];z.furn=z.furn.map(f=>({x:f[0],y:f[1],w:f[2],h:f[3],k:f[4],label:f[5]||'',solid:!['rug','stairs','torch','window','banner','portrait','sign','skeleton','clock'].includes(f[4])}));}
+const ZONE_IDS=Object.keys(ZONES);const MAIN_ZONE_IDS=ZONE_IDS.filter(id=>!ZONES[id].sub&&ZONES[id].num<=24);
+for(const id of ZONE_IDS){const z=ZONES[id];z.id=id;z.doors=[];z.furn=z.furn.map(f=>({x:f[0],y:f[1],w:f[2],h:f[3],k:f[4],label:f[5]||'',solid:!NONSOLID_K.includes(f[4])}));}
 for(const c of CONNS){ZONES[c[0]].doors.push({side:c[1],pos:c[2],to:c[3]});ZONES[c[3]].doors.push({side:c[4],pos:c[5],to:c[0]});}
 function doorTrigger(z,d){ // returns center point at the inner edge
   if(d.side==='N')return{x:d.pos+.5,y:1};if(d.side==='S')return{x:d.pos+.5,y:z.h-1};
@@ -1087,7 +1240,7 @@ const BUBTEX=(()=>{const [c,g]=mkCan(12,9);g.fillStyle='#ffffff';g.fillRect(1,0,
 const BROOMTEX=(()=>{const [c,g]=mkCan(30,8);g.fillStyle='#7a5030';g.fillRect(0,3,20,2);g.fillStyle='#c8a050';g.fillRect(20,1,9,6);g.fillStyle='#a07830';g.fillRect(22,2,7,1);g.fillRect(22,5,7,1);outlinePass(c,g);return texOf(c);})();
 function sprAt(tex,w,h,x,y,z){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,alphaTest:0.5}));s.center.set(0.5,0);s.scale.set(w/PPU,h/PPU,1);s.position.set(x,y,z);ambGrp.add(s);return s;}
 function freeSpot(z,tries){for(let i=0;i<(tries||40);i++){const x=1.5+Math.random()*(z.w-3),y=1.5+Math.random()*(z.h-3);if(!solidAt(z,x,y,0.3))return{x,y};}return null;}
-function ambCount(z){const id=z.id;if(['great_hall'].includes(id))return 14;if(['hogsmeade'].includes(id))return 11;if(['entrance_hall','grand_staircase','courtyard','library','gryffindor_common','ravenclaw_common','hufflepuff_common','slytherin_common'].includes(id))return 8;
+function ambCount(z){const id=z.id;if(z.x6)return z.sub?4:(z.out?7:5);if(['great_hall'].includes(id))return 14;if(['hogsmeade'].includes(id))return 11;if(['entrance_hall','grand_staircase','courtyard','library','gryffindor_common','ravenclaw_common','hufflepuff_common','slytherin_common'].includes(id))return 8;
   if(['charms','transfiguration','potions','dada','three_broomsticks','honeydukes','zonkos','greenhouses','black_lake'].includes(id))return 6;if(['quidditch'].includes(id))return 4;if(['hospital','divination','owlery','astronomy','kitchens','hagrid_hut'].includes(id))return 3;return 2;}
 function buildAmbient(){if(ambGrp){scene.remove(ambGrp);}ambGrp=new THREE.Group();amb=[];scene.add(ambGrp);const z=zone;
   const shop=z.sub==='hogsmeade'||z.id==='hogsmeade';const commonH={gryffindor_common:'G',ravenclaw_common:'R',hufflepuff_common:'H',slytherin_common:'S'}[z.id];
@@ -1144,7 +1297,8 @@ const TIME_LIGHT={morning:{bg:'#f3c9a4',sky:['#9ad0f0','#ffd8a8'],hs:'#ffe2c0',h
   night:{bg:'#0a0f2a',sky:['#05081a','#1a1a4a'],hs:'#4050b0',hg:'#141020',hi:0.45,sc:'#9aaaff',si:0.55,sp:[-0.5,1.2,-0.6],fog:'#0e1230'}};
 const FLOOR_COL={stone:['#8d8580','#7f7772'],wood:['#9a6b45','#8c5f3c'],redrug:['#8e2f2a','#7d2824'],bluerug:['#2f4a86','#284076'],straw:['#b59a62','#a78c55'],white:['#d8d2cc','#cbc4bd'],cobble:['#9a958c','#8a857c'],soil:['#6e5a3e','#62502f'],grass:['#6fa04f','#659447'],forest:['#3f6a3a','#375d33'],candy:['#f2c2d4','#eab0c6']};
 const FLOOR_TEX={};
-function floorTex(z){if(FLOOR_TEX[z.id])return FLOOR_TEX[z.id];const P=32,f=FLOOR_COL[z.floor]||FLOOR_COL.stone;
+function floorTex(z){if(FLOOR_TEX[z.id])return FLOOR_TEX[z.id];const t=_floorTex(z);if(z.paths&&z.paths.length){const g=t.image.getContext('2d'),P=32;const pc=z.floor==='cobble'?['#b4ab9c','#a69d8e']:z.floor==='forest'?['#5a4a32','#4e4029']:['#a08a62','#94805a'];for(const [x,y] of z.paths){g.fillStyle=pc[(x+y)&1];g.fillRect(x*P-4,y*P-4,P+8,P+8);g.fillStyle='rgba(0,0,0,.12)';g.fillRect(x*P+hash(x,y)*24,y*P+hash(y,x)*24,5,3);}t.needsUpdate=true;}return t;}
+function _floorTex(z){if(FLOOR_TEX[z.id])return FLOOR_TEX[z.id];const P=32,f=FLOOR_COL[z.floor]||FLOOR_COL.stone;
   return FLOOR_TEX[z.id]=canvasTex(z.w*P,z.h*P,(g)=>{for(let y=0;y<z.h;y++)for(let x=0;x<z.w;x++){const h=hash(x,y);g.fillStyle=((x+y)&1)?f[0]:f[1];g.fillRect(x*P,y*P,P,P);
     if(z.floor==='grass'||z.floor==='forest'){g.fillStyle='rgba(30,70,20,.35)';for(let k=0;k<3;k++)g.fillRect(x*P+hash(x+k,y)*28,y*P+hash(x,y+k)*26,2,5);if(h>0.92){g.fillStyle=['#fff','#ffd2e8','#fff19a'][(x+y)%3];g.beginPath();g.arc(x*P+16,y*P+16,3,0,7);g.fill();}}
     else if(z.floor==='wood'){g.fillStyle='rgba(0,0,0,.15)';g.fillRect(x*P,y*P+(h*P|0),P,1.5);g.fillRect(x*P+P-1,y*P,1,P);}
@@ -1184,7 +1338,7 @@ function buildZone3D(){clearWorld();const z=zone,t=TIMES[timeIdx],TL=TIME_LIGHT[
   candleInst=flameInst=null;const showC=z.candles||(!outside&&t==='night');
   if(showC){const n=z.candles?70:22;candleInst=new THREE.InstancedMesh(CYL,toon('#f6efe0',{emissive:'#6a5030',ei:0.4}),n);flameInst=new THREE.InstancedMesh(SPHL,basic('#ffcf5a'),n);candleInst.userData.ph=[];for(let i=0;i<n;i++)candleInst.userData.ph.push([1.5+hash(i,3)*(z.w-3),1.5+hash(i,7)*(z.h-3),hash(i,11)*6]);world.add(candleInst,flameInst);
     const cl=new THREE.PointLight(0xffc070,t==='night'?5:2.5,Math.max(z.w,z.h),1.2);cl.position.set(z.w/2,2.8,z.h/2);world.add(cl);}
-  const LS=[];for(const f of z.furn){if(['fire','torch','cauldron','lamp','mushrooms','house','hut'].includes(f.k))LS.push({x:f.x+f.w/2,y:f.y+f.h/2,k:f.k});}
+  const LS=[];for(const f of z.furn){if(['fire','torch','cauldron','lamp','mushrooms','house','hut','lantern','candelabra'].includes(f.k))LS.push({x:f.x+f.w/2,y:f.y+f.h/2,k:f.k});}
   LS.sort((a,b)=>Math.hypot(a.x-player.x,a.y-player.y)-Math.hypot(b.x-player.x,b.y-player.y));
   for(const l of LS.slice(0,5)){const col=l.k==='mushrooms'?0xc08aff:l.k==='cauldron'?0x8aff9a:0xffa04a;const pl=new THREE.PointLight(col,l.k==='fire'?(t==='night'?14:8):(t==='night'?6:3),l.k==='fire'?9:6,1.6);pl.position.set(l.x,l.k==='fire'?0.8:1.4,l.y+0.4);world.add(pl);lightsDyn.push({pl,base:pl.intensity,ph:Math.random()*6});}
   scene.background=new THREE.Color(outside?TL.bg:(z.underwater?'#0a2a24':'#120d1e'));
@@ -1261,6 +1415,32 @@ function buildFurn(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f.y
    case'glasswall':A(mesh(BOX,toon('#c8f0ff',{opacity:0.28}),0,1.2,0,0.08,2.4,d,false));break;
    case'boathouse':{outlined(B(w,2,d,'#6a4a32'),1.02);A(rot(mesh(ROOF,T('#4a3a3a'),0,2.7,0,w*0.78,1.4,d*0.8),0,Math.PI/4));B(1.2,1.4,0.05,'#2a1a14',0,0,d/2);break;}
    case'willow':{A(outlined(mesh(CYL,T('#4a3a24'),0,1.3,0,0.3,2.6,0.3)));const arms=new THREE.Group();arms.position.y=2.4;for(let i=0;i<5;i++)arms.add(rot(mesh(CYL,T('#4a3a24'),Math.cos(i*1.25)*0.6,0.4,Math.sin(i*1.25)*0.6,0.06,1.6,0.06),Math.sin(i*1.25)*0.9,0,-Math.cos(i*1.25)*0.9));g.add(arms);g.userData.willow=arms;A(mesh(ICO,T(weather==='snow'?'#dfe8ee':'#4a7a3a'),0,3.6,0,1.2,0.8,1.2));break;}
+   case'pine':case'oak':case'birch':case'bush':case'bigtreeI':case'rockI':case'flowers':case'tuft':break; // chunk-instanced
+   case'tapestry':{g.position.z=f.y+0.12;const cs=['#7a1a2a','#1c2f6e','#1d5c35','#8a6a1a','#5a2a6a'];const c=cs[(f.x+f.y)%cs.length];B(Math.max(0.9,w*0.9),1.9,0.04,c,0,0.5);B(Math.max(0.9,w*0.9)-0.2,1.5,0.05,shade(c,40),0,0.7);B(Math.max(0.9,w*0.9),0.08,0.08,'#c9a24a',0,2.4);for(let i=0;i<3;i++)B(0.12,0.12,0.06,'#e0b23a',-0.3+i*0.3,1.4+i%2*0.3);break;}
+   case'armour':{B(0.6,0.15,0.5,'#5a5a62');for(const sx of[-0.12,0.12])B(0.14,0.75,0.14,'#b8bcc8',sx,0.15);outlined(B(0.42,0.6,0.3,'#c8ccd8',0,0.9),1.04);A(outlined(mesh(SPH,T('#c8ccd8'),0,1.72,0,0.2),1.06));B(0.22,0.05,0.05,'#2a2a30',0,1.72,0.18);for(const sx of[-0.3,0.3])B(0.12,0.6,0.12,'#b8bcc8',sx,0.85);A(mesh(CYL,T('#8a8a92'),0.32,1.1,0.1,0.03,1.6,0.03));A(mesh(CONE,T('#d0d4e0'),0.32,1.95,0.1,0.06,0.2,0.06));break;}
+   case'candelabra':{A(mesh(CYL,T('#c9a24a'),0,0.7,0,0.05,1.4,0.05));B(0.5,0.05,0.5,'#a8823a',0,0);for(const a of[0,2.1,4.2]){const x=Math.cos(a)*0.22,z=Math.sin(a)*0.22;A(mesh(CYL,T('#f4ecd8'),x,1.5,z,0.035,0.2,0.035));A(mesh(CONE,basic('#ffb040',{add:1}),x,1.67,z,0.04,0.1,0.04,false));}A(mesh(CYL,T('#f4ecd8'),0,1.55,0,0.035,0.22,0.035));break;}
+   case'crate':{outlined(B(w*0.85,0.7,d*0.85,'#9a7448'),1.03);B(w*0.86,0.06,0.08,'#6a4a2a',0,0.32,d*0.43);B(0.08,0.7,0.08,'#6a4a2a',w*0.38,0,d*0.38);break;}
+   case'lantern':{A(mesh(CYL,T('#2a2a2a'),0,0.9,0,0.04,1.8,0.04));B(0.3,0.36,0.3,'#2a2a2a',0,1.8);A(mesh(BOX,basic('#ffd77a'),0,1.98,0,0.22,0.26,0.22,false));A(mesh(CONE,T('#2a2a2a'),0,2.3,0,0.24,0.16,0.24));break;}
+   case'fence':{const n=Math.max(w,d);for(let i=0;i<=n;i++){const x=w>=d?-w/2+i:0,z=w>=d?0:-d/2+i;B(0.1,0.8,0.1,'#7a5a3a',x,0,z);}B(w>=d?w:0.06,0.07,w>=d?0.06:d,'#8a6a42',0,0.55);B(w>=d?w:0.06,0.07,w>=d?0.06:d,'#8a6a42',0,0.25);break;}
+   case'stone':{const s=Math.max(w,d);A(outlined(mesh(BOX,T('#8a8a84'),0,0.9*s*0.7+0.2,0,0.5*s*0.6+0.25,1.8*s*0.7+0.4,0.35*s*0.6+0.2),1.03)).rotation.y=hash(f.x,f.y)*1.2;break;}
+   case'trophycase':{outlined(B(w,1.9,d,'#5a3a24'),1.02);A(mesh(BOX,toon('#c8e8ff',{opacity:0.35}),0,1.0,d/2+0.01,w-0.15,1.6,0.02,false));for(let i=0;i<Math.max(w,d)*3;i++){const x=(w>=d?-w/2+0.25+i*0.33:0),z=(w>=d?0:-d/2+0.25+i*0.33);A(mesh(CYL,toon(i%3?'#e0b23a':'#c8ccd8',{emissive:'#6a5a1a',ei:0.3}),x,0.55+(i%2)*0.7,z,0.09,0.25,0.09));}break;}
+   case'shopwin':{g.position.z=f.y+0.12;B(1.4,1.2,0.06,'#6a4a3a',0,0.4);A(mesh(BOX,toon('#ffe8a8',{emissive:'#ffcf70',ei:0.9}),0,1.0,0.04,1.2,1.0,0.02,false));for(let i=0;i<4;i++)A(mesh(SPH,T(['#ff7aa8','#7ad0ff','#ffe066','#9af07a'][i]),-0.4+i*0.27,0.75,0.1,0.08));break;}
+   case'train':{outlined(B(w*0.98,1.8,d*0.8,'#a4161a',0,0.3),1.01);B(w*0.98,0.3,d*0.82,'#1a1a1a',0,0);B(w*0.98,0.15,d*0.84,'#e0b23a',0,1.4);for(let i=0;i<w/2.2;i++)A(mesh(BOX,toon('#ffe8a8',{emissive:'#ffcf70',ei:0.7}),-w/2+1.2+i*2.2,1.3,d*0.41,1.0,0.6,0.02,false));A(mesh(CYL,T('#1a1a1a'),w/2-1.5,2.6,0,0.25,0.8,0.25));A(rot(mesh(CYL,T('#a4161a'),w/2-2.5,1.3,0,0.8,3,0.8),0,0,Math.PI/2));break;}
+   case'platform':B(w,0.18,d,'#8a847a');B(w,0.04,0.12,'#e0d04a',0,0.18,d/2-0.08);break;
+   case'rail':{const n=Math.max(w,d);for(let i=0;i<=n;i+=2){const x=w>=d?-w/2+i:0,z=w>=d?0:-d/2+i;B(0.18,0.9,0.18,zone.floor==='cobble'?'#9a948a':'#6a4a2a',x,0,z);}B(w>=d?w:0.12,0.12,w>=d?0.14:d,zone.floor==='cobble'?'#a8a298':'#7a5a3a',0,0.85);break;}
+   case'bell':{for(const sx of[-1,1])B(0.2,3.4,0.2,'#5a4a3a',sx*w*0.42,0);B(w*0.9,0.2,0.25,'#5a4a3a',0,3.3);A(outlined(mesh(CONE,T('#c9a24a',{emissive:'#4a3a1a',ei:0.2}),0,2.5,0,0.9,1.3,0.9),1.04));A(mesh(SPH,T('#a8823a'),0,1.85,0,0.15));break;}
+   case'gears':{for(let i=0;i<3;i++){const gr=A(outlined(rot(mesh(CYL,T(['#c9a24a','#a8823a','#8a8a92'][i]),(i-1)*w*0.25,0.9+i*0.6,0,w*0.22+0.3,0.15,w*0.22+0.3),Math.PI/2,0,0),1.03));g.userData.spin=g.userData.spin||gr;}B(0.15,2.6,0.15,'#5a4a3a',0,0,-0.2);break;}
+   case'fruitpaint':{g.position.z=f.y+0.12;B(w*0.9,1.3,0.06,'#c9a24a',0,0.8);B(w*0.8,1.1,0.07,'#3a5a4a',0,0.9);A(mesh(SPH,T('#7a5232'),0,1.25,0.08,0.5,0.2,0.1));for(let i=0;i<5;i++)A(mesh(SPH,T(['#e04a3a','#9af07a','#ffd040','#b06ad0','#9af07a'][i]),-0.4+i*0.2,1.45,0.1,0.11));break;}
+   case'mirror':{g.position.z=f.y+0.12;B(0.8,1.9,0.06,'#c9a24a',0,0.2);A(mesh(BOX,toon('#d8e8f8',{emissive:'#8ab0d0',ei:0.5}),0,1.15,0.04,0.64,1.6,0.02,false));break;}
+   case'piano':{outlined(B(1.4,0.9,0.7,'#1a1418'),1.02);B(1.3,0.06,0.25,'#f4f0e8',0,0.9,0.3);B(1.4,0.8,0.1,'#1a1418',0,0.95,-0.3);break;}
+   case'cushion':A(outlined(mesh(SPH,T(['#c04a6a','#4a8ac0','#e0b23a'][(f.x+f.y)%3]),0,0.2,0,0.4,0.2,0.4),1.05));break;
+   case'boatin':{outlined(B(w*0.5,0.5,d*0.9,'#6a4a2a',0,0.1),1.03);A(mesh(BOX,toon('#2a5a7a',{emissive:'#10304a',ei:0.6}),0,0.05,0,w,0.05,d,false));break;}
+   case'shack':{outlined(B(w,2.6,d,'#5a4a3a'),1.02);A(rot(mesh(ROOF,T('#3a2a2a'),0,3.3,0,w*0.78,1.4,d*0.9),0.08,Math.PI/4,0.05));B(0.6,0.6,0.05,'#1a1410',-w/4,1.4,d/2);B(0.6,0.6,0.05,'#1a1410',w/4,1.4,d/2);break;}
+   case'teaset':{A(mesh(CYL,T('#f4c0d4'),0,0.35,0,0.5,0.7,0.5));A(mesh(CYL,T('#ffffff'),0,0.72,0,0.52,0.04,0.52));A(mesh(SPH,T('#ff8ab0'),0.15,0.82,0,0.09));A(mesh(CYL,T('#ffffff'),-0.15,0.8,0.1,0.06,0.1,0.06));break;}
+   case'mannequin':{A(mesh(CYL,T('#5a4a3a'),0,0.3,0,0.04,0.6,0.04));A(outlined(mesh(CONE,T(['#6a3fa0','#1d5a35','#8a1414','#2a3a7a'][f.x%4]),0,1.0,0,0.35,1.0,0.35),1.04));A(mesh(SPH,T('#e8dcc8'),0,1.6,0,0.15));A(mesh(CONE,T('#3a2a4a'),0,1.9,0,0.18,0.4,0.18));break;}
+   case'quills':{B(w,0.75,d,'#7a5232');for(let i=0;i<6;i++)A(rot(mesh(CONE,T(['#f4f4f4','#e04a3a','#4a8ac0','#e0b23a','#9af07a','#b06ad0'][i]),-w/2+0.3+i*(w-0.6)/5,1.0,0,0.05,0.5,0.05),0.2,0,0.25));break;}
+   case'locker':{outlined(B(w,2,d*0.8,'#8a2a2a'),1.02);for(let i=0;i<w*2;i++)B(0.04,1.8,0.05,'#4a1414',-w/2+i*0.5,0.1,d*0.41);break;}
+   case'broomrack':{B(0.15,1.6,d,'#5a3a22');for(let i=0;i<d*2;i++){A(rot(mesh(CYL,T('#7a5030'),0.1,1.0,-d/2+0.3+i*0.5,0.03,1.6,0.03),0.1,0,0));A(mesh(CONE,T('#c8a050'),0.1,0.25,-d/2+0.3+i*0.5,0.1,0.4,0.1));}break;}
    default:B(w,0.8,d,'#7a6a5a');}
   W.add(g);if(g.userData.owl||g.userData.sway||g.userData.spin||g.userData.hand||g.userData.willow||g.userData.fountain||g.userData.chimney||f.k==='fire'||f.k==='torch'||f.k==='books'||f.k==='cauldron')animFurn.push(g);}
 /* ===================== PARTICLES (object pool, single Points draw call) ===================== */
@@ -1387,7 +1567,28 @@ function buildPools(){if(poolGrp){scene.remove(poolGrp);}poolGrp=new THREE.Group
     const m=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:POOLTEX,color:col,transparent:true,opacity:0.55,blending:THREE.AdditiveBlending,depthWrite:false}));m.rotation.x=-Math.PI/2;m.scale.set(4.2,4.2,1);m.position.set(p.x,0.03,p.z);poolGrp.add(m);
     const st=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:STREAKTEX,color:col,transparent:true,opacity:0.5*wet,blending:THREE.AdditiveBlending,depthWrite:false}));st.rotation.set(-Math.PI/2,0,Math.PI/4);st.scale.set(0.5,3.2*wet+0.5,1);st.position.set(p.x+1.1,0.035,p.z+1.1);st.userData.streak=1;poolGrp.add(st);}
   scene.add(poolGrp);}
-function buildCandles(){if(zone){buildZone3D();buildPools();buildAmbient();}}
+/* ---- chunk-instanced vegetation/rocks (per 10x10-tile chunk so frustum culling skips off-screen chunks) ---- */
+let scatterGrp=null;const _sm=new THREE.Matrix4(),_sq=new THREE.Quaternion(),_sp=new THREE.Vector3(),_ss=new THREE.Vector3(),_sc=new THREE.Color();
+const SCAT_KINDS=['pine','oak','birch','bush','bigtreeI','rockI','flowers','tuft'];
+function buildScatter(){if(scatterGrp){scene.remove(scatterGrp);scatterGrp.traverse(o=>{if(o.isInstancedMesh)o.dispose();});}scatterGrp=new THREE.Group();scene.add(scatterGrp);const z=zone,snow=weather==='snow';
+  const parts={}; // key -> {geo,mat,list:[[x,y,z,sx,sy,sz,ry,color]]}
+  const P=(key,g,m,ch,x,y,zz,sx,sy,sz,ry,col)=>{const k=key+'|'+ch;(parts[k]||(parts[k]={g,m,list:[],col:!!col})).list.push([x,y,zz,sx,sy,sz,ry||0,col]);};
+  const leaf=snow?'#e8f0f4':null;
+  for(const f of z.furn){if(!SCAT_KINDS.includes(f.k))continue;const cx=f.x+0.5,cz=f.y+0.5,h=hash(f.x,f.y),ch=(Math.floor(f.x/10))+'_'+(Math.floor(f.y/10)),s=0.85+h*0.5;
+    switch(f.k){
+     case'pine':P('trunk',CYL,toon('#5a3a24'),ch,cx,0.4*s,cz,0.12*s,0.8*s,0.12*s);for(let i=0;i<3;i++)P('pine',CONE,toon(leaf||'#2a5a3a'),ch,cx,(1.0+i*0.65)*s,cz,(0.85-i*0.22)*s,1.0*s,(0.85-i*0.22)*s,h*3);break;
+     case'bigtreeI':P('trunk',CYL,toon('#5a3a24'),ch,cx,1.2*s,cz,0.25*s,2.4*s,0.25*s);P('canopyD',ICO,toon(leaf||'#1f4a2a'),ch,cx,2.9*s,cz,1.5*s,1.2*s,1.5*s,h*3);break;
+     case'oak':P('trunk',CYL,toon('#5a3a24'),ch,cx,0.8*s,cz,0.16*s,1.6*s,0.16*s);P('canopy',ICO,toon(leaf||'#3f7a3a'),ch,cx,2.0*s,cz,1.05*s,0.9*s,1.05*s,h*3);P('canopy',ICO,toon(leaf||'#3f7a3a'),ch,cx+0.4*s,2.5*s,cz-0.2,0.6*s,0.5*s,0.6*s,h);break;
+     case'birch':P('btrunk',CYL,toon('#e8e4dc'),ch,cx,1.0*s,cz,0.1*s,2.0*s,0.1*s);P('bleaf',ICO,toon(leaf||'#8ab04a'),ch,cx,2.3*s,cz,0.75*s,1.0*s,0.75*s,h*3);break;
+     case'bush':P('bush',ICO,toon(leaf||'#3a6a32'),ch,cx,0.35,cz,0.6*s,0.45*s,0.6*s,h*3);break;
+     case'rockI':P('rock',ICO,toon('#7a7a80'),ch,cx,0.25,cz,0.55*s,0.4*s,0.5*s,h*5);break;
+     case'flowers':for(let i=0;i<Math.max(3,f.w*f.h*4);i++){const fx=f.x+hash(i,f.x)*f.w,fz=f.y+hash(f.y,i)*f.h;P('stem',CYL,toon('#3a7a3a'),ch,fx,0.12,fz,0.02,0.24,0.02);P('bloom',SPH,new THREE.MeshToonMaterial({gradientMap:gradTex}),ch,fx,0.26,fz,0.07,0.06,0.07,0,['#ff8ab0','#ffe066','#ffffff','#b08aff','#ff7a5a'][(i+f.x)%5]);}break;
+     case'tuft':for(let i=0;i<4;i++)P('tuft',CONE,toon('#4a8a3a'),ch,f.x+0.2+hash(i,f.y)*0.6,0.12,f.y+0.2+hash(f.x,i)*0.6,0.05,0.25,0.05);break;}}
+  let n=0;for(const k in parts){const p=parts[k];const im=new THREE.InstancedMesh(p.g,p.m,p.list.length);p.list.forEach((e,i)=>{_sq.setFromAxisAngle(_sp.set(0,1,0),e[6]);_sm.compose(_sp.set(e[0],e[1],e[2]),_sq,_ss.set(e[3],e[4],e[5]));im.setMatrixAt(i,_sm);if(p.col)im.setColorAt(i,_sc.set(e[7]));});
+    im.castShadow=!k.startsWith('bloom')&&!k.startsWith('stem')&&!k.startsWith('tuft');im.receiveShadow=true;im.computeBoundingSphere();scatterGrp.add(im);n++;}
+  scatterGrp.userData.chunks=n;}
+
+function buildCandles(){if(zone){buildZone3D();buildScatter();buildPools();buildAmbient();}}
 window.__clearTrack=()=>{trackId=null;};
 
 function isDoorTile(z,x,y){for(const d of z.doors){if((d.side==='N'&&y===0||d.side==='S'&&y===z.h-1)&&x===d.pos)return true;if((d.side==='W'&&x===0||d.side==='E'&&x===z.w-1)&&y===d.pos)return true;}return false;}
@@ -1405,7 +1606,7 @@ const Audio={curMood:null,mel:null,bar:0,ac:null,master:null,muted:save.muted||f
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(this.master);o.start(t);o2.start(t);o.stop(t+dur+0.05);o2.stop(t+dur+0.05);},
   // ---- v5 procedural waltz score (original composition) ----
   mood(){const id=zone.id,night=TIMES[timeIdx]==='night';if(id==='great_hall')return night?'night':'festive';if(zone.sub==='hogsmeade'||id==='hogsmeade')return 'cheer';
-    if(['hagrid_hut','potions','slytherin_common','dada'].includes(id)||(id==='black_lake'&&night))return 'myst';if(night)return 'night';return 'castle';},
+    if(['hagrid_hut','potions','slytherin_common','dada','forest_trail','centaur_glade','dungeon_corridor','whomping_willow','shrieking_overlook','stone_circle'].includes(id)||(id==='black_lake'&&night))return 'myst';if(night)return 'night';return 'castle';},
   MOODS:{castle:{bpm:104,root:62,minor:1,prog:[[0,'m'],[-2,'M'],[-7,'m'],[-5,'M7'],[0,'m'],[3,'M'],[-7,'m'],[-5,'M7']]},
     festive:{bpm:132,root:67,prog:[[0,'M'],[-3,'m'],[5,'M'],[7,'M'],[0,'M'],[4,'m'],[5,'M'],[7,'M7']]},
     cheer:{bpm:126,root:65,prog:[[0,'M'],[-3,'m'],[5,'M'],[7,'M'],[0,'M'],[4,'m'],[-7,'M'],[7,'M7']]},
@@ -1556,9 +1757,27 @@ function castSpell(i){Audio.init();Audio.sfx('spell');toast('🪄 '+SPELLS[i].th
 document.querySelectorAll('.spell').forEach(b=>b.addEventListener('click',()=>{castSpell(+b.dataset.s);}));
 
 /* ===================== MAP & DIRECTORY ===================== */
-function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';for(const id of ZONE_IDS){const z=ZONES[id];const ppl=NPCS.filter(n=>n.zone===id);const b=document.createElement('button');b.className='btn mapZ'+(id===zone.id?' on':'');
-  b.innerHTML='<b>'+(id===zone.id?'📍 ':'')+(z.num?z.num+'. ':'↳ ')+z.th+'</b><small>'+z.en+(z.sub?' — ภายในโซน 24':'')+'</small><small>👥 '+ppl.length+' คน: '+ppl.map(n=>n.c.th.split(' ')[0]).join(', ')+'</small>';
-  b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});grid.appendChild(b);}}
+const MAPXY={gryffindor_common:[18,7],ravenclaw_common:[28,5],astronomy:[38,4],divination:[48,5],headmaster:[58,7],room_of_requirement:[70,5],
+ trophy_room:[5,17],library:[13,23],charms:[22,15],grand_staircase:[36,16],transfiguration:[47,13],hospital:[58,16],seventh_corridor:[70,13],prefects_bathroom:[69,21],
+ dada:[44,23],great_hall:[21,31],entrance_hall:[34,30],slytherin_common:[21,44],potions:[32,42],dungeon_corridor:[30,50],kitchens:[42,42],kitchen_corridor:[42,50],hufflepuff_common:[52,47],
+ courtyard:[54,34],owlery:[46,32],clock_tower:[56,26],bell_tower:[61,30],wooden_bridge:[67,29],stone_circle:[76,36],greenhouses:[64,40],viaduct:[62,51],hogsmeade_station:[73,57],
+ black_lake:[44,60],boathouse:[36,57],lake_shore:[50,67],whomping_willow:[30,64],hagrid_hut:[62,62],quidditch:[80,24],forest_trail:[90,18],centaur_glade:[97,10],changing_rooms:[86,31],stands_tower:[80,14],
+ hogsmeade:[86,52],three_broomsticks:[81,44],honeydukes:[88,43],zonkos:[95,45],scrivenshafts:[96,52],dervish_banges:[93,38],shrieking_overlook:[97,59],gladrags:[92,62],hogs_head:[80,66],puddifoots:[87,68],post_office:[94,68]};
+function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';
+  const trackZone=trackId?(NPCS.find(n=>n.c.id===trackId)||{}).zone:null;
+  const wrap=document.createElement('div');wrap.className='bigMap';let svg='<svg viewBox="0 0 100 72" preserveAspectRatio="none"><defs><radialGradient id="mg" cx="50%" cy="45%"><stop offset="0" stop-color="#3a3060"/><stop offset="1" stop-color="#15102a"/></radialGradient></defs><rect width="100" height="72" fill="url(#mg)"/>'+
+   '<ellipse cx="44" cy="63" rx="13" ry="5" fill="#1f3f5a" opacity=".8"/><path d="M76 4 Q100 2 100 28 L84 30 Q78 18 76 4Z" fill="#163a22" opacity=".6"/><rect x="2" y="1" width="74" height="54" rx="4" fill="#2a2440" opacity=".55" stroke="#6a5a8a" stroke-width=".3"/><rect x="77" y="36" width="22" height="35" rx="3" fill="#2e2a24" opacity=".55"/>';
+  for(const c of CONNS){const a=MAPXY[c[0]],b=MAPXY[c[3]];if(a&&b)svg+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="#c9a24a" stroke-width=".35" stroke-dasharray="1 .6" opacity=".75"/>';}
+  svg+='<text x="4" y="4.5" font-size="2.2" fill="#e8dcff" opacity=".7">ปราสาทฮอกวอตส์</text><text x="79" y="40" font-size="2" fill="#f2d68a" opacity=".7">ฮอกส์มี้ด</text><text x="84" y="7" font-size="2" fill="#9ad0a0" opacity=".7">ป่าต้องห้าม</text><text x="38" y="70" font-size="2" fill="#9ac0e0" opacity=".7">ทะเลสาบดำ</text></svg>';
+  wrap.innerHTML=svg;
+  for(const id of ZONE_IDS){const z=ZONES[id],p=MAPXY[id];if(!p)continue;const ppl=NPCS.filter(n=>n.zone===id).length;const b=document.createElement('button');
+    b.className='mapNode'+(id===zone.id?' here':'')+(id===trackZone?' track':'')+(z.sub?' shop':'')+(z.x6?' new':'');b.style.left=p[0]+'%';b.style.top=(p[1]/72*100)+'%';
+    b.innerHTML=(id===zone.id?'📍':id===trackZone?'🧭':'')+(z.num?'<i>'+z.num+'</i>':'')+'<span>'+z.th.replace(/ \(ฮอกส์มี้ด\)/,'')+'</span>'+(ppl?'<em>'+ppl+'</em>':'');b.title=z.th+' · '+z.en+(ppl?' · 👥 '+ppl:'');
+    b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});wrap.appendChild(b);}
+  grid.appendChild(wrap);
+  const list=document.createElement('div');list.className='mapList';for(const id of ZONE_IDS){const z=ZONES[id];const ppl=NPCS.filter(n=>n.zone===id);const b=document.createElement('button');b.className='btn mapZ'+(id===zone.id?' on':'');
+   b.innerHTML='<b>'+(id===zone.id?'📍 ':id===trackZone?'🧭 ':'')+(z.num?z.num+'. ':'↳ ')+z.th+'</b><small>'+z.en+(z.sub?' — ย่านฮอกส์มี้ด':'')+'</small>'+(ppl.length?'<small>👥 '+ppl.map(n=>n.c.th.split(' ')[0]).join(', ')+'</small>':'');
+   b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});list.appendChild(b);}grid.appendChild(list);}
 let dirBuilt=false;
 function openDirectory(){openModal('dirM');const list=$('dirList');if(!dirBuilt){list.innerHTML='';for(const n of NPCS){const c=n.c;const item=document.createElement('div');item.className='dirItem';const m=document.createElement('canvas');m.width=58;m.height=68;
     const Lk=c.look;m.style.imageRendering='pixelated';pixThumb(m,Lk,c.house!=='N'?c.house:null);
