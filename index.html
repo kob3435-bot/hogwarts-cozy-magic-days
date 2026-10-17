@@ -3126,7 +3126,7 @@ const lumosLight=new THREE.PointLight(0xcfe8ff,0,8,1.4);scene.add(lumosLight);co
 const _m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_p=new THREE.Vector3(),_s=new THREE.Vector3();
 function render(){const dt=lastDt;ensurePlayer();
   const _sk=(QM.on&&QM.mode==='seeker'&&!QM.done)||!!player.fly;if(playerModel.userData.parts&&playerModel.userData.parts.q)applyActVisual(playerModel,_sk?'fly':V17P.pose&&!player.moving?V17P.pose:(QM.watchSit&&!player.moving?'sit':'none'),_sk?false:player.moving,now,true);if(QM.watchSit&&player.moving)QM.watchSit=false;playerModel.position.set(player.x,_sk?(player.fly?V17P.alt:(QM.palt||2)):player.boat?0.12:0,player.y);animChar(playerModel,now,_sk?false:player.moving,player.walk,0,player.dir,dt,!!player.sit||_sk||(QM.watchSit&&!player.moving));
-  lunaModel.position.set(luna.x,player.boat?0.12:0,luna.y);animChar(lunaModel,now+1.3,luna.moving,luna.walk,1.3,player.sit?{x:player.x-luna.x,y:player.y-luna.y}:luna.dir,dt,!!player.sit||player.boat);lunaLife(dt,!!player.sit||player.boat);
+  const _lf=L21.alt>0.01;if((_lf||L21.vis)&&lunaModel.userData.parts&&lunaModel.userData.parts.q){applyActVisual(lunaModel,_lf?'fly':'none',false,now,true);L21.vis=_lf;}lunaModel.position.set(luna.x,_lf?L21.alt:player.boat?0.12:0,luna.y);animChar(lunaModel,now+1.3,luna.moving,luna.walk,1.3,player.sit?{x:player.x-luna.x,y:player.y-luna.y}:luna.dir,dt,!!player.sit||player.boat||_lf);if(!_lf)lunaLife(dt,!!player.sit||player.boat);lunaFlyVis21();
   if(boatMesh){if(player.boat){boatMesh.position.set(player.x-0.25,Math.sin(now*2)*0.03,player.y);boatMesh.rotation.y=playerModel.rotation.y;}else{const d=zone.dock;boatMesh.position.set(d[0]+1,Math.sin(now*2)*0.03,d[1]+d[3]+0.9);}}
   for(const n of NPCS){if(n.inMatch)continue;const m=npcModels[n.c.id];if(!m)continue;const fly=n.act==='fly'&&!n.moving&&(zone.out||zone.outdoorSky);const act=fly||n.act!=='fly'?n.act:'chat';const seat=!isGhost(n.c)&&applyActVisual(m,act,n.moving,now+n.phase,n.c.house!=='N');const _o=VZ[n.zone]||Z0;m.position.set(n.x+_o.x,fly?1.4+Math.sin(now*1.6+n.phase)*0.3:isGhost(n.c)?0.12+Math.sin(now*1.2+n.phase)*0.1:0,n.y+_o.y);animChar(m,now+n.phase,n.moving||!!n.nbT,n.walk,n.phase,n.dir,dt,!n.moving&&!n.nbT&&seat);lifeTick(n,m,now+n.phase,dt,!n.moving&&!n.nbT&&seat);}
   for(const g of animFurn){if(g.userData.owl)g.userData.owl.rotation.y=Math.sin(now*0.7+g.position.x)*0.6;if(g.userData.sway)g.rotation.y=Math.sin(now*0.3)*0.05;if(g.userData.spin)g.userData.spin.rotation.y=now;if(g.userData.hand)g.userData.hand.rotation.z=-now*0.3;if(g.userData.willow)g.userData.willow.rotation.y=Math.sin(now*0.8)*0.6;
@@ -3161,7 +3161,7 @@ function render(){const dt=lastDt;ensurePlayer();
       if(full)placed.push({l:x-ew/2,r:x+ew/2,t:y-eh,b:y});el.style.transform='translate('+(x|0)+'px,'+(y|0)+'px) translate(-50%,-100%)';
       const ov=(x-ew/2<PR.r&&x+ew/2>PR.l&&y-eh<PR.b&&y>PR.t);el.style.opacity=ov?0.25:(full?0.95:0.55);});
     drawConvBubbles(placed,uiAvoidRects());
-    if(luna.bubbleT>0&&luna.bubble&&luna.bubbleZ&&luna.bubbleZ!==zone.id){luna.bubbleT=0;luna.bubble=null;}if(luna.bubbleT>0&&luna.bubble){const el=labelEl('luna','bubble3d');el.textContent='🌙 '+luna.bubble;el.style.opacity=Math.min(1,luna.bubbleT);placeLabel(el,screenOf(luna.x,luna.y,1.8));}}
+    if(luna.bubbleT>0&&luna.bubble&&luna.bubbleZ&&luna.bubbleZ!==zone.id){luna.bubbleT=0;luna.bubble=null;}if(luna.bubbleT>0&&luna.bubble){const el=labelEl('luna','bubble3d');el.textContent='🌙 '+luna.bubble;el.style.opacity=Math.min(1,luna.bubbleT);placeLabel(el,screenOf(luna.x,luna.y,1.8+L21.alt));}}
   for(const k in labelPool)if(!labelPool[k].dataset.used)labelPool[k].style.display='none';}
 let poolGrp=null;const POOLTEX=canvasTex(64,64,g=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.35,'rgba(255,255,255,.45)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;g.fillRect(0,0,64,64);});
 const STREAKTEX=canvasTex(16,64,g=>{const r=g.createLinearGradient(0,0,0,64);r.addColorStop(0,'rgba(255,255,255,0)');r.addColorStop(.5,'rgba(255,255,255,.9)');r.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=r;for(let x=0;x<16;x++){g.globalAlpha=Math.max(0,1-Math.abs(x-8)/8);g.fillRect(x,0,1,64);}});
@@ -4009,7 +4009,7 @@ function update(dt){now+=dt;doorCooldown=Math.max(0,doorCooldown-dt);if(spellLig
   weatherTick(dt);updateParticles(dt);updateCam(false);
   if(trackId){const n=NPCS.find(m=>m.c.id===trackId);if(n.zone===zone.id&&Math.hypot(n.x-player.x,n.y-player.y)<2){toast('🎉 เจอ '+n.c.th+' แล้ว! กด E เพื่อคุย');trackId=null;}}
   const ti=$('trackInfo');if(trackId){const n=NPCS.find(m=>m.c.id===trackId);ti.style.display='';ti.innerHTML='🧭 '+n.c.th+' @ '+ZONES[n.zone].th+' <button class="btn" style="padding:1px 6px;font-size:11px" onclick="window.__clearTrack()">✕</button>';}else ti.style.display='none';}
-function updateLuna(dt){
+function updateLuna(dt){if(lunaFly21(dt))return;
   if(player.boat){luna.x=player.x-0.55;luna.y=player.y+0.05;luna.moving=false;return;}
   if(player.sit){luna.moving=false;luna.dir={x:-1,y:0};return;}
   const side={x:-player.dir.y,y:player.dir.x};
@@ -4780,6 +4780,35 @@ window.__vis20={get g(){return V20G}};
 function skyFloorTex(night){const k='sf'+(night?1:0);return V20T[k]||(V20T[k]=v20Canvas(512,384,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,night?'rgba(40,50,140,.55)':'rgba(120,170,255,.35)');gr.addColorStop(1,night?'rgba(90,40,130,.45)':'rgba(255,200,160,.3)');g.fillStyle=gr;g.fillRect(0,0,w,h);
  for(let i=0;i<12;i++){const x=Math.random()*w,y=Math.random()*h,r=40+Math.random()*70;const c=g.createRadialGradient(x,y,0,x,y,r);c.addColorStop(0,night?'rgba(160,170,255,.25)':'rgba(255,255,255,.35)');c.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=c;g.fillRect(0,0,w,h);}
  for(let i=0;i<(night?380:120);i++){g.fillStyle='rgba(255,250,220,'+(0.4+Math.random()*0.6)+')';const s=Math.random()<0.1?2.5:1.2;g.fillRect(Math.random()*w,Math.random()*h,s,s);}}));}
+
+/* ===================== v21: Luna rides her own broom alongside the player ===================== */
+const L21={on:false,alt:0,bank:0,yaw:null,talk:7,px:0,py:0,land:null,ph:Math.random()*6};
+const L21_UP=['ไปกันเลย! ไม้กวาดของฉันชอบบินตอนลมหอมๆ แบบนี้','รอด้วยนะ~ ฉันขอผูกผ้าพันคอกันแร็กสเปิร์ตก่อน','ว้าว ขึ้นฟ้าพร้อมกันแบบนี้เหมือนฝูงเธสตรัลเลย'];
+const L21_SKY=['เห็นไหม? ก้อนเมฆตรงนั้นรูปร่างเหมือนสนอร์แคกเขายู่ยี่เลย','ลมข้างบนนี้พัดพวกแร็กสเปิร์ตออกจากหัวหมด รู้สึกโล่งจัง','ถ้าบินเงียบๆ อาจได้ยินเสียงนาร์เกิลหัวเราะอยู่บนยอดไม้นะ','พ่อบอกว่าเธสตรัลชอบบินตามคนที่ใจดี บางทีพวกมันอาจตามเราอยู่ก็ได้','ฉันชอบมองหลังคาจากข้างบน ทุกบ้านดูเหมือนขนมชิ้นเล็กๆ','ระวังกิ่งไม้นะ บางทีนาร์เกิลซ่อนอยู่ในกิ่งมิสเซิลโท','บินช้าๆ ก็ได้นะ ท้องฟ้าไม่หนีไปไหนหรอก','ถ้าตกลงไป ฉันจะร่ายคาถาพยุงให้เอง... น่าจะนะ'];
+const L21_DOWN=['ลงจอดนุ่มนวลจัง เหมือนขนนกเลย','สนุกมากเลย บินด้วยกันอีกนะ','ผมฉันคงยุ่งไปหมดแล้ว... แต่ไม่เป็นไร พวกนาร์เกิลชอบแบบนี้'];
+function l21Say(a){if(typeof lunaBubble==='function'&&!uiOpen)lunaBubble(pick(a));}
+function lunaFly21(dt){if(!zone)return false;const want=!!player.fly&&isOut()&&!player.boat;
+ if(want&&!L21.on){L21.on=true;L21.land=null;if(Math.hypot(player.x-luna.x,player.y-luna.y)>6)placeLunaNear();for(let i=0;i<14;i++)spawnP('spark',luna.x+rnd(-.5,.5),luna.y+rnd(-.5,.5),rnd(-1,1),rnd(-1,1),0.9,3,pick(['#cfe8ff','#fff','#e8d0ff']));l21Say(L21_UP);L21.talk=9+Math.random()*6;}
+ if(!want&&L21.on){L21.on=false;if(!isOut()){L21.alt=0;placeLunaNear();return false;}const p=findFree(zone,player.x-player.dir.x*1.2+0.6,player.y-player.dir.y*1.2);L21.land=[p.x,p.y];l21Say(L21_DOWN);}
+ const tgt=L21.on?Math.max(0.6,V17P.alt*0.9+0.2+Math.sin(now*1.7+L21.ph)*0.12):0;L21.alt+=(tgt-L21.alt)*Math.min(1,dt*(L21.on?2.2:3.2));
+ if(!L21.on){if(L21.alt<0.03){if(L21.land){luna.x=L21.land[0];luna.y=L21.land[1];L21.land=null;for(let i=0;i<10;i++)spawnP('dust',luna.x+rnd(-.5,.5),luna.y+rnd(-.5,.5),rnd(-1,1),rnd(-1,1),0.8,4,'#d8c8a8');}L21.alt=0;L21.bank*=0.8;if(lunaModel)lunaModel.rotation.z=L21.bank;return false;}
+  if(L21.land){const k=1-Math.exp(-dt*3.5);luna.x+=(L21.land[0]-luna.x)*k;luna.y+=(L21.land[1]-luna.y)*k;}luna.moving=false;return true;}
+ const d0=player.dir,dl=Math.hypot(d0.x,d0.y)||1,dx0=d0.x/dl,dy0=d0.y/dl;const sd={x:-dy0,y:dx0};const back=player.moving?1.7:1.2,lat=player.moving?1.15:1.35;
+ let tx=player.x-dx0*back+sd.x*lat,ty=player.y-dy0*back+sd.y*lat;tx=clamp(tx,0.7,zone.w-0.7);ty=clamp(ty,0.7,zone.h-0.7);
+ const ox=luna.x,oy=luna.y,ddx=tx-luna.x,ddy=ty-luna.y,dd=Math.hypot(ddx,ddy);
+ if(dd>9){luna.x=tx;luna.y=ty;for(let i=0;i<8;i++)spawnP('spark',luna.x+rnd(-.4,.4),luna.y+rnd(-.4,.4),0,-0.4,0.9,3,'#cfe8ff');}
+ else{const k=1-Math.exp(-dt*(dd>3?6:3.6));luna.x+=ddx*k;luna.y+=ddy*k;}
+ const qx=luna.x-player.x,qy=luna.y-player.y,qd=Math.hypot(qx,qy);if(qd<0.9){if(qd<1e-3){luna.x=player.x+sd.x*0.9;luna.y=player.y+sd.y*0.9;}else{luna.x=player.x+qx/qd*0.9;luna.y=player.y+qy/qd*0.9;}}
+ const vx=(luna.x-ox)/Math.max(dt,1e-3),vy=(luna.y-oy)/Math.max(dt,1e-3),sp=Math.hypot(vx,vy);
+ if(sp>0.6){const ny=Math.atan2(vx,vy);if(L21.yaw==null)L21.yaw=ny;let dy=ny-L21.yaw;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;L21.yaw+=dy*Math.min(1,dt*6);const tb=clamp(-dy*1.6,-0.35,0.35);L21.bank+=(tb-L21.bank)*Math.min(1,dt*4);luna.dir={x:vx/sp,y:vy/sp};}
+ else{L21.bank*=Math.pow(0.1,dt);luna.dir={x:dx0,y:dy0};}
+ luna.moving=false;
+ if(sp>0.6&&Math.random()<0.5)spawnP('spark',luna.x-luna.dir.x*0.5+rnd(-.2,.2),luna.y-luna.dir.y*0.5,rnd(-.2,.2),rnd(-.2,.2),0.8,3,pick(['#cfe8ff','#fff6c0','#e8d0ff']));
+ L21.talk-=dt;if(L21.talk<=0){L21.talk=14+Math.random()*12;if(!(luna.bubbleT>0))l21Say(L21_SKY);}
+ return true;}
+function lunaFlyVis21(){if(!lunaModel)return false;if(L21.alt<=0.01){lunaModel.rotation.z=L21.bank;return false;}
+ lunaModel.position.y=L21.alt;lunaModel.rotation.z=L21.bank+Math.sin(now*1.3+L21.ph)*0.03;return true;}
+window.__l21=L21;
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
