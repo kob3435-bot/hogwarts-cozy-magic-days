@@ -1022,7 +1022,7 @@ function ph(){return timeIdx;}
 const GK={chess:1,gob:1,group:1};const GAME_RE=/common|great_hall|leaky|three_broom|hogs_head|burrow_house|kitchens|room_of_req|grimmauld|yule/;
 function gSpots(z){if(z._gs)return z._gs;const out=[];const tabs=(z.furn||[]).filter(f=>['table','roundtable','longtable'].includes(f.k));
  if(GAME_RE.test(z.id))tabs.slice(0,2).forEach((f,ti)=>{const tx=f.x+f.w/2,ty=f.y+f.h/2,bx=tx+(f.k==='longtable'?f.w*0.25:0);const kind=ti===1&&/common|burrow|leaky/.test(z.id)?'gob':'chess';
-   const seats=[[bx,f.y-0.5],[bx,f.y+f.h+0.5]].map(q=>findFree(z,q[0],q[1]));out.push({kind,bx,by:ty,seats,occ:[null,null],ti});});
+   const seats=[[bx,f.y-0.5],[bx,f.y+f.h+0.5]].map(q=>reachSeat(z,q[0],q[1]));out.push({kind,bx,by:ty,seats,occ:[null,null],ti});});
  const grpZ=/_common|courtyard|hogsmeade|great_lake|black_lake|quad|viaduct|burrow|greenhouses|stone_circle|clock_tower|lake|grounds|shell_cottage|room_of_req/;
  if(grpZ.test(z.id)){const k=z.w*z.h>500?2:1;for(let i=0;i<k;i++){const cx=z.w*(0.3+0.4*hash(i*7+z.w,z.h*3)),cy=z.h*(0.35+0.3*hash(i*11+z.h,z.w*5));const c=findFree(z,cx,cy);
    const seats=[0,1,2].map(j=>{const a=j*2.094+0.3;return findFree(z,c.x+Math.cos(a)*0.95,c.y+Math.sin(a)*0.8);});out.push({kind:'group',bx:c.x,by:c.y,seats,occ:[null,null,null]});}}
@@ -1068,7 +1068,7 @@ function hop(n){const tr=n.trip;const from=n.zone,to=tr.path[tr.i+1];const wasHe
   const z=ZONES[to];const d=z.doors.find(d=>d.to===from);const ds=d?doorSpawn(z,d):fireSpot(z);const p=findFree(z,ds.x,ds.y);n.x=n.tx=p.x;n.y=n.ty=p.y;n.wp=null;
   const ek=edgeKind(from,to);SIM.edges=SIM.edges||{};SIM.edges[ek]=(SIM.edges[ek]||0)+1;
   if(wasHere&&!_nb){despawnNpc(n);if(ek==='floo'||ek==='pk')for(let i=0;i<14;i++)spawnP('spark',n.x+rnd(-.4,.4),n.y-0.6,rnd(-.6,.6),-rnd(.4,1.4),1,4,ek==='floo'?'#6aff8a':'#ffd86a');}
-  if(to===zone.id){spawnNpc(n);if(d){const t=doorTrigger(z,d);const f=findFree(z,t.x,t.y);n.x=f.x;n.y=f.y;}else for(let i=0;i<16;i++)spawnP('spark',n.x+rnd(-.4,.4),n.y-0.6,rnd(-.6,.6),-rnd(.4,1.4),1,4,'#6aff8a');}
+  if(to===zone.id){spawnNpc(n);if(d){const t=doorTrigger(z,d);const f=findFree(z,t.x,t.y);n.x=f.x;n.y=f.y;v17NbIn(n,from,to);}else for(let i=0;i<16;i++)spawnP('spark',n.x+rnd(-.4,.4),n.y-0.6,rnd(-.6,.6),-rnd(.4,1.4),1,4,'#6aff8a');}
   if(tr.i>=tr.path.length-1){n.trip=null;settle(n);n.withLuna=0;if(n.c.id==='ginny'&&to===zone.id&&Math.random()<0.5){const f=findFree(z,luna.x+0.9,luna.y+0.3);n.tx=n.hx=f.x;n.ty=n.hy=f.y;n.act='chat';n.withLuna=1;}SIM.log.push([n.c.id,to]);}
   else{tr.hopT=hopTime(to,tr.path[tr.i+1]);if(to===zone.id&&!SIM.ff){const t=exitPoint(z,tr.path[tr.i+1]);n.tx=t.x;n.ty=t.y;n.moving=true;n.leaving=true;n.leaveT=0;}}
  if(_nb){const zz=ZONES[to];const T=n.trip?exitPoint(zz,n.trip.path[n.trip.i+1]):{x:n.hx,y:n.hy};n.x=Math.max(0.4,Math.min(zz.w-0.4,_bx));n.y=Math.max(0.4,Math.min(zz.h-0.4,_by));n.nbT={x:T.x,y:T.y};n.moving=false;if(n.trip)n.trip.hopT=Math.max(n.trip.hopT,Math.hypot(T.x-n.x,T.y-n.y)/1.6+0.5);SIM.nbWalk=(SIM.nbWalk||0)+1;}}
@@ -1782,7 +1782,7 @@ function drawFace(g,L,S,hy,o){const blink=o.blink, ey=hy+1.5*S, ex=5.2*S;
     else if(L.gl==='square'){g.strokeRect(-ex-4*S,ey-3.5*S,8*S,7*S);g.strokeRect(ex-4*S,ey-3.5*S,8*S,7*S);}
     else{g.lineWidth=1.6*S;g.fillStyle='rgba(200,230,255,.25)';g.beginPath();g.arc(-ex,ey,5.8*S,0,7);g.fill();g.stroke();g.beginPath();g.arc(ex,ey,5.8*S,0,7);g.fill();g.stroke();}}
 }
-function playerLook(){return{hair:player.hair,hs:player.hs,eye:'#6a4a3a',skin:SK.l};}
+function playerLook(){return{hair:player.hair,hs:player.hs,eye:'#6a4a3a',skin:SK.l,robe:(typeof V!=='undefined'&&V&&V.robe)||undefined};}
 /* ===================== 3D ENGINE (Three.js, toon / cel-shaded) ===================== */
 const ctx=document.createElement('canvas').getContext('2d'); // scratch 2D context (portraits use their own canvases)
 
@@ -2291,7 +2291,7 @@ function updateAmbient(dt){if(!ambGrp)return;const z=zone;
 let world=null,lightsDyn=[],candleInst=null,flameInst=null,waterMat=null,boatMesh=null,wallSides={},npcModels={},sitRings=[],auroraMesh=null,animFurn=[],patronusModels=null;
 const hemi=new THREE.HemisphereLight(0xffffff,0x444444,1);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.castShadow=true;sun.shadow.mapSize.set(IS_MOBILE?1024:2048,IS_MOBILE?1024:2048);sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.03;scene.add(sun);scene.add(sun.target);
-const playerModelKey=()=>player.hs+player.hair+player.house;
+const playerModelKey=()=>player.hs+player.hair+player.house+((typeof V!=='undefined'&&V&&V.robe)||'');
 /* ===================== v7 REALISTIC HUMANS (procedural rig) ===================== */
 THREE.Object3D.prototype.addR=function(o){this.add(o);return o;};
 // Bone hierarchy (THREE.Bone) with rigid body segments parented to bones + a skinned robe skirt (SkinnedMesh) bound to hips/thighs.
@@ -2667,7 +2667,7 @@ function buildDistantCastle(z,t){const g=new THREE.Group();const night=t==='nigh
   styleModel(g,{w:1.0,col:night?'#1a1a30':'#4a4a6a'});return g;}
 /* ---------- stylised clouds & god rays ---------- */
 function addClouds(grp,z,t){if(t==='night')return;const cm=toonify(new THREE.MeshStandardMaterial({color:t==='sunset'?'#ffd0d8':'#ffffff',emissive:new THREE.Color(t==='sunset'?'#ff9a8a':'#d8e8ff'),emissiveIntensity:0.35}));const ld=geo('cloudlump',()=>new THREE.IcosahedronGeometry(1,3));
-  for(let i=0;i<15;i++){const c=new THREE.Group();const n=4+(i%4);for(let k=0;k<n;k++){const m=new THREE.Mesh(ld,cm);const s=2.2+hash(i,k)*2.2;m.scale.set(s*1.3,s*0.85,s);m.position.set((k-n/2)*2.6,Math.sin(k*1.7)*0.8+(k%2?1:0),hash(k,i)*1.5);c.add(m);}const fb=new THREE.Mesh(ld,cm);fb.scale.set(n*1.6,1.2,2.5);c.add(fb);
+  for(let i=0;i<15;i++){const c=new THREE.Group();const n=6+(i%3);for(let k=0;k<n;k++){const m=new THREE.Mesh(ld,cm);const s=1.9+hash(i,k)*1.9+Math.sin((k+0.5)/n*Math.PI)*1.1;m.scale.set(s*1.2,s*0.95,s);m.position.set((k-n/2)*2.1,Math.sin((k+0.5)/n*Math.PI)*2.0+Math.sin(k*1.7)*0.35,hash(k,i)*1.8-0.9);c.add(m);}const fb=new THREE.Mesh(ld,cm);fb.scale.set(n*1.6,1.2,2.5);c.add(fb);
     const x0=z.w/2-80+i*12,y0=20+hash(i,2)*18,z0=-38-hash(i,5)*20;c.position.set(x0,y0,z0);grp.add(c);ANIM8.push(tt=>{c.position.x=x0+((tt*0.4+i*30)%40)-20;});}}
 function addGodRays(grp,z,t){if(t==='night'||weather==='rain'||weather==='snow')return;const mat=new THREE.MeshBasicMaterial({map:shaftTex(),color:new THREE.Color(t==='sunset'?'#ffb070':'#fff0c0').multiplyScalar(1.1),transparent:true,opacity:0.16,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
   for(let i=0;i<7;i++){const m=new THREE.Mesh(PLANE,mat);m.scale.set(3+hash(i,1)*4,30,1);m.position.set(z.w*(0.1+i*0.14),9,z.h*(0.2+hash(i,3)*0.6));m.rotation.set(0,Math.PI/4,0.55);grp.add(m);const ph=i;ANIM8.push(tt=>{m.material.opacity=0.12+0.05*Math.sin(tt*0.3+ph);});}}
@@ -2823,7 +2823,7 @@ function animQ(g,t,moving,walk,blinkPh,dir,dt,sitting){const P=g.userData.parts;
   qrot(qF(P,'pelvis'),_Y,moving?sw*0.08:0);qrot(qF(P,'spine_02'),_Y,moving?-sw*0.07:0);qrot(qF(P,'spine_03'),_X,br*0.018);
   let ly=Math.sin(t*0.37+blinkPh)*0.35*(moving?0.2:1);if(g!==playerModel&&!moving){const dx=player.x-g.position.x,dz=player.y-g.position.z;if(dx*dx+dz*dz<9){const a=Math.atan2(dx,dz)-g.rotation.y;ly=Math.atan2(Math.sin(a),Math.cos(a));ly=Math.max(-1.1,Math.min(1.1,ly));}}
   P.look+=(ly-P.look)*Math.min(1,(dt||0.016)*4);qrot(qF(P,'neck_01'),_Y,P.look*0.4);qrot(_QA,_Y,P.look*0.6);qrot(_QB,_X,Math.sin(t*0.5+blinkPh)*0.04);qF(P,'Head').copy(_QA).multiply(_QB);
-  if(P.AF){const bt=(t+blinkPh*3.1)%3.6;const cl=bt>3.46;const m=cl?P.AF.closed:P.AF.open;if(P.AF.fm.map!==m){P.AF.fm.map=m;}}
+  if(P.AF){const bt=(t+blinkPh*3.1)%3.6;const cl=bt>3.46;let m=cl?P.AF.closed:P.AF.open;if(P.talk>now)m=Math.sin(now*20)>-0.2?faceVar(P.AF,cl,true):P.AF.open;else if(P.happy>now&&!cl)m=faceVar(P.AF,false,false);if(P.AF.fm.map!==m){P.AF.fm.map=m;}}
   qPose(P);}
 
 let playerModel=null,playerKey='';const lunaModel=buildChibi(LUNA_LOOK,'R');scene.add(lunaModel);addHitbox(lunaModel).userData.luna=1;
@@ -3114,7 +3114,7 @@ const trackPivot=new THREE.Group();const trackArrow=mesh(CONE,toon('#f2d68a',{em
 const lumosLight=new THREE.PointLight(0xcfe8ff,0,8,1.4);scene.add(lumosLight);const lumosOrb=mesh(SPHL,basic('#e8f6ff'),0,0,0,0.07,0.07,0.07,false);scene.add(lumosOrb);
 const _m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_p=new THREE.Vector3(),_s=new THREE.Vector3();
 function render(){const dt=lastDt;ensurePlayer();
-  const _sk=QM.on&&QM.mode==='seeker'&&!QM.done;if(playerModel.userData.parts&&playerModel.userData.parts.q)applyActVisual(playerModel,_sk?'fly':(QM.watchSit&&!player.moving?'sit':'none'),_sk?false:player.moving,now,true);if(QM.watchSit&&player.moving)QM.watchSit=false;playerModel.position.set(player.x,_sk?(QM.palt||2):player.boat?0.12:0,player.y);animChar(playerModel,now,_sk?false:player.moving,player.walk,0,player.dir,dt,!!player.sit||_sk||(QM.watchSit&&!player.moving));
+  const _sk=(QM.on&&QM.mode==='seeker'&&!QM.done)||!!player.fly;if(playerModel.userData.parts&&playerModel.userData.parts.q)applyActVisual(playerModel,_sk?'fly':V17P.pose&&!player.moving?V17P.pose:(QM.watchSit&&!player.moving?'sit':'none'),_sk?false:player.moving,now,true);if(QM.watchSit&&player.moving)QM.watchSit=false;playerModel.position.set(player.x,_sk?(player.fly?V17P.alt:(QM.palt||2)):player.boat?0.12:0,player.y);animChar(playerModel,now,_sk?false:player.moving,player.walk,0,player.dir,dt,!!player.sit||_sk||(QM.watchSit&&!player.moving));
   lunaModel.position.set(luna.x,player.boat?0.12:0,luna.y);animChar(lunaModel,now+1.3,luna.moving,luna.walk,1.3,player.sit?{x:player.x-luna.x,y:player.y-luna.y}:luna.dir,dt,!!player.sit||player.boat);
   if(boatMesh){if(player.boat){boatMesh.position.set(player.x-0.25,Math.sin(now*2)*0.03,player.y);boatMesh.rotation.y=playerModel.rotation.y;}else{const d=zone.dock;boatMesh.position.set(d[0]+1,Math.sin(now*2)*0.03,d[1]+d[3]+0.9);}}
   for(const n of NPCS){if(n.inMatch)continue;const m=npcModels[n.c.id];if(!m)continue;const fly=n.act==='fly'&&!n.moving&&(zone.out||zone.outdoorSky);const act=fly||n.act!=='fly'?n.act:'chat';const seat=!isGhost(n.c)&&applyActVisual(m,act,n.moving,now+n.phase,n.c.house!=='N');const _o=VZ[n.zone]||Z0;m.position.set(n.x+_o.x,fly?1.4+Math.sin(now*1.6+n.phase)*0.3:isGhost(n.c)?0.12+Math.sin(now*1.2+n.phase)*0.1:0,n.y+_o.y);animChar(m,now+n.phase,n.moving||!!n.nbT,n.walk,n.phase,n.dir,dt,!n.moving&&!n.nbT&&seat);}
@@ -3837,12 +3837,13 @@ function openDialogue(n){const c=n.c;openModal('dlg');n.dir={x:player.x-n.x,y:pl
     opts.push(['🍖 ให้อาหาร ('+cr.food+')',()=>{if(locked())return;if(fed){typeText('(อิ่มแล้ว ไว้มาใหม่นะ)');return;}fed=true;friend[c.id]=(friend[c.id]||0)+3;persist();head();Audio.sfx('gift');drawPortrait(c.look,c.house,'happy');typeText(c.gift);hearts3();}]);
   }else opts.push(['🎁 ให้ของขวัญ',()=>{if(gifted){typeText('(ให้ไปแล้วรอบนี้ ไว้มาใหม่นะ)');return;}gifted=true;friend[c.id]=(friend[c.id]||0)+3;persist();head();Audio.sfx('gift');drawPortrait(c.look,c.house,'happy');typeText(c.gift);for(let i=0;i<14;i++)spawnP('spark',n.x,n.y-0.8,rnd(-1,1),rnd(-1.5,0),1.2,3,'#ff9ac8');}]);
   if(!c.creature)opts.splice(1,0,['🗨️ ถามความเห็น',()=>{const ex=pick(DLG_EX);drawPortrait(c.look,c.house,'smile');typeText(ex[0]);setOpts(ex.slice(1).map(([lab,rep])=>[lab,()=>{drawPortrait(c.look,c.house,'happy');typeText(rep);friend[c.id]=(friend[c.id]||0)+1;persist();head();setOpts(opts);}]));}]);
+  if(typeof v17DlgOpts==='function'){for(const o of v17DlgOpts(n)){const j=opts.findIndex(x=>x[0]===o[0]);if(j>=0)opts[j]=o;else opts.push(o);}}
   opts.push(['👋 ลาก่อน',closeModal]);setOpts(opts);}
 function lunaContextLine(){const t=TIMES[timeIdx];let extra='';
   if(zone.id==='quidditch'&&Math.hypot(player.x-31.5*2.15,player.y-5.5*2.15)<6)extra='\n\nอ๊ะ ระวังนะ ต้นมิสเซิลโทนั่นมีตัวนาร์เกิลชุกชุมเลย อย่ายืนใต้มันนานล่ะ';
   return LUNA_ZONE[zone.id]+extra;}
 function openLuna(){openModal('dlg');$('dlgName').textContent='ลูน่า เลิฟกู๊ด · Luna Lovegood (เรเวนคลอ)';$('dlgHearts').textContent='♥♥♥♥♥  เพื่อนรักตลอดกาล';drawPortrait(LUNA_LOOK,'R','smile');typeText('อ้อ สวัสดีจ้ะ'+(player.name?' '+player.name:'')+'... '+(Math.random()<0.5?lunaContextLine():lunaPick()));
-  setOpts([['💬 คุยเล่น',()=>{drawPortrait(LUNA_LOOK,'R',Math.random()<0.5?'happy':'smile');typeText(lunaPick());}],['📍 ที่นี่',()=>{drawPortrait(LUNA_LOOK,'R','smile');typeText(lunaContextLine());}],
+  setOpts([...v17LunaOpts(),['💬 คุยเล่น',()=>{drawPortrait(LUNA_LOOK,'R',Math.random()<0.5?'happy':'smile');typeText(lunaPick());}],['📍 ที่นี่',()=>{drawPortrait(LUNA_LOOK,'R','smile');typeText(lunaContextLine());}],
    ['🕰️ ตอนนี้',()=>{drawPortrait(LUNA_LOOK,'R','happy');typeText(LUNA_TIME[TIMES[timeIdx]]);}],
    ['☁️ อากาศ',()=>{drawPortrait(LUNA_LOOK,'R','smile');typeText(LUNA_WEATHER[weather]);}],
    ['👓 ขอยืมสเปกตระสเปกส์',()=>{drawPortrait(LUNA_LOOK,'R','happy');typeText('ใส่แล้วมองรอบๆ สิ... เห็นแร็กสเปิร์ตสีชมพูฟ้าลอยอยู่ไหม? พวกมันไม่อันตรายหรอก แค่ทำให้หัวมึนนิดหน่อย');for(let i=0;i<24;i++)spawnP('nargle',player.x+rnd(-5,5),player.y+rnd(-4,3),rnd(-.3,.3),-rnd(.1,.4),rnd(3,6),3,pick(['#ff8fc8','#80d8ff']));}],
@@ -3850,7 +3851,7 @@ function openLuna(){openModal('dlg');$('dlgName').textContent='ลูน่า �
 
 /* ===================== SPELLS ===================== */
 const SPELLS=[{th:'ลูมอส',en:'Lumos'},{th:'วินการ์เดียม เลวิโอซา',en:'Wingardium Leviosa'},{th:'เอกซ์เปกโต พาโตรนุม',en:'Expecto Patronum'},{th:'ออร์คิเดียส',en:'Orchideous'}];
-function castSpell(i){DSTATE.lastSpell=now;Audio.init();Audio.sfx('spell');toast('🪄 '+SPELLS[i].th+'!');const px=player.x+player.dir.x*0.6,py=player.y-0.7;
+function castSpell(i){if(i===2&&!V.patronus){closeModal();toast('🦌 ยังร่ายคาถาผู้พิทักษ์ไม่เป็น — มาเรียนกับศาสตราจารย์ลูปินก่อน!');gPatronus();return;}DSTATE.lastSpell=now;v17Spell(i);Audio.init();Audio.sfx('spell');toast('🪄 '+SPELLS[i].th+'!');const px=player.x+player.dir.x*0.6,py=player.y-0.7;
   for(let k=0;k<12;k++)spawnP('spark',px,py,rnd(-1,1),rnd(-1,1),0.8,2.5,'#fff6b0');
   if(i===0){spellLight=spellLight>0?0:20;}
   if(i===1){for(let k=0;k<16;k++)spawnP('feather',player.x+rnd(-2,2),player.y+rnd(-1,1),0,-rnd(.3,.7),rnd(3,5),3,'#fff');}
@@ -3882,7 +3883,7 @@ window.__floo=flooTravel;
 /* ===== v16: unified outdoor world map ===== */
 let WMAP=null;function worldLayout(){if(WMAP)return WMAP;const pos={},clusters=[];const outs=ZONE_IDS.filter(id=>isOutZ(ZONES[id]));const order=['courtyard'].concat(outs.filter(i=>i!=='courtyard'));
  for(const root of order){if(pos[root]||!ZONES[root])continue;const cl=[root];const P={};P[root]={x:0,y:0};const q=[root];while(q.length){const id=q.shift();for(const nb of NB_OF[id]||[]){if(!isOutZ(ZONES[nb.id])||P[nb.id]||pos[nb.id])continue;P[nb.id]={x:P[id].x+nb.off.x,y:P[id].y+nb.off.y};cl.push(nb.id);q.push(nb.id);}}
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const id of cl){const z=ZONES[id];x0=Math.min(x0,P[id].x);y0=Math.min(y0,P[id].y);x1=Math.max(x1,P[id].x+z.w);y1=Math.max(y1,P[id].y+z.h);}for(const id of cl)pos[id]=P[id];clusters.push({ids:cl,P,x0,y0,x1,y1});}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const id of cl){const z=ZONES[id];x0=Math.min(x0,P[id].x);y0=Math.min(y0,P[id].y);x1=Math.max(x1,P[id].x+z.w);y1=Math.max(y1,P[id].y+z.h);}wmSeparate(cl,P);x0=1e9;y0=1e9;x1=-1e9;y1=-1e9;for(const id of cl){const z=ZONES[id];x0=Math.min(x0,P[id].x);y0=Math.min(y0,P[id].y);x1=Math.max(x1,P[id].x+z.w);y1=Math.max(y1,P[id].y+z.h);}for(const id of cl)pos[id]=P[id];clusters.push({ids:cl,P,x0,y0,x1,y1});}
  return WMAP={pos,clusters};}
 const WM_COL={grass:'#6aa04c',forest:'#3a6a38',cobble:'#9c968a',soil:'#8a7250',straw:'#c0a468',stone:'#8a8490',snow:'#e8eef4',sand:'#d8c48a',wood:'#8a6a48'};
 function drawWorldMap(cv){const L=worldLayout();const g=cv.getContext('2d');const W=cv.width,H=cv.height;g.fillStyle='#14102a';g.fillRect(0,0,W,H);
@@ -3971,8 +3972,8 @@ function update(dt){now+=dt;doorCooldown=Math.max(0,doorCooldown-dt);if(spellLig
   let v={x:0,y:0};if(!uiOpen&&!player.sit){v=inputVec();
     if(!v.x&&!v.y&&clickTarget){const dx=clickTarget.x-player.x,dy=clickTarget.y-player.y,d=Math.hypot(dx,dy);const reach=clickNpc?1.3:0.12;
       if(d<reach){if(clickNpc){openDialogue(clickNpc);clickNpc=null;}else if(clickTarget.sit)sitDown(clickTarget.sit);clickTarget=null;}else{v={x:dx/d,y:dy/d};}}}
-  const sp=player.boat?3.2:(QM.on&&QM.mode==='seeker'?6.8:4.4);player.moving=!!(v.x||v.y);
-  if(player.moving){player.dir={x:v.x,y:v.y};const ox=player.x,oy=player.y;moveEntity(player,v.x*sp*dt,v.y*sp*dt,R,player.boat);player.walk+=dt*11;stepT-=dt;if(stepT<=0&&!player.boat){Audio.sfx('step');stepT=0.32;}
+  const sp=player.fly?8.5:player.boat?3.2:(QM.on&&QM.mode==='seeker'?6.8:4.4);player.moving=!!(v.x||v.y);
+  if(player.moving){player.dir={x:v.x,y:v.y};const ox=player.x,oy=player.y;if(player.fly)flyMove(v.x*sp*dt,v.y*sp*dt);else moveEntity(player,v.x*sp*dt,v.y*sp*dt,R,player.boat);player.walk+=dt*11;stepT-=dt;if(stepT<=0&&!player.boat){Audio.sfx('step');stepT=0.32;}
     if(clickTarget&&Math.hypot(player.x-ox,player.y-oy)<sp*dt*0.15){clickTarget.stuck=(clickTarget.stuck||0)+dt;if(clickTarget.stuck>0.6){clickTarget=null;clickNpc=null;}}
     if(!player.boat)checkDoors();if(player.boat&&weather!=='snow'&&Math.random()<0.3)spawnP('drop',player.x+rnd(-.5,.5),player.y+0.2,rnd(-.3,.3),0.2,0.8,2,'rgba(200,230,255,.6)');}else if(!player.boat&&(player.x<1.2||player.y<1.2||player.x>zone.w-1.2||player.y>zone.h-1.2))checkDoors();
   // luna companion (frame-rate independent smoothing)
@@ -4015,10 +4016,498 @@ function updateLuna(dt){
   // anti-overlap: never stand on the player
   const ddx=luna.x-player.x,ddy=luna.y-player.y,dd=Math.hypot(ddx,ddy);if(dd<0.75){const push=(0.75-dd);const nx=dd>0.01?ddx/dd:1,ny=dd>0.01?ddy/dd:0;moveEntity(luna,nx*push,ny*push,R);}}
 
+/* ===================== v17: cozy features module ===================== */
+var V17P={pose:null,filter:0};
+var V=(()=>{let d={};try{d=JSON.parse(localStorage.getItem(SAVE_KEY+'_v17')||'{}')||{};}catch(e){}
+ return Object.assign({gal:30,hp:{G:0,S:0,R:0,H:0},sorted:false,inv:{},cards:[],creatures:[],plants:[],places:[],nargles:[],fish:[],letters:[],quests:null,plots:[null,null,null,null],pet:null,wand:{wood:'ฮอลลี่',core:'ขนนกฟีนิกซ์',col:'#ffe08a'},robe:null,scarf:false,lunaH:0,lunaEv:[],cls:{},wins:{},vol:0.55,festSeen:{},cup:0,lastDay:-1,stats:{}},d);})();
+window.__V=V;
+function saveV(){try{localStorage.setItem(SAVE_KEY+'_v17',JSON.stringify(V));}catch(e){}}
+setInterval(saveV,15000);
+const HSE=['G','S','R','H'];const HTH={G:'กริฟฟินดอร์',S:'สลิธีริน',R:'เรเวนคลอ',H:'ฮัฟเฟิลพัฟ'};const HCOL={G:'#c8282e',S:'#2a8a4a',R:'#2a5ac8',H:'#e0b020'};
+/* ---------- style: parchment / magical UI ---------- */
+(function(){const st=document.createElement('style');st.textContent=`
+#v17M .card,#v17M .card *{font-family:inherit}
+#v17M .card{background:radial-gradient(ellipse at 30% 20%,#fbf1d6,#ecd9a8 70%,#d8bf86);color:#3a2614;border:3px solid #8a6a2a;border-radius:18px;box-shadow:0 12px 50px rgba(0,0,0,.55),inset 0 0 40px rgba(120,80,20,.35);width:min(820px,95vw);max-height:90vh;animation:pop .28s cubic-bezier(.2,1.4,.4,1)}
+#v17M .card h2{color:#6a3a10;font-size:20px;margin:0 0 8px;text-shadow:0 1px 0 #fff6d8}
+#v17M .btn{background:linear-gradient(180deg,#7a4a2a,#4a2a14);border-color:#c8a050;color:#fff4d8}
+#v17M .btn.gold{background:linear-gradient(180deg,#d8a840,#9a6a18)}
+#v17M .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+#v17M .tile{background:rgba(255,250,235,.7);border:1.5px solid #b8944a;border-radius:12px;padding:8px;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;font-size:13px}
+#v17M .tile:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 4px 14px rgba(120,80,20,.35)}
+#v17M .tile b{display:block;font-size:26px;margin-bottom:2px}
+#v17M .tile.lock{opacity:.45;filter:grayscale(.8)}
+#v17M .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}
+#v17M .tabs .btn.on{background:linear-gradient(180deg,#d8a840,#9a6a18)}
+#v17M canvas{display:block;margin:6px auto;max-width:100%;border-radius:12px;border:2px solid #8a6a2a;background:#1a1430;touch-action:none}
+#v17M .bar{height:14px;border-radius:7px;background:rgba(0,0,0,.15);overflow:hidden}#v17M .bar i{display:block;height:100%}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+#v17hud{position:fixed;left:10px;top:44px;z-index:5;display:flex;gap:6px;pointer-events:auto;font-size:12px}
+#v17hud span{background:rgba(30,20,10,.72);color:#ffe9b0;border:1px solid #c8a050;border-radius:999px;padding:3px 9px;cursor:pointer}
+#v17ctx{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:6;display:flex;gap:6px}
+#v17ctx .btn{background:linear-gradient(180deg,#d8a840,#8a5a18);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 14px #ffd86a}}
+body.touch #v17ctx{bottom:96px}
+#photo{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:30;display:none;gap:6px;background:rgba(20,14,30,.6);padding:6px;border-radius:14px}
+#photo.show{display:flex}
+body.photo .hud,body.photo #mBtns,body.photo #joy,body.photo #bubbleLayer,body.photo #v17hud,body.photo #v17ctx,body.photo #locPill,body.photo #zoneName,body.photo #toast,body.photo #spellBar{display:none!important}
+#cine{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
+#cine.show{display:block}#cine:before,#cine:after{content:'';position:absolute;left:0;right:0;height:11vh;background:#000;transition:transform .6s}
+#cine:before{top:0}#cine:after{bottom:0}
+#cineT{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);width:min(760px,92vw);background:rgba(20,14,40,.85);color:#fff4e0;border:1.5px solid #d8c0ff;border-radius:14px;padding:12px 16px;font-size:16px;pointer-events:auto;cursor:pointer}
+.fxflash{position:fixed;inset:0;z-index:39;pointer-events:none;background:radial-gradient(circle,rgba(255,240,200,.85),rgba(255,240,200,0) 70%);animation:flash 1s forwards}
+@keyframes flash{from{opacity:1}to{opacity:0}}
+`;document.head.appendChild(st);
+ const m=document.createElement('div');m.className='modal';m.id='v17M';m.innerHTML='<div class="card"><h2><span id="v17T"></span><button class="btn" style="float:right" id="v17X">ปิด ✕</button></h2><div id="v17B"></div></div>';document.body.appendChild(m);
+ m.addEventListener('pointerdown',e=>{if(e.target===m)closeV();});
+ const hud=document.createElement('div');hud.id='v17hud';document.body.appendChild(hud);
+ const ctx=document.createElement('div');ctx.id='v17ctx';document.body.appendChild(ctx);
+ const ph=document.createElement('div');ph.id='photo';document.body.appendChild(ph);
+ const ci=document.createElement('div');ci.id='cine';ci.innerHTML='<div id="cineT"></div>';document.body.appendChild(ci);
+ const rb=document.getElementById('rightBtns');const add=(id,t,tt)=>{const b=document.createElement('button');b.className='btn';b.id=id;b.textContent=t;b.title=tt;rb.insertBefore(b,document.getElementById('bSet'));return b;};
+ add('bHub','🎒 เมนู','เมนูกิจกรรม (H)').onclick=()=>openHub();add('bBroom','🧹','ขี่ไม้กวาด (B)').onclick=()=>toggleBroom();add('bPhoto','📷','โหมดถ่ายภาพ (P)').onclick=()=>openPhoto();
+ const mb=document.getElementById('mBtns');const mk=(t,f)=>{const b=document.createElement('button');b.className='btn';b.textContent=t;b.onclick=f;mb.appendChild(b);};mk('🎒',()=>openHub());mk('🧹',()=>toggleBroom());
+ $('v17X').onclick=()=>closeV();})();
+let vOnClose=null;
+function openV(title,build,onClose){if(uiOpen&&uiOpen!=='v17M')closeModal();$('v17T').textContent=title;const B=$('v17B');B.innerHTML='';vOnClose=onClose||null;openModal('v17M');build(B);}
+function closeV(){if(uiOpen==='v17M'){closeModal();}if(vOnClose){const f=vOnClose;vOnClose=null;f();}}
+function h17(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='on')for(const ev in attrs.on)e.addEventListener(ev,attrs.on[ev]);else if(k==='style')e.style.cssText=attrs.style;else e[k]=attrs[k];}if(html!=null)e.innerHTML=html;return e;}
+function btn(t,f,cls){return h17('button',{className:'btn '+(cls||''),on:{click:f}},t);}
+function burst(col,n){for(let i=0;i<(n||30);i++)spawnP('spark',player.x+rnd(-1,1),player.y-0.6+rnd(-1,1),rnd(-1.5,1.5),rnd(-1.5,1.5),1.2,4,col||'#ffe08a');}
+/* ---------- economy, house points, events ---------- */
+function addGal(n,why){V.gal=Math.max(0,V.gal+n);if(n>0)toast('🪙 +'+n+' เกลเลียน'+(why?' · '+why:''));saveV();hudV();}
+function addHP(n,why,h){h=h||player.house;V.hp[h]=(V.hp[h]||0)+n;toast('🏆 '+(n>0?'+':'')+n+' แต้ม '+HTH[h]+(why?' · '+why:''));saveV();hudV();}
+function addInv(k,n){V.inv[k]=(V.inv[k]||0)+(n||1);if(V.inv[k]<=0)delete V.inv[k];saveV();}
+const QEV=[];function ev(type,arg){V.stats[type]=(V.stats[type]||0)+1;if(V.quests)for(const q of V.quests.list){if(q.done)continue;if(q.type===type&&(!q.arg||q.arg===arg)){q.n=(q.n||0)+1;if(q.n>=(q.need||1)){q.done=true;toast('📜 ทำภารกิจสำเร็จ: '+q.t);addGal(q.rew,'ภารกิจ');addHP(5,'ภารกิจประจำวัน');Audio.sfx('chime');}}}saveV();}
+function hudV(){const h=$('v17hud');if(!h)return;h.innerHTML='';const a=h17('span',{on:{click:()=>openShopInv()}},'🪙 '+V.gal);const b=h17('span',{on:{click:()=>openCup()}},'🏆 '+HTH[player.house]+' '+(V.hp[player.house]||0));const f=festToday();const c=h17('span',{on:{click:()=>openCalendar()}},'📅 วันที่ '+(SIM.day+1)+(f?' · '+f.ic+' '+f.th:''));h.append(a,b,c);}
+/* ---------- items ---------- */
+const ITEMS={
+ frog:{ic:'🐸',th:'ช็อกโกแลตกบ',p:6,shop:'honeydukes',d:'มีการ์ดพ่อมดชื่อดังข้างใน!'},
+ bean:{ic:'🫘',th:'ถั่วทุกรสของเบอร์ตี้บอตต์',p:4,shop:'honeydukes',d:'ระวังรสขี้หู'},
+ fizz:{ic:'🍬',th:'ฟิซซิ่ง วิซบี',p:5,shop:'honeydukes',d:'กินแล้วตัวลอยนิดๆ'},
+ pepper:{ic:'🌶️',th:'เปปเปอร์อิมป์',p:5,shop:'honeydukes',d:'ควันออกหู อุ่นทั้งตัว'},
+ cauldron:{ic:'🧁',th:'เค้กหม้อใหญ่',p:7,shop:'honeydukes',d:'ขนมอบรูปหม้อ'},
+ quill:{ic:'🪶',th:'ขนนกน้ำตาล',p:3,shop:'honeydukes',d:'แอบดูดในห้องเรียนได้'},
+ firework:{ic:'🎆',th:'ดอกไม้ไฟมังกรของวีสลีย์',p:12,shop:'weasleys_wheezes',use:true,d:'ใช้แล้วมังกรไฟพุ่งกลางฟ้า'},
+ decoy:{ic:'💥',th:'ระเบิดเบนความสนใจ',p:8,shop:'weasleys_wheezes',use:true,d:'ตูม! ทุกคนหันไปมอง'},
+ puff:{ic:'🟣',th:'แคระฟู (พิกมีพัฟ)',p:15,shop:'weasleys_wheezes',use:true,d:'ก้อนขนสีชมพูส่งเสียงจี๊ดๆ'},
+ snack:{ic:'🍭',th:'กล่องขนมหนีเรียน',p:10,shop:'weasleys_wheezes',use:true,d:'เลือดกำเดาไหลชั่วคราว... ล้อเล่น ไม่ไหลจริง'},
+ potion:{ic:'🧪',th:'ยาที่ปรุงเอง',d:'จากวิชาปรุงยา'},
+ plant:{ic:'🌿',th:'สมุนไพรจากเรือนกระจก',d:'จากวิชาสมุนไพร'},
+ fishi:{ic:'🐟',th:'ปลาจากทะเลสาบดำ',d:'สดๆ จากทะเลสาบ'},
+ flower:{ic:'💐',th:'ช่อดอกไม้',p:4,shop:'hogsmeade',d:'ดอกไม้หอมๆ'},
+ book:{ic:'📕',th:'หนังสือนิทานบีเดิล',p:9,shop:'flourish_blotts',d:'นิทานก่อนนอนของพ่อมด'},
+ cork:{ic:'🍾',th:'สร้อยจุกบัตเตอร์เบียร์',p:6,shop:'hogsmeade',d:'ลูน่าชอบมาก'},
+ feed:{ic:'🥩',th:'อาหารสัตว์วิเศษ',p:3,shop:'eeylops',d:'สำหรับวิชาดูแลสัตว์'}};
+/* favourite gifts per character */
+const FAV={harry:['frog','cauldron','fishi'],ron:['frog','cauldron','bean','pepper'],hermione:['book','quill','potion'],neville:['plant','flower','book'],ginny:['firework','fizz','frog'],fred:['firework','decoy','puff','snack'],george:['firework','decoy','puff','snack'],draco:['potion','book'],luna:['cork','plant','flower','puff','book'],cedric:['flower','frog'],cho:['flower','quill'],dean:['quill','frog'],seamus:['firework','pepper'],hagrid:['feed','cauldron','fishi'],dumbledore:['bean','quill','book'],mcgonagall:['book','cauldron'],snape:['potion','plant'],sprout:['plant','flower'],flitwick:['book','fizz'],lupin:['frog','book'],trelawney:['flower','pepper'],dobby:['book','quill','frog'],winky:['cauldron'],colin:['quill','frog'],hannah:['plant','flower'],ernie:['cauldron'],parvati:['flower','fizz'],padma:['book','flower'],lavender:['flower','fizz'],oliver:['frog','fishi'],pansy:['flower'],blaise:['book'],pomfrey:['potion','plant'],pince:['book'],filch:['feed'],rosmerta:['flower'],fang:['feed','fishi'],buckbeak:['fishi','feed'],crookshanks:['fishi'],hedwig:['feed'],mrsnorris:['fishi'],trevor:['feed'],thestrals:['feed'],fawkes:['feed']};
+const HATE={ron:['book'],draco:['frog'],snape:['firework','decoy','snack'],filch:['firework','decoy','puff','snack'],mcgonagall:['decoy']};
+function giftReact(id,k){const f=FAV[id]||[];if(f.includes(k))return 3;if((HATE[id]||[]).includes(k))return -1;return 1;}
+
+/* ---------- Sorting Hat quiz ---------- */
+const SORTQ=[
+ ['ถ้าเจอประตูลึกลับกลางทางเดินตอนดึก เธอจะ...',[['เปิดเข้าไปเลย! การผจญภัยรออยู่','G'],['จดตำแหน่งไว้ แล้วไปค้นในห้องสมุดก่อน','R'],['ชวนเพื่อนมาด้วย จะได้ไม่มีใครต้องกลัวคนเดียว','H'],['คิดว่ามันจะพาไปสู่อะไรที่ใช้ประโยชน์ได้บ้าง','S']]],
+ ['ของที่อยากได้ที่สุดจากฮันนี่ดุกส์?',[['เปปเปอร์อิมป์เผ็ดๆ','G'],['ขนนกน้ำตาล ไว้กินตอนอ่านหนังสือ','R'],['เค้กหม้อใหญ่ แบ่งกินกับทุกคน','H'],['ช็อกโกแลตกบ เผื่อได้การ์ดหายาก','S']]],
+ ['คำชมแบบไหนที่ทำให้ยิ้มได้ทั้งวัน?',[['"เธอกล้าหาญมาก"','G'],['"เธอฉลาดจัง"','R'],['"เธอใจดีจริงๆ"','H'],['"เธอเก่งเกินใคร"','S']]],
+ ['เวลาว่างวันอาทิตย์ เธอจะ...',[['ไปขี่ไม้กวาดที่สนามควิดดิช','G'],['นั่งริมหน้าต่างหอคอยอ่านนิยาย','R'],['ช่วยปลูกต้นไม้ในเรือนกระจก','H'],['วางแผนสิ่งที่จะทำให้สัปดาห์หน้า','S']]],
+ ['สัตว์วิเศษตัวไหนเหมือนเธอที่สุด?',[['สิงโตทองคำ','G'],['นกอินทรีสีน้ำเงิน','R'],['แบดเจอร์ขี้อาย','H'],['งูสีเขียวเงา','S']]]];
+function openSorting(){const sc={G:0,R:0,H:0,S:0};let qi=0;
+ openV('🎩 พิธีคัดสรร · หมวกคัดสรรกำลังคิด...',B=>{const draw=()=>{B.innerHTML='';
+  if(qi<SORTQ.length){const [q,opts]=SORTQ[qi];B.append(h17('div',{style:'text-align:center;font-size:44px'},'🎩'),h17('p',{style:'font-size:16px;text-align:center'},'<i>"อืมม... ยากนะ ยากจริงๆ..."</i><br><b>'+(qi+1)+'/'+SORTQ.length+'. '+q+'</b>'));
+   const g=h17('div',{className:'grid'});for(const [t,h] of opts)g.append(h17('div',{className:'tile',on:{click:()=>{sc[h]+=2;sc[player.house]+=0.5;qi++;Audio.sfx('chime');draw();}}},t));B.append(g);}
+  else{let best='G';for(const h of HSE)if(sc[h]>sc[best])best=h;B.append(h17('div',{style:'text-align:center;font-size:56px'},'🎩✨'),h17('h2',{style:'text-align:center;color:'+HCOL[best]+';font-size:30px'},HTH[best]+'!'),h17('p',{style:'text-align:center'},'หมวกคัดสรรตะโกนก้องไปทั่วห้องโถงใหญ่ เสียงปรบมือดังลั่น!'));
+   const r=h17('div',{className:'row',style:'justify-content:center'});r.append(btn('✨ เข้าบ้าน '+HTH[best],()=>finish(best),'gold'));if(best!==player.house)r.append(btn('ขอเลือกบ้าน '+HTH[player.house]+' ที่เลือกไว้',()=>finish(player.house)));B.append(r);}};
+  const finish=h=>{V.sorted=true;if(player.house!==h){player.house=h;persist();}saveV();closeV();burst(HCOL[h],60);for(let i=0;i<20;i++)spawnP('spark',player.x+rnd(-3,3),player.y+rnd(-3,3),0,-1,2,5,HOUSES[h].c2);addHP(10,'ยินดีต้อนรับสู่บ้าน');addGal(0);toast('🎩 กด 🎒 (H) เพื่อดูกิจกรรมทั้งหมดนะ!');};
+  draw();});}
+/* ---------- House Cup ---------- */
+function rivalTick(){for(const h of HSE)if(h!==player.house)V.hp[h]=(V.hp[h]||0)+Math.floor(rnd(4,18));}
+function openCup(){openV('🏆 ถ้วยประจำบ้าน (House Cup)',B=>{const mx=Math.max(50,...HSE.map(h=>V.hp[h]||0));
+ for(const h of [...HSE].sort((a,b)=>(V.hp[b]||0)-(V.hp[a]||0))){B.append(h17('div',{style:'margin:6px 0'},'<b style="color:'+HCOL[h]+'">'+HTH[h]+(h===player.house?' (บ้านของเธอ)':'')+'</b> — '+(V.hp[h]||0)+' แต้ม<div class="bar"><i style="width:'+((V.hp[h]||0)/mx*100)+'%;background:'+HCOL[h]+'"></i></div>'));}
+ B.append(h17('p',{},'ได้แต้มจาก: ภารกิจประจำวัน, คาบเรียนมินิเกม, ให้ของขวัญ, จับปลา, ห่วงบิน, เก็บนาร์เกิล. ถ้วยจะประกาศผลทุก 8 วัน (วันฉลองเทศกาลยูล) 🏆 ชนะแล้ว: '+V.cup+' ครั้ง'));});}
+function cupAward(){let best='G';for(const h of HSE)if((V.hp[h]||0)>(V.hp[best]||0))best=h;const win=best===player.house;if(win)V.cup++;
+ openV('🏆 ประกาศผลถ้วยประจำบ้าน!',B=>{B.append(h17('div',{style:'text-align:center;font-size:60px'},'🏆'),h17('h2',{style:'text-align:center;color:'+HCOL[best]},HTH[best]+' ชนะถ้วยประจำบ้าน!'),h17('p',{style:'text-align:center'},win?'ห้องโถงใหญ่ประดับธงสีบ้านของเธอทั้งห้อง! +50 เกลเลียน':'ปีหน้าสู้ใหม่นะ! ทุกบ้านได้แต้มเริ่มต้นใหม่'),btn('เริ่มรอบใหม่',()=>{closeV();},'gold'));});
+ if(win){addGal(50,'ชนะถ้วยประจำบ้าน');burst(HCOL[best],80);}for(const h of HSE)V.hp[h]=0;saveV();}
+/* ---------- Festivals & calendar ---------- */
+const FEST={1:{id:'halloween',ic:'🎃',th:'ฮาโลวีน',d:'ฟักทองลอยได้ ค้างคาวบินว่อน งานเลี้ยงในห้องโถงใหญ่',col:'#ff8a2a'},3:{id:'hogsmeade',ic:'🍺',th:'วันหยุดฮอกส์มี้ด',d:'ร้านในฮอกส์มี้ดลดราคา 30%! บัตเตอร์เบียร์อุ่นๆ',col:'#ffcf6a'},5:{id:'qcup',ic:'🏟️',th:'ควิดดิชนัดชิง',d:'นัดชิงถ้วยควิดดิช! ชนะได้ 40 เกลเลียน',col:'#ffd84a'},7:{id:'yule',ic:'🎄',th:'เทศกาลยูล',d:'หิมะ ต้นคริสต์มาส และประกาศผลถ้วยประจำบ้าน',col:'#9ae0ff'}};
+function festToday(){return FEST[SIM.day%8]||null;}
+function openCalendar(){openV('📅 ปฏิทินฮอกวอตส์',B=>{const g=h17('div',{className:'grid'});for(let i=0;i<8;i++){const d=SIM.day-SIM.day%8+i,f=FEST[i];g.append(h17('div',{className:'tile'+(d<SIM.day?' lock':''),style:d===SIM.day?'border:3px solid #c8282e':''},'<b>'+(f?f.ic:'☀️')+'</b>วันที่ '+(d+1)+'<br>'+(f?'<b style="font-size:13px">'+f.th+'</b>'+f.d:'วันธรรมดาแสนสบาย')));}
+ B.append(g,h17('p',{},'วันจะเปลี่ยนเมื่อเวลาวนครบรอบ หรือกด "😴 นอนพักถึงวันใหม่" ในเมนู 🎒'));});}
+function nextDay(){SIM.day++;persist();timeIdx=0;if(typeof applyTime==='function')applyTime();onNewDay();toast('🌅 เช้าวันใหม่! วันที่ '+(SIM.day+1));}
+function onNewDay(){if(V.lastDay===SIM.day)return;V.lastDay=SIM.day;genQuests();rivalTick();V.plots=V.plots.map(p=>p?Object.assign(p,{g:p.w?Math.min(3,p.g+1):p.g,w:false}):p);if(Math.random()<0.9)queueLetter();const f=festToday();if(f){toast(f.ic+' วันนี้: '+f.th+'! '+f.d);if(f.id==='yule')setTimeout(cupAward,1500);}saveV();hudV();}
+/* ---------- Daily quests ---------- */
+const QPOOL=[['talk','คุยกับเพื่อน 3 คน',3,8],['gift','ให้ของขวัญเพื่อน 1 ชิ้น',1,10],['class','เข้าเรียนคาบมินิเกม 1 คาบ',1,12],['fish','ตกปลาที่ทะเลสาบดำ 2 ตัว',2,10],['spell','ร่ายคาถา 5 ครั้ง',5,6],['nargle','ตามหานาร์เกิล 1 ตัว',1,12],['zone','สำรวจสถานที่ 4 แห่ง',4,8],['buy','ซื้อของจากร้านค้า 1 ชิ้น',1,6],['ring','บินลอดห่วงที่สนามควิดดิช 5 ห่วง',5,12],['luna','คุยกับลูน่า 2 ครั้ง',2,6],['gob','เล่นกอบสโตน 1 ตา',1,10],['pet','ให้อาหารสัตว์เลี้ยง',1,5]];
+function genQuests(){const pool=[...QPOOL].sort(()=>Math.random()-0.5).slice(0,4);V.quests={day:SIM.day,list:pool.map(([type,t,need,rew])=>({type,t,need,rew,n:0,done:false}))};saveV();}
+function openQuests(){if(!V.quests||V.quests.day!==SIM.day)genQuests();openV('📜 กระดานภารกิจประจำวัน',B=>{for(const q of V.quests.list)B.append(h17('div',{className:'tile',style:'text-align:left;margin:6px 0;cursor:default'},(q.done?'✅ ':'⬜ ')+'<b style="display:inline;font-size:14px">'+q.t+'</b> — '+Math.min(q.n,q.need)+'/'+q.need+' · รางวัล 🪙'+q.rew+' +5🏆'));B.append(h17('p',{},'ภารกิจใหม่ทุกวัน'));});}
+/* ---------- Chocolate frog cards ---------- */
+const CARDS=[['🧙','ดัมเบิลดอร์','ค้นพบการใช้เลือดมังกร 12 วิธี'],['🧪','นิโคลัส แฟลเมล','ผู้สร้างศิลาอาถรรพ์'],['🦁','กอดริก กริฟฟินดอร์','ผู้ก่อตั้งผู้กล้าหาญ'],['🦅','โรวีนา เรเวนคลอ','ปัญญาคือทรัพย์อันยิ่งใหญ่'],['🦡','เฮลกา ฮัฟเฟิลพัฟ','ยินดีต้อนรับทุกคน'],['🐍','ซัลลาซาร์ สลิธีริน','ผู้ก่อตั้งผู้ทะเยอทะยาน'],['🧹','ไซเปรียน ยูดล์','เกี่ยวข้องกับควิดดิชยุคแรก'],['🐉','นิวท์ สคามันเดอร์','นักสัตววิเศษวิทยา'],['🌙','เมอร์ลิน','พ่อมดในตำนาน'],['🔮','คาสซานดรา','นักพยากรณ์ชื่อดัง'],['⚗️','ปาราเซลซัส','นักเล่นแร่แปรธาตุ'],['🎻','เซเลสติน่า วอร์เบ็ค','นักร้องแม่มดเสียงหวาน'],['🦉','อาร์ชิบอลด์ นกฮูก','(การ์ดแต่งขึ้นใหม่) ส่งจดหมายเร็วที่สุด'],['🍄','มันโก้ ปุ๋ยดี','(การ์ดแต่งขึ้นใหม่) ปลูกเห็ดเรืองแสงได้'],['⭐','ดวงดาว ราตรี','(การ์ดแต่งขึ้นใหม่) วาดแผนที่กลุ่มดาว'],['🫖','ป้าน้ำชา','(การ์ดแต่งขึ้นใหม่) ชงชาให้ตัวลอยได้']];
+function openFrog(){if(!V.inv.frog)return toast('ไม่มีช็อกโกแลตกบ');addInv('frog',-1);const i=Math.floor(Math.random()*CARDS.length);const nw=!V.cards.includes(i);if(nw)V.cards.push(i);saveV();
+ openV('🐸 แกะช็อกโกแลตกบ!',B=>{const c=CARDS[i];B.append(h17('div',{style:'text-align:center'},'<div style="display:inline-block;width:180px;padding:14px;border-radius:14px;background:linear-gradient(160deg,#6a3a8a,#2a1a4a);color:#ffe9b0;border:3px solid #e0b23a;box-shadow:0 0 30px #e0b23a;animation:pop .5s"><div style="font-size:64px">'+c[0]+'</div><b>'+c[1]+'</b><br><small>'+c[2]+'</small></div><p>'+(nw?'✨ การ์ดใหม่! ':'การ์ดซ้ำ — ')+'สะสมแล้ว '+V.cards.length+'/'+CARDS.length+'</p>'),h17('div',{className:'row',style:'justify-content:center'},''));B.lastChild.append(btn('🎒 กลับ',()=>openInv()));});
+ burst('#e0b23a',30);Audio.sfx('chime');if(V.cards.length===CARDS.length)addGal(80,'สะสมการ์ดครบ!');}
+/* ---------- Journal ---------- */
+const CREAT=['hedwig','crookshanks','fang','buckbeak','fawkes','mrsnorris','trevor','thestrals','hippogriff','niffler','bowtruckle','puffskein','kneazle','grindylow','merpeople','acromantula','centaur','unicorn'];
+const CREAT_TH={hedwig:'🦉 เฮดวิก',crookshanks:'🐈 ครุกแชงค์',fang:'🐕 เขี้ยว',buckbeak:'🦅 บัคบีก',fawkes:'🔥 ฟอกส์',mrsnorris:'🐈‍⬛ มิสซิสนอร์ริส',trevor:'🐸 เทรเวอร์',thestrals:'🐴 เธสตรอล',hippogriff:'🦅 ฮิปโปกริฟฟ์',niffler:'🦫 นิฟเฟลอร์',bowtruckle:'🌱 โบว์ทรักเคิล',puffskein:'🟡 พัฟสเกน',kneazle:'🐱 นีซเซิล',grindylow:'🦑 กรินดีโลว์',merpeople:'🧜 ชาวเงือก',acromantula:'🕷️ อโครแมนทูลา',centaur:'🏹 เซนทอร์',unicorn:'🦄 ยูนิคอร์น'};
+const PLANTS=[['🌱','แมนเดรก','ร้องเสียงดังมาก ต้องใส่ที่ปิดหู'],['🌿','ดิตตานี','รักษาบาดแผล'],['🍃','ใบสะระแหน่วิเศษ','ลมหายใจหอมเย็น'],['🌸','ดอกไลออนฟิช','บานตอนพระจันทร์เต็มดวง'],['🍄','เห็ดเรืองแสง','ส่องสว่างในป่าต้องห้าม'],['🌵','มิมบูเลตัส','พ่นเมือกเหม็นเมื่อโดนจิ้ม']];
+const FISHES=[['🐟','ปลาเงินทะเลสาบ',1],['🐠','ปลาสีรุ้ง',2],['🦐','กุ้งเรืองแสง',2],['🐡','ปลาปักเป้าพองลม',3],['🦑','ลูกหมึกยักษ์',4],['👢','รองเท้าบูทเก่า',0],['🧜‍♀️','เกล็ดเงือก',5]];
+function discover(kind,key,label){if(!V[kind].includes(key)){V[kind].push(key);saveV();toast('📖 บันทึกใหม่: '+label);return true;}return false;}
+function openJournal(tab){tab=tab||'cards';openV('📖 สมุดบันทึกเวทมนตร์',B=>{const T=h17('div',{className:'row tabs'});const body=h17('div');const tabs=[['cards','🐸 การ์ด'],['creatures','🐾 สัตว์วิเศษ'],['plants','🌿 พืช'],['places','🗺️ สถานที่'],['nargles','✨ เดอะควิบเบลอร์'],['fish','🐟 ปลา'],['letters','💌 จดหมาย']];
+ for(const [k,t] of tabs)T.append(btn(t,()=>openJournal(k),k===tab?'on':''));B.append(T,body);const g=h17('div',{className:'grid'});
+ if(tab==='cards'){CARDS.forEach((c,i)=>{const h=V.cards.includes(i);g.append(h17('div',{className:'tile'+(h?'':' lock')},'<b>'+(h?c[0]:'❔')+'</b>'+(h?c[1]+'<br><small>'+c[2]+'</small>':'ยังไม่พบ')));});body.append(h17('p',{},'สะสมแล้ว '+V.cards.length+'/'+CARDS.length+' — ซื้อช็อกโกแลตกบที่ฮันนี่ดุกส์แล้วแกะในกระเป๋า 🎒'));}
+ if(tab==='creatures'){CREAT.forEach(k=>{const h=V.creatures.includes(k);g.append(h17('div',{className:'tile'+(h?'':' lock')},'<b>'+(h?CREAT_TH[k].split(' ')[0]:'❔')+'</b>'+(h?CREAT_TH[k].split(' ').slice(1).join(' '):'ยังไม่พบ')));});body.append(h17('p',{},'พบ '+V.creatures.length+'/'+CREAT.length+' — คุยกับสัตว์วิเศษ หรือเรียนวิชาดูแลสัตว์วิเศษ'));}
+ if(tab==='plants'){PLANTS.forEach((p,i)=>{const h=V.plants.includes(i);g.append(h17('div',{className:'tile'+(h?'':' lock')},'<b>'+(h?p[0]:'❔')+'</b>'+(h?p[1]+'<br><small>'+p[2]+'</small>':'ยังไม่ได้ปลูก')));});body.append(h17('p',{},'ปลูกในวิชาสมุนไพร (เรือนกระจก) แล้วรอให้โตข้ามวัน'));}
+ if(tab==='places'){body.append(h17('p',{},'สำรวจแล้ว '+V.places.length+'/'+ZONE_IDS.length+' สถานที่'));for(const id of ZONE_IDS){const h=V.places.includes(id);g.append(h17('div',{className:'tile'+(h?'':' lock'),style:'font-size:12px'},(h?'📍 '+ZONES[id].th:'❔ ???')));}}
+ if(tab==='nargles'){body.append(h17('p',{},'<b>ภารกิจเดอะควิบเบลอร์ของลูน่า:</b> นาร์เกิลตัวจิ๋วเรืองแสงสีฟ้าซ่อนอยู่ใน '+NARG.length+' สถานที่ เดินเข้าใกล้เพื่อจับ! พบแล้ว '+V.nargles.length+'/'+NARG.length+(V.nargles.length>=NARG.length?' 🎉 ลูน่าดีใจมาก!':'')));for(const [zid,x,y,hint] of NARG){const h=V.nargles.includes(zid);g.append(h17('div',{className:'tile'+(h?'':' lock'),style:'font-size:12px'},'<b>'+(h?'✨':'❔')+'</b>'+(h?ZONES[zid].th:'คำใบ้: '+hint)));}}
+ if(tab==='fish'){FISHES.forEach((f,i)=>{const h=V.fish.includes(i);g.append(h17('div',{className:'tile'+(h?'':' lock')},'<b>'+(h?f[0]:'❔')+'</b>'+(h?f[1]:'ยังไม่ได้ตก')));});}
+ if(tab==='letters'){if(!V.letters.length)body.append(h17('p',{},'ยังไม่มีจดหมาย นกฮูกจะมาส่งทุกเช้า'));for(const L of [...V.letters].reverse().slice(0,12))body.append(h17('div',{className:'tile',style:'text-align:left;margin:6px 0;cursor:default'},'<b style="display:inline;font-size:16px">'+L.ic+'</b> <b style="display:inline;font-size:14px">'+L.t+'</b><br>'+L.b));}
+ body.append(g);});}
+/* ---------- Inventory ---------- */
+function useItem(k){const it=ITEMS[k];if(k==='frog')return openFrog();if(!it.use)return toast(it.th+' — เก็บไว้เป็นของขวัญได้นะ (คุยกับเพื่อน → 🎁)');addInv(k,-1);closeV();Audio.init();
+ if(k==='firework'){Audio.sfx('spell');for(let i=0;i<80;i++)spawnP('ember',player.x+rnd(-4,4),player.y+rnd(-4,4),rnd(-2,2),rnd(-2,2),2.5,6,pick(['#ff5a2a','#ffd84a','#ff8ad8','#6ad8ff']));toast('🎆 มังกรไฟพุ่งทะยานกลางฟ้า!');document.body.append(h17('div',{className:'fxflash'}));setTimeout(()=>{const f=document.querySelector('.fxflash');f&&f.remove();},1000);}
+ if(k==='decoy'){for(let i=0;i<30;i++)spawnP('smoke',player.x+rnd(-1,1),player.y+rnd(-1,1),rnd(-1,1),rnd(-1,1),2,8,'#cccccc');toast('💥 ตูม! ทุกคนหันมามอง');for(const n of NPCS)if(n.zone===zone.id)n.dir={x:player.x-n.x,y:player.y-n.y};}
+ if(k==='puff'){V.pet=V.pet||'puff';toast('🟣 แคระฟูกระโดดมาเกาะไหล่เธอ!');for(let i=0;i<20;i++)spawnP('heart',player.x,player.y,rnd(-1,1),rnd(-1,1),1.5,4,'#ff8ad8');}
+ if(k==='snack'){toast('🍭 อร่อย! ตัวเธอเปลี่ยนเป็นสีรุ้งแป๊บนึง');for(let i=0;i<40;i++)spawnP('bubble',player.x,player.y,rnd(-1,1),rnd(-1,1),2,5,pick(['#ff5a5a','#ffd84a','#5aff8a','#5a8aff']));}
+ ev('use',k);}
+function openInv(){openV('🎒 กระเป๋า · 🪙 '+V.gal+' เกลเลียน',B=>{const g=h17('div',{className:'grid'});const ks=Object.keys(V.inv);if(!ks.length)B.append(h17('p',{},'กระเป๋าว่าง — ไปซื้อของที่ฮันนี่ดุกส์ / ร้านวีสลีย์ หรือเรียนคาบมินิเกม'));
+ for(const k of ks){const it=ITEMS[k];g.append(h17('div',{className:'tile',on:{click:()=>useItem(k)}},'<b>'+it.ic+'</b>'+it.th+' ×'+V.inv[k]+'<br><small>'+(it.d||'')+'</small>'+(k==='frog'?'<br><u>แตะเพื่อแกะ</u>':it.use?'<br><u>แตะเพื่อใช้</u>':'')));}B.append(g);});}
+var openShopInv=openInv;
+/* ---------- Shops ---------- */
+const SHOPS={honeydukes:{ic:'🍭',th:'ร้านขนมฮันนี่ดุกส์',greet:'ขนมหวานทุกรสชาติ รวมถึงรสที่เธอไม่อยากรู้!'},weasleys_wheezes:{ic:'🎆',th:'ร้านเกมกลวิเศษวีสลีย์',greet:'ของเล่นสุดป่วนจากฝาแฝด! (ไม่รับคืนเงิน)'},hogsmeade:{ic:'💐',th:'แผงของฝากฮอกส์มี้ด',greet:'ดอกไม้กับของจุกจิกน่ารัก'},flourish_blotts:{ic:'📚',th:'ร้านหนังสือฟลอริชแอนด์บล็อตส์',greet:'หนังสือดีๆ ทุกชั้นวาง'},eeylops:{ic:'🦉',th:'ร้านนกฮูกและสัตว์เลี้ยงอีล็อปส์',greet:'อาหารสัตว์ และเพื่อนสี่ขาสองปีก'}};
+function price(k){const f=festToday();return Math.max(1,Math.round(ITEMS[k].p*(f&&f.id==='hogsmeade'?0.7:1)));}
+function openShop(sid){const S=SHOPS[sid];openV(S.ic+' '+S.th,B=>{B.append(h17('p',{},'<i>"'+S.greet+'"</i> · 🪙 '+V.gal+(festToday()&&festToday().id==='hogsmeade'?' · <b>ลด 30% วันหยุดฮอกส์มี้ด!</b>':'')));const g=h17('div',{className:'grid'});
+ for(const k in ITEMS){const it=ITEMS[k];if(it.shop!==sid)continue;const p=price(k);g.append(h17('div',{className:'tile',on:{click:()=>{if(V.gal<p){toast('เกลเลียนไม่พอ 😢');return;}addGal(-p);addInv(k,1);Audio.sfx('chime');toast('ซื้อ '+it.ic+' '+it.th+' แล้ว!');ev('buy',k);openShop(sid);}}},'<b>'+it.ic+'</b>'+it.th+'<br>🪙 '+p+'<br><small>'+it.d+'</small>'+(V.inv[k]?'<br>มีแล้ว ×'+V.inv[k]:'')));}
+ if(sid==='eeylops'){for(const [pk,ic,th,pp] of PETS)g.append(h17('div',{className:'tile',on:{click:()=>{if(V.pet===pk){V.pet=null;saveV();toast('ให้'+th+'พักที่ร้าน');openShop(sid);return;}if(!(V.ownPets||[]).includes(pk)){if(V.gal<pp)return toast('เกลเลียนไม่พอ 😢');addGal(-pp);V.ownPets=(V.ownPets||[]).concat(pk);}V.pet=pk;saveV();toast(ic+' '+th+' จะเดินตามเธอแล้ว!');Audio.sfx('hoot');openShop(sid);}}},'<b>'+ic+'</b>สัตว์เลี้ยง: '+th+'<br>'+((V.ownPets||[]).includes(pk)?(V.pet===pk?'✅ กำลังตาม (แตะเพื่อพัก)':'แตะเพื่อพาไปด้วย'):'🪙 '+pp)));}
+ B.append(g);});}
+/* Ollivanders: wand customisation */
+const WOODS=[['ฮอลลี่','#c8a070'],['ยู','#8a5a3a'],['เอลเดอร์','#d8c8a8'],['วิลโลว์','#a88a5a'],['เชอร์รี่','#a03a2a'],['เอบโบนี','#2a2020']];
+const CORES=[['ขนนกฟีนิกซ์','#ffb04a'],['เอ็นหัวใจมังกร','#ff4a6a'],['ขนหางยูนิคอร์น','#e0f0ff'],['ขนเธสตรอล','#b08aff']];
+function openOllivander(){openV('🪄 ร้านไม้กายสิทธิ์โอลลิแวนเดอร์',B=>{B.append(h17('p',{},'<i>"ไม้กายสิทธิ์เป็นผู้เลือกพ่อมด... แต่วันนี้ให้เธอช่วยเลือกนิดหน่อยก็ได้"</i> ปรับแต่งฟรีครั้งแรก ครั้งต่อไป 🪙10'),h17('b',{},'เนื้อไม้'));
+ const r1=h17('div',{className:'row'});for(const [w,c] of WOODS)r1.append(btn('<span style="color:'+c+'">▮</span> '+w,()=>setW({wood:w}),V.wand.wood===w?'gold':''));const r2=h17('div',{className:'row'});for(const [w,c] of CORES)r2.append(btn('<span style="color:'+c+'">✦</span> '+w,()=>setW({core:w,col:c}),V.wand.core===w?'gold':''));
+ B.append(r1,h17('b',{},'แกนกลาง (สีประกายคาถา)'),r2,h17('p',{},'ไม้ของเธอ: <b>'+V.wand.wood+' แกน'+V.wand.core+'</b> — ร่ายคาถา (1-4) จะเห็นประกายสีใหม่'),btn('✨ ลองโบก',()=>{closeV();castSpell(3);},'gold'));});
+ function setW(o){if(V.wandMod){if(V.gal<10)return toast('เกลเลียนไม่พอ');addGal(-10);}V.wandMod=true;Object.assign(V.wand,o);saveV();burst(V.wand.col,30);Audio.sfx('spell');openOllivander();}}
+/* Madam Malkin: robe customisation */
+const ROBES=[[null,'ชุดคลุมประจำบ้าน'],['#2a2a3a','ดำคลาสสิก'],['#5a2a7a','ม่วงราตรี'],['#2a5a7a','ฟ้าทะเลสาบ'],['#7a2a3a','แดงไวน์'],['#3a6a3a','เขียวป่าต้องห้าม'],['#c8b8e8','ลาเวนเดอร์ (ชุดงานเต้นรำ)'],['#e8e0d0','ขาวหิมะ']];
+function openMalkin(){openV('👘 ร้านเสื้อคลุมมาดามมัลกิ้น',B=>{B.append(h17('p',{},'<i>"ลองชุดใหม่ไหมจ๊ะ? ตัวละ 🪙8 ลองฟรี!"</i>'));const g=h17('div',{className:'grid'});
+ for(const [c,t] of ROBES){const own=!c||(V.robes||[]).includes(c);g.append(h17('div',{className:'tile',style:V.robe===c?'border:3px solid #c8282e':'',on:{click:()=>{if(!own){if(V.gal<8)return toast('เกลเลียนไม่พอ');addGal(-8);V.robes=(V.robes||[]).concat(c);}V.robe=c;saveV();Audio.sfx('chime');burst('#fff',20);openMalkin();}}},'<b style="color:'+(c||HOUSES[player.house].c1)+'">▲</b>'+t+'<br>'+(own?(V.robe===c?'✅ สวมอยู่':'แตะเพื่อสวม'):'🪙 8')));}
+ B.append(g,h17('div',{className:'row'},''));B.lastChild.append(btn((V.scarf?'✅':'⬜')+' ผ้าพันคอสีบ้าน',()=>{V.scarf=!V.scarf;saveV();openMalkin();}));});}
+
+/* ---------- Gifts ---------- */
+function giftMenu(id,name,onDone){const ks=Object.keys(V.inv);openV('🎁 เลือกของขวัญให้ '+name,B=>{if(!ks.length){B.append(h17('p',{},'กระเป๋าว่าง! ซื้อของที่ฮันนี่ดุกส์ (ฮอกส์มี้ด) หรือร้านวีสลีย์ (ตรอกไดแอกอน) ก่อนนะ'));return;}
+ B.append(h17('p',{},'💡 แต่ละคนชอบของไม่เหมือนกัน ลองสังเกตดู! ของที่ชอบมาก = +3 ความสนิท'));const g=h17('div',{className:'grid'});
+ for(const k of ks){const it=ITEMS[k];g.append(h17('div',{className:'tile',on:{click:()=>{addInv(k,-1);const r=giftReact(id,k);
+   if(id==='luna'){V.lunaH=(V.lunaH||0)+r+1;}else friend[id]=Math.max(0,(friend[id]||0)+r);persist();saveV();ev('gift',id);closeV();
+   const msg=r>=3?pick(['ว้าว! นี่ของโปรดฉันเลย! ขอบใจมากๆ 💖','รู้ได้ไงว่าฉันชอบ! ดีใจสุดๆ','เธอนี่รู้ใจจริงๆ!']):r<0?pick(['เอ่อ... ขอบใจนะ ถึงจะไม่ค่อยชอบก็เถอะ','อืม... เก็บไว้ก่อนละกัน']):pick(['ขอบใจนะ น่ารักจัง','โอ้ ของขวัญเหรอ? ขอบคุณจ้ะ']);
+   toast(it.ic+' '+name+': "'+msg+'"');if(r>=3){for(let i=0;i<16;i++)spawnP('heart',player.x+rnd(-1,1),player.y+rnd(-1,1),rnd(-.5,.5),-1,1.6,5,'#ff7aa8');addHP(3,'ของขวัญถูกใจ');}
+   if(onDone)onDone(r);}}},'<b>'+it.ic+'</b>'+it.th+' ×'+V.inv[k]));}B.append(g);});}
+/* ---------- Luna special events (heart levels) ---------- */
+function lunaLv(){return Math.min(10,1+Math.floor((V.lunaH||0)/3));}
+const LUNA_EV=[
+ {lv:3,id:'nargle_walk',t:'🌙 เดินตามหานาร์เกิล',zone:'forest_trail',time:3,lines:['ชู่ว... ได้ยินไหมจ๊ะ? เสียงกระดิ่งเล็กๆ นั่นแหละนาร์เกิล','พวกมันชอบขโมยรองเท้าของฉันไปซ่อน แต่คืนนี้ฉันพาเธอมาด้วย มันเลยไม่กล้า','(ลูน่าหยิบแว่นสเปกเตรสเป็กส์สีรุ้งให้เธอใส่ แสงสีฟ้าเล็กๆ ลอยวนรอบต้นไม้)','เห็นไหม? ไม่ใช่ทุกคนจะมองเห็นนะ เธอพิเศษจริงๆ'],gift:'cork'},
+ {lv:6,id:'thestral_flight',t:'🐴 ขี่เธสตรอลชมดาว',zone:'astronomy',time:3,lines:['คืนนี้ดาวสวยมากเลย ฉันอยากให้เธอเห็นกลุ่มดาวที่ฉันตั้งชื่อเอง','นั่นไง "ดาวหัวไชเท้าเต้นรำ" สว่างที่สุดในฤดูนี้','(ลมเย็นๆ พัดผ่าน หิ่งห้อยเวทมนตร์ลอยขึ้นมาจากป่าเหมือนดาวตกกลับหัว)','ขอบใจที่ไม่เคยหัวเราะเยาะฉันนะ... เธอเป็นเพื่อนแท้จริงๆ'],gift:'frog'},
+ {lv:10,id:'lovegood_tea',t:'🫖 จิบชาที่บ้านเลิฟกู๊ด',zone:'lovegood_hill',time:1,lines:['ยินดีต้อนรับสู่บ้านของฉันจ้ะ! พ่อออกไปตามหาสนอร์แคคหงอนย่น','นี่ชากิลลี่วีดของฉันเอง รสชาติเหมือน... ความฝันตอนบ่าย','(ลูน่าวาดรูปเธอไว้บนเพดานห้องนอน ข้างๆ รูปเพื่อนคนอื่นๆ เชื่อมกันด้วยคำว่า "เพื่อน")','เธอจะอยู่ในใจฉันตลอดไปเลยนะ ' + '💙'],gift:'puff'}];
+function lunaEvAvail(){return LUNA_EV.filter(e=>lunaLv()>=e.lv&&!V.lunaEv.includes(e.id));}
+function playLunaEvent(e){closeModal();closeV();const prevT=timeIdx;changeZone(e.zone,{x:ZONES[e.zone].w/2,y:ZONES[e.zone].h/2},false);timeIdx=e.time;buildCandles();updateHud();placeLunaNear&&placeLunaNear();
+ const C=$('cine'),T=$('cineT');let i=0;uiOpen='cine';keysPressed={};C.classList.add('show');V17P.cine=e;
+ const show=()=>{T.innerHTML='<b style="color:#d8c0ff">'+e.t+'</b><br>'+(e.lines[i].startsWith('(')?'<i>'+e.lines[i]+'</i>':'ลูน่า: "'+e.lines[i]+'"')+'<br><small style="opacity:.7">แตะเพื่อไปต่อ ('+(i+1)+'/'+e.lines.length+')</small>';lunaBubble(e.lines[i].startsWith('(')?'✨':e.lines[i]);for(let k=0;k<14;k++)spawnP(pick(['spark','heart']),player.x+rnd(-4,4),player.y+rnd(-4,4),rnd(-.3,.3),-0.6,2.5,4,pick(['#9ad8ff','#d8b0ff','#fff2a8']));Audio.sfx('chime');};
+ T.onclick=()=>{i++;if(i>=e.lines.length){T.onclick=null;C.classList.remove('show');if(uiOpen==='cine')uiOpen=null;V17P.cine=null;if(!V.lunaEv.includes(e.id)){V.lunaEv.push(e.id);addInv(e.gift,1);saveV();toast('💙 ความทรงจำพิเศษกับลูน่า: '+e.t+' · ได้รับ '+ITEMS[e.gift].ic+' '+ITEMS[e.gift].th);addHP(15,'ช่วงเวลาพิเศษกับลูน่า');}else toast('💙 ย้อนความทรงจำ: '+e.t);return;}show();};show();}
+/* ---------- Pets ---------- */
+const PETS=[['owl','🦉','นกฮูกหิมะ',25],['cat','🐈','แมวขนฟู',25],['toad','🐸','คางคก',12],['puff','🟣','แคระฟู',15]];
+const PET_LOOK={owl:{cr:'owl',hair:'#f4f4f0',eye:'#e0a020'},cat:{cr:'cat',hair:'#d88a3a',eye:'#e0c040'},toad:{cr:'toad',hair:'#6a8a3a',eye:'#e0c040'},puff:{cr:'owl',hair:'#ff8ad8',eye:'#222'}};
+let petM=null,petK=null;const pet={x:0,y:0,walk:0,dir:{x:0,y:1},z:''};
+function petTick(dt){if(!V.pet||V17P.photoHidePet){if(petM){scene.remove(petM);petM=null;petK=null;}return;}
+ if(petK!==V.pet){if(petM)scene.remove(petM);const L=Object.assign({},(NPCS.find(n=>n.c.id===({owl:'hedwig',cat:'crookshanks',toad:'trevor'})[V.pet])||{c:{look:PET_LOOK[V.pet]}}).c.look);if(V.pet==='puff'){L.hair='#ff8ad8';}try{petM=buildChibi(L,null);}catch(e){petM=buildChibi(PET_LOOK.cat,null);}petM.scale.multiplyScalar(V.pet==='puff'?0.45:0.6);scene.add(petM);petK=V.pet;pet.x=player.x-1;pet.y=player.y-1;}
+ if(pet.z!==zone.id){pet.z=zone.id;pet.x=player.x-0.8;pet.y=player.y+0.8;}
+ const tx=player.x-player.dir.x*1.2+0.7,ty=player.y-player.dir.y*1.2,dx=tx-pet.x,dy=ty-pet.y,d=Math.hypot(dx,dy);let mv=false;
+ if(d>8){pet.x=tx;pet.y=ty;}else if(d>0.6){const sp=Math.min(d*3,player.fly?12:6)*dt;pet.x+=dx/d*sp;pet.y+=dy/d*sp;pet.dir={x:dx,y:dy};mv=true;pet.walk+=dt*8;}
+ const fly=V.pet==='owl'||V.pet==='puff';petM.position.set(pet.x,(fly?1.4+Math.sin(now*3)*0.25:0)+(player.fly?V17P.alt*0.8:0),pet.y);try{animChar(petM,now,mv,pet.walk,0,pet.dir,dt,false);}catch(e){}
+ if(V.pet==='toad'&&mv)petM.position.y+=Math.abs(Math.sin(pet.walk))*0.3;}
+/* ---------- Owl post ---------- */
+const LETTERS=[()=>({ic:'📰',t:'เดลี่พรอเฟ็ต: '+pick(['ฮิปโปกริฟฟ์บินแซงรถไฟสายด่วน!','ฟักทองยักษ์ในสวนแฮกริดหนักที่สุดในรอบร้อยปี','นักควิดดิชดาวรุ่งจับลูกสนิชได้ใน 3 นาที','กระทรวงเตือน: อย่าเลี้ยงนิฟเฟลอร์ใกล้เครื่องเพชร','ร้านฮันนี่ดุกส์เปิดตัวขนมรสสายรุ้ง','พบกลุ่มดาวใหม่เหนือหอดูดาว']),b:pick(['ข่าวสั้นจากโลกเวทมนตร์ประจำวันนี้ อ่านจบแล้วยิ้มได้ทั้งเช้า','ภาพประกอบในหนังสือพิมพ์ขยับโบกมือให้เธอ'])}),
+ ()=>({ic:'💌',t:'จดหมายจากบ้าน',b:pick(['คิดถึงนะลูก อย่าลืมกินผักด้วยล่ะ ส่งขนมมาให้ 1 กล่อง 🍬','แม่ถักผ้าพันคอให้ใหม่ ใส่ให้อุ่นนะ','ส่งเกลเลียนมาให้ซื้อขนมนิดหน่อย 🪙']),gift:'gal'}),
+ ()=>({ic:'🌙',t:'จดหมายจากลูน่า',b:pick(['ฉันเจอนาร์เกิลอีกตัวในห้องสมุด! ช่วยฉันตามหาที่เหลือด้วยนะ','เดอะควิบเบลอร์ฉบับนี้มีบทความเรื่องสนอร์แคคด้วยล่ะ','ฝันดีนะ อย่าลืมใส่ถุงเท้าคนละสีเพื่อไล่ร็อกสเปิร์ต'])}),
+ ()=>({ic:'📜',t:'ประกาศจากศาสตราจารย์',b:pick(['วิชาปรุงยาวันนี้: ยาแก้ฝีหนอง ใครทำได้ดีมีแต้มบ้าน','ศาสตราจารย์สเปราต์ต้องการผู้ช่วยรดน้ำเรือนกระจก','การบินลอดห่วงที่สนามควิดดิชเปิดให้ฝึกซ้อมแล้ว'])})];
+function queueLetter(){V17P.post=(V17P.post||0)+1;}
+function deliverPost(){V17P.post--;const L=pick(LETTERS)();L.day=SIM.day;V.letters.push(L);if(V.letters.length>40)V.letters.shift();if(L.gift==='gal')addGal(8,'จากบ้าน');else if(L.ic==='💌')addInv(pick(['frog','bean','cauldron']),1);saveV();Audio.sfx('hoot');
+ for(let i=0;i<12;i++)spawnP('feather',player.x+rnd(-1,1),player.y+rnd(-1,1),rnd(-1,1),rnd(-1,1),2,5,'#f4f0e8');toast('🦉 นกฮูกส่งจดหมาย: '+L.ic+' '+L.t+' (J เพื่ออ่าน)');}
+/* ---------- Nargles (Quibbler quest) ---------- */
+const NARG=[['library',0,0,'ระหว่างชั้นหนังสือ'],['greenhouses',0,0,'ใต้กระถางต้นไม้'],['courtyard',0,0,'ใกล้น้ำพุ'],['black_lake',0,0,'ริมฝั่งน้ำ'],['forest_trail',0,0,'ในป่ามืด'],['hogsmeade',0,0,'ตรอกหิมะ'],['owlery',0,0,'ใต้คอนนกฮูก'],['astronomy',0,0,'บนยอดหอคอย'],['great_hall',0,0,'ใต้โต๊ะยาว'],['lovegood_hill',0,0,'บ้านรูปหอคอย'],['diagon_alley',0,0,'ตรอกที่วุ่นวาย'],['room_of_requirement',0,0,'ห้องที่ปรากฏเมื่อต้องการ']].filter(n=>ZONES[n[0]]);
+for(const n of NARG){const z=ZONES[n[0]];let p={x:z.w*0.5,y:z.h*0.5};for(let k=0;k<40;k++){const x=rnd(2,z.w-2),y=rnd(2,z.h-2);if(!solidAt(z,x,y,R+.2)){p={x,y};if(hash(k,n[0].length)<0.6)break;}}n[1]=p.x;n[2]=p.y;}
+let nargM=null;
+function nargTick(dt){const n=NARG.find(q=>q[0]===zone.id&&!V.nargles.includes(q[0]));if(!n){if(nargM){scene.remove(nargM);nargM=null;}return;}
+ if(!nargM){nargM=new THREE.Group();const m=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8),new THREE.MeshBasicMaterial({color:0x8ae0ff}));const h=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),new THREE.MeshBasicMaterial({color:0x6ac8ff,transparent:true,opacity:0.25,depthWrite:false,blending:THREE.AdditiveBlending}));nargM.add(m,h);
+  for(let i=0;i<2;i++){const w=new THREE.Mesh(new THREE.CircleGeometry(0.12,8),new THREE.MeshBasicMaterial({color:0xd8f4ff,transparent:true,opacity:.7,side:THREE.DoubleSide}));w.position.x=i?0.14:-0.14;nargM.add(w);}scene.add(nargM);}
+ const t=now;nargM.position.set(n[1]+Math.sin(t*1.3)*0.5,0.9+Math.sin(t*2.7)*0.25,n[2]+Math.cos(t*1.1)*0.5);nargM.children[1].scale.setScalar(1+Math.sin(t*6)*0.2);nargM.children[2].rotation.y=Math.sin(t*20);nargM.children[3].rotation.y=-Math.sin(t*20);
+ if(Math.random()<dt*4)spawnP('spark',nargM.position.x,nargM.position.z,rnd(-.2,.2),rnd(-.2,.2),0.8,2,'#9ae8ff');
+ if(Math.hypot(player.x-nargM.position.x,player.y-nargM.position.z)<1.3){V.nargles.push(n[0]);saveV();scene.remove(nargM);nargM=null;burst('#9ae8ff',40);Audio.sfx('chime');toast('✨ จับนาร์เกิลได้! ('+V.nargles.length+'/'+NARG.length+') ลูน่าต้องดีใจแน่');lunaBubble('นาร์เกิล! เธอเก่งมากเลย!');addGal(5,'นาร์เกิล');addHP(4,'ภารกิจเดอะควิบเบลอร์');ev('nargle');if(V.nargles.length===NARG.length){addGal(60,'ครบทุกตัว!');V.lunaH+=6;toast('🎉 ภารกิจเดอะควิบเบลอร์สำเร็จ! ลูน่าจะเขียนบทความถึงเธอ');}}}
+
+/* ---------- Broom free-flight ---------- */
+function isOut(){return !!(zone.out||zone.outdoorSky);}
+V17P.alt=0;
+function toggleBroom(){if(uiOpen)return;if(player.fly){land();return;}if(QM.on&&QM.mode==='seeker')return toast('กำลังแข่งควิดดิชอยู่');if(!isOut())return toast('🧹 ขี่ไม้กวาดได้เฉพาะกลางแจ้งนะ');player.sit=null;player.boat=false;player.fly=true;Audio.init();Audio.sfx('spell');burst('#ffe8a8',24);toast('🧹 ขึ้นบิน! B อีกครั้งเพื่อลงจอด'+(zone.id==='quidditch'?' · ลองบินลอดห่วงทอง!':''));ev('fly');}
+function land(silent){if(!player.fly)return;player.fly=false;const p=findFree(zone,player.x,player.y);player.x=p.x;player.y=p.y;V17P.alt=0;if(!silent){for(let i=0;i<16;i++)spawnP('dust',player.x+rnd(-.6,.6),player.y+rnd(-.6,.6),rnd(-1,1),rnd(-1,1),0.8,4,'#d8c8a8');toast('🛬 ลงจอดอย่างปลอดภัย');}}
+function flyMove(dx,dy){const m=0.7;player.x=clamp(player.x+dx,m,zone.w-m);player.y=clamp(player.y+dy,m,zone.h-m);
+ // allow normal door crossing at edges: if pushing into the edge, try normal movement there
+ if(player.x<=m+0.01||player.y<=m+0.01||player.x>=zone.w-m-0.01||player.y>=zone.h-m-0.01){if(!solidAt(zone,player.x,player.y,R)){moveEntity(player,dx,dy,R,false);}}}
+function flyTick(dt){const tgt=player.fly?3.2:0;V17P.alt+=(tgt-V17P.alt)*Math.min(1,dt*3);if(!player.fly)return;if(!isOut()){land(true);toast('🛬 ลงจอดก่อนเข้าในอาคาร');return;}
+ if(player.moving&&Math.random()<0.6)spawnP('spark',player.x-player.dir.x*0.5+rnd(-.2,.2),player.y-player.dir.y*0.5,rnd(-.2,.2),rnd(-.2,.2),0.9,3,pick(['#ffe8a8','#fff','#ffd0f0']));}
+/* rings (flying lesson) */
+let ringG=null,ringZ='';V17P.rings=[];
+function ringTick(dt){const want=zone.id==='quidditch'&&player.fly&&!(QM.on&&QM.mode==='seeker');if(!want){if(ringG){scene.remove(ringG);ringG=null;}return;}
+ if(!ringG||ringZ!==zone.id){if(ringG)scene.remove(ringG);ringG=new THREE.Group();ringZ=zone.id;V17P.rings=[];const z=zone,cx=z.w/2,cy=z.h/2;
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r=Math.min(z.w,z.h)*0.32;const x=cx+Math.cos(a)*r*1.2,y=cy+Math.sin(a)*r;const m=new THREE.Mesh(new THREE.TorusGeometry(0.9,0.09,8,28),new THREE.MeshBasicMaterial({color:0xffd84a}));m.position.set(x,3.6,y);m.rotation.y=-a;ringG.add(m);V17P.rings.push({x,y,m,done:false});}
+  scene.add(ringG);V17P.ringI=0;V17P.ringT=0;}
+ V17P.ringT+=dt;const cur=V17P.rings.find(r=>!r.done);for(const r of V17P.rings){r.m.material.color.set(r.done?0x5ad87a:r===cur?0xffd84a:0x8a7a5a);r.m.scale.setScalar(r===cur?1+Math.sin(now*6)*0.08:1);}
+ if(cur&&Math.hypot(player.x-cur.x,player.y-cur.y)<1.1){cur.done=true;Audio.sfx('chime');burst('#ffd84a',20);ev('ring');const n=V.rings17=(V.rings17||0)+1;if(!V17P.rings.find(r=>!r.done)){const t=V17P.ringT;toast('🏅 บินครบ 8 ห่วงใน '+t.toFixed(1)+' วิ!');addGal(t<40?20:10,'บทเรียนบิน');addHP(t<40?10:5,'บทเรียนบิน');V.cls.fly=(V.cls.fly||0)+1;V.bestRing=Math.min(V.bestRing||999,t);saveV();ev('class','fly');setTimeout(()=>{if(ringG){scene.remove(ringG);ringG=null;}},400);}}}
+/* ---------- Photo mode ---------- */
+const FILTERS=[['ปกติ','none'],['ซีเปีย','sepia(.75) contrast(1.05)'],['ฝันหวาน','saturate(1.4) brightness(1.08) hue-rotate(-12deg)'],['ขาวดำ','grayscale(1) contrast(1.15)'],['ราตรี','hue-rotate(200deg) saturate(.8) brightness(.9)'],['อบอุ่น','sepia(.25) saturate(1.3) brightness(1.05)']];
+const POSES=[[null,'ยืน'],['read','อ่านหนังสือ'],['tea','จิบชา'],['sketch','วาดรูป'],['photo','ถ่ายรูป'],['sit','นั่ง']];
+function openPhoto(){if(uiOpen)return;const P=$('photo');P.innerHTML='';V17P.pi=0;
+ const mk=(t,f)=>{const b=btn(t,f);P.append(b);return b;};
+ const fb=mk('🎨 '+FILTERS[V17P.filter][0],()=>{V17P.filter=(V17P.filter+1)%FILTERS.length;fb.innerHTML='🎨 '+FILTERS[V17P.filter][0];renderer.domElement.style.filter=FILTERS[V17P.filter][1];});
+ const pb=mk('🧍 ท่า: ยืน',()=>{V17P.pi=(V17P.pi+1)%POSES.length;V17P.pose=POSES[V17P.pi][0];pb.innerHTML='🧍 ท่า: '+POSES[V17P.pi][1];});
+ mk('🔄',()=>{cam.yaw+=Math.PI/8;});mk('➕',()=>{cam.dist=clamp(cam.dist-2,6,26);camProj();});mk('➖',()=>{cam.dist=clamp(cam.dist+2,6,26);camProj();});
+ mk('💖 เอฟเฟกต์',()=>{for(let i=0;i<30;i++)spawnP(pick(['heart','spark','flower']),player.x+rnd(-2,2),player.y+rnd(-2,2),rnd(-.5,.5),-rnd(.2,1),2.5,5,pick(['#ff9ac8','#ffe08a','#a8e0ff']));});
+ mk('📸 บันทึก PNG',()=>savePhoto());mk('✕ ออก',()=>closePhoto());
+ renderer.domElement.style.filter=FILTERS[V17P.filter][1];openModal('photo');document.body.classList.add('photo');toast('📷 โหมดถ่ายภาพ');}
+function closePhoto(){V17P.pose=null;renderer.domElement.style.filter='';document.body.classList.remove('photo');if(uiOpen==='photo')closeModal();}
+function savePhoto(){try{render();const src=renderer.domElement;const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.filter=FILTERS[V17P.filter][1];g.drawImage(src,0,0);g.filter='none';
+  g.font='bold '+Math.round(c.height/30)+'px sans-serif';g.fillStyle='rgba(255,240,200,.85)';g.textAlign='right';g.fillText('✨ '+ZONES[zone.id].th+' · Hogwarts Cozy Magic Days',c.width-16,c.height-16);
+  const url=c.toDataURL('image/png');V17P.lastShot=url.length;const a=document.createElement('a');a.href=url;a.download='hogwarts-cozy-'+zone.id+'-'+Date.now()+'.png';document.body.appendChild(a);a.click();a.remove();
+  document.body.append(h17('div',{className:'fxflash'}));setTimeout(()=>{document.querySelectorAll('.fxflash').forEach(f=>f.remove());},900);Audio.sfx('chime');toast('📸 บันทึกภาพแล้ว!');V.photos=(V.photos||0)+1;saveV();ev('photo');}catch(e){console.warn(e);toast('บันทึกภาพไม่สำเร็จ');}}
+/* ---------- Festival decorations / floating candles ---------- */
+let festG=null,festK='';
+function festTick(dt){const f=festToday();const night=TIMES[timeIdx]==='night'||TIMES[timeIdx]==='sunset';const key=f&&isOut()?f.id+zone.id+(night?1:0):'';
+ if(key!==festK){festK=key;if(festG){scene.remove(festG);festG=null;}
+  if(key){festG=new THREE.Group();const z=zone,N=Math.min(70,Math.floor(z.w*z.h/18));const dm=new THREE.Object3D();
+   if(night||f.id==='yule'||f.id==='halloween'){const cg=new THREE.CylinderGeometry(0.06,0.06,0.34,6),fg=new THREE.SphereGeometry(0.09,6,5);
+    const cm=new THREE.InstancedMesh(cg,new THREE.MeshBasicMaterial({color:0xfff4dc}),N),fm=new THREE.InstancedMesh(fg,new THREE.MeshBasicMaterial({color:f.id==='halloween'?0xff9a3a:0xffd88a,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}),N);
+    const pos=[];for(let i=0;i<N;i++)pos.push([rnd(1,z.w-1),rnd(2.6,4.4),rnd(1,z.h-1),rnd(0,6)]);festG.userData={cm,fm,pos};festG.add(cm,fm);}
+   if(f.id==='halloween'){const pm=new THREE.InstancedMesh(new THREE.SphereGeometry(0.35,10,8),new THREE.MeshToonMaterial({color:0xff7a1a,emissive:0x5a1a00}),12);for(let i=0;i<12;i++){const p=findFree(z,rnd(2,z.w-2),rnd(2,z.h-2));dm.position.set(p.x,0.3,p.y);dm.scale.set(1,0.8,1);dm.updateMatrix();pm.setMatrixAt(i,dm.matrix);}festG.add(pm);}
+   if(f.id==='yule'){const tm=new THREE.InstancedMesh(new THREE.ConeGeometry(0.7,1.8,8),new THREE.MeshToonMaterial({color:0x2a7a4a}),6),sm=new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.2),new THREE.MeshBasicMaterial({color:0xffe060}),6);for(let i=0;i<6;i++){const p=findFree(z,rnd(2,z.w-2),rnd(2,z.h-2));dm.position.set(p.x,0.9,p.y);dm.scale.set(1,1,1);dm.updateMatrix();tm.setMatrixAt(i,dm.matrix);dm.position.y=1.95;dm.updateMatrix();sm.setMatrixAt(i,dm.matrix);}festG.add(tm,sm);}
+   if(f.id==='hogsmeade'||f.id==='qcup'){const n2=16,bm=new THREE.InstancedMesh(new THREE.PlaneGeometry(0.5,0.8),new THREE.MeshToonMaterial({color:f.id==='qcup'?new THREE.Color(HCOL[player.house]):0xffcf6a,side:THREE.DoubleSide}),n2);for(let i=0;i<n2;i++){dm.position.set(1+i/(n2-1)*(z.w-2),3.2,1.2);dm.rotation.set(0,0,0);dm.updateMatrix();bm.setMatrixAt(i,dm.matrix);}festG.add(bm);}
+   scene.add(festG);}}
+ if(festG&&festG.userData.cm){const {cm,fm,pos}=festG.userData,d=new THREE.Object3D();for(let i=0;i<pos.length;i++){const p=pos[i];d.position.set(p[0],p[1]+Math.sin(now*1.2+p[3])*0.18,p[2]);d.updateMatrix();cm.setMatrixAt(i,d.matrix);d.position.y+=0.24;d.scale.setScalar(0.85+Math.sin(now*9+p[3]*3)*0.2);d.updateMatrix();fm.setMatrixAt(i,d.matrix);d.scale.setScalar(1);}cm.instanceMatrix.needsUpdate=true;fm.instanceMatrix.needsUpdate=true;}
+ if(f&&isOut()){if(f.id==='halloween'&&Math.random()<dt*1.5)spawnP('ember',player.x+rnd(-8,8),player.y+rnd(-8,8),rnd(-.5,.5),rnd(-.5,.5),2.5,4,'#ff8a2a');if(f.id==='qcup'&&Math.random()<dt*4)spawnP('spark',player.x+rnd(-7,7),player.y+rnd(-7,7),0,-.5,2,4,pick(['#c8282e','#2a5ac8','#e0b020','#2a8a4a']));}}
+/* ---------- Rainbow after rain ---------- */
+let rainbow=null,lastW=null;V17P.rainbowT=0;
+function rainbowTick(dt){if(lastW==='rain'&&weather!=='rain'&&TIMES[timeIdx]!=='night'){V17P.rainbowT=60;toast('🌈 สายรุ้งหลังฝน!');}lastW=weather;V17P.rainbowT=Math.max(0,V17P.rainbowT-dt);
+ const show=V17P.rainbowT>0&&isOut()&&weather!=='rain';if(show&&!rainbow){const g=new THREE.TorusGeometry(10,0.9,10,64,Math.PI);const m=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{op:{value:0}},vertexShader:'varying vec3 vp;void main(){vp=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform float op;varying vec3 vp;vec3 h2r(float h){return clamp(abs(mod(h*6.+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.);}void main(){float r=(length(vp.xy)-9.1)/1.8;float e=smoothstep(0.,.15,r)*smoothstep(1.,.85,r);gl_FragColor=vec4(h2r(r*.8),op*e*.55);}'});rainbow=new THREE.Mesh(g,m);rainbow.renderOrder=-1;scene.add(rainbow);}
+ if(rainbow){const o=rainbow.material.uniforms.op;o.value+=((show?1:0)-o.value)*Math.min(1,dt*0.8);if(!show&&o.value<0.02){scene.remove(rainbow);rainbow=null;return;}const fx=-Math.sin(cam.yaw),fz=-Math.cos(cam.yaw);rainbow.position.set(cam.tx+fx*9,-1,cam.tz+fz*9);rainbow.rotation.set(0,cam.yaw,0);}}
+/* ---------- Snow accumulation ---------- */
+let snow17M=null;V17P.snow=0;
+function snowTick(dt){const want=weather==='snow'&&isOut()?1:0;V17P.snow=clamp(V17P.snow+(want?dt/40:-dt/25),0,1);
+ if(V17P.snow>0.01&&isOut()){if(!snow17M||snow17M.userData.z!==zone.id){if(snow17M)scene.remove(snow17M);const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');for(let i=0;i<500;i++){const x=Math.random()*256,y=Math.random()*256,r=rnd(6,26);const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}
+   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(zone.w/8,zone.h/8);snow17M=new THREE.Mesh(new THREE.PlaneGeometry(zone.w,zone.h),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:0,depthWrite:false,color:0xf4f8ff}));snow17M.rotation.x=-Math.PI/2;snow17M.position.set(zone.w/2,0.03,zone.h/2);snow17M.userData.z=zone.id;snow17M.renderOrder=1;scene.add(snow17M);}
+  snow17M.material.opacity=V17P.snow*0.75;}else if(snow17M){scene.remove(snow17M);snow17M=null;}}
+/* ---------- Seasons ---------- */
+const SEASON=['🍂 ใบไม้ร่วง','🍂 ใบไม้ร่วง','🍂 ใบไม้ร่วง','❄️ ฤดูหนาว','❄️ ฤดูหนาว','🌸 ใบไม้ผลิ','🌸 ใบไม้ผลิ','❄️ ฤดูหนาว'];
+function seasonTick(dt){if(!isOut()||weather==='rain')return;const s=SEASON[SIM.day%8];if(Math.random()<dt*2.5){const x=player.x+rnd(-9,9),y=player.y+rnd(-7,7);if(s.startsWith('🍂'))spawnP('feather',x,y,rnd(.2,.8),rnd(-.2,.4),3.5,4,pick(['#e07a2a','#c84a1a','#e0b02a']));else if(s.startsWith('🌸'))spawnP('flower',x,y,rnd(.2,.6),rnd(-.2,.3),3.5,3,pick(['#ffb0d0','#ffd8e8']));}}
+/* ---------- Castle silhouette with lit windows ---------- */
+const CASTLE_Z=['black_lake','lake_shore','boats_arrival','boathouse','hagrid_hut','quidditch','viaduct','wooden_bridge','greenhouses','whomping_willow','stone_circle'];
+let castleG=null;
+function castleTick(){const want=CASTLE_Z.includes(zone.id);if(!want){if(castleG)castleG.visible=false;return;}
+ if(!castleG){castleG=new THREE.Group();const stone=new THREE.MeshToonMaterial({color:0x5a5a72}),roof=new THREE.MeshToonMaterial({color:0x2a3050});const win=new THREE.MeshBasicMaterial({color:0xffd27a});castleG.userData.win=win;
+  const T=(x,z,r,h)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.05,h,10),stone);c.position.set(x,h/2,z);const k=new THREE.Mesh(new THREE.ConeGeometry(r*1.25,r*2.6,10),roof);k.position.set(x,h+r*1.3,z);castleG.add(c,k);};
+  const Bx=(x,z,w,h,d)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),stone);b.position.set(x,h/2,z);castleG.add(b);};
+  Bx(0,0,16,6,4);Bx(-7,-3,5,9,5);Bx(6,-2,6,8,4);T(-10,0,1.4,12);T(-4,-4,1.1,15);T(3,-5,1.6,17);T(9,0,1.2,11);T(0,2,0.9,9);T(13,-3,1,13);
+  const wg=new THREE.PlaneGeometry(0.35,0.6),wm=new THREE.InstancedMesh(wg,win,70),d=new THREE.Object3D();let i=0;for(let k=0;k<70;k++){const x=rnd(-12,13),y=rnd(1.5,12);d.position.set(x,y,2.06+(Math.abs(x)<8?0:-2));d.updateMatrix();wm.setMatrixAt(i++,d.matrix);}castleG.add(wm);scene.add(castleG);}
+ castleG.visible=true;castleG.position.set(zone.w*0.45,-0.5,-9);castleG.scale.setScalar(1.25);const t=TIMES[timeIdx];castleG.userData.win.color.set(t==='night'?0xffd27a:t==='sunset'?0xe0a860:0x6a6a80);}
+
+/* ---------- Class mini-games ---------- */
+let gTok=0;
+function gameLoop(fn){const tok=++gTok;let last=performance.now();const step=t=>{if(tok!==gTok||uiOpen!=='v17M')return;const dt=Math.min(0.05,(t-last)/1000);last=t;if(fn(dt)!==false)requestAnimationFrame(step);};requestAnimationFrame(step);return tok;}
+function cnv(B,w,h){const c=h17('canvas');c.width=w;c.height=h;c.style.width=Math.min(w,innerWidth*0.85)+'px';B.append(c);const g=c.getContext('2d');const P=e=>{const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*w,y:(e.clientY-r.top)/r.height*h};};return{c,g,P};}
+function classDone(key,label,score,extra){score=clamp(score,0,1);const gal=4+Math.round(score*12),hp=Math.round(score*12);V.cls[key]=(V.cls[key]||0)+1;saveV();addGal(gal,label);if(hp)addHP(hp,label);ev('class',key);burst(score>.6?'#ffd84a':'#a8e0ff',30);
+ const B=$('v17B');const stars='⭐'.repeat(1+Math.round(score*2));B.append(h17('div',{style:'text-align:center;font-size:18px;margin-top:8px'},'<b>'+stars+' คะแนน '+Math.round(score*100)+'%</b><br>ได้ 🪙'+gal+' · 🏆'+hp+(extra?'<br>'+extra:'')+'<br>เรียนวิชานี้แล้ว '+V.cls[key]+' ครั้ง'));const r=h17('div',{className:'row',style:'justify-content:center'});r.append(btn('🔁 เล่นอีกครั้ง',()=>CLASSES.find(c=>c.k===key).go()),btn('ปิด',()=>closeV(),'gold'));B.append(r);}
+/* Potions */
+const ING=[['🍄','เห็ดเรืองแสง'],['🦷','เขี้ยวงู'],['🌿','ใบตำแย'],['🐌','เมือกหอยทาก'],['🪶','ขนนกฟีนิกซ์'],['💧','น้ำค้างจันทรา'],['🌰','เมล็ดมะม่วงหิมพานต์วิเศษ'],['🐸','คางคกแห้ง']];
+const RECIPES=[['ยาแก้ฝีหนอง','#7ad87a'],['ยาเพิ่มความจำ','#7aa8ff'],['ยานอนหลับฝันดี','#c89aff'],['ยาหัวเราะชวนขำ','#ffd84a']];
+function gPotions(){openV('🧪 วิชาปรุงยา',B=>{const rec=pick(RECIPES),seq=[...ING].sort(()=>Math.random()-.5).slice(0,4);let step=0,mist=0,phase='ing',stir=0,ang=0,hits=0,col='#5a4a3a';
+ B.append(h17('p',{},'สูตร <b>'+rec[0]+'</b>: ใส่ส่วนผสมตามลำดับ → '+seq.map((s,i)=>(i+1)+'.'+s[0]+' '+s[1]).join('  ')+'<br>จากนั้นคน 3 ครั้ง: แตะเมื่อเข็มอยู่ในโซนสีทอง'));
+ const {c,g,P}=cnv(B,560,300);const bt=ING.map((s,i)=>({s,x:30+i*65,y:250}));
+ c.onpointerdown=e=>{const p=P(e);if(phase==='ing'){const b=bt.find(b=>Math.hypot(p.x-b.x-22,p.y-b.y-15)<28);if(!b)return;if(b.s===seq[step]){step++;Audio.sfx('spell');col=step===4?rec[1]:shade(rec[1],-90+step*20);for(let i=0;i<10;i++)bub.push({x:280+rnd(-40,40),y:150,v:rnd(30,60)});if(step===4)phase='stir';}else{mist++;Audio.sfx('door');col='#6a5a2a';}}
+  else if(phase==='stir'){const a=((ang%(Math.PI*2))+Math.PI*2)%(Math.PI*2);const z0=1.2+stir*1.3;const ok=Math.abs(a-z0)<0.45;if(ok)hits++;stir++;Audio.sfx(ok?'chime':'step');if(stir>=3){phase='done';const sc=clamp((hits/3)*0.7+(1-mist*0.15)*0.3,0,1);addInv('potion',1);classDone('potions','วิชาปรุงยา',sc,'ได้ 🧪 '+rec[0]+' 1 ขวด');}}};
+ const bub=[];gameLoop(dt=>{g.clearRect(0,0,560,300);g.fillStyle='#2a2036';g.fillRect(0,0,560,300);
+  g.fillStyle='#1a1418';g.beginPath();g.ellipse(280,170,110,70,0,0,Math.PI*2);g.fill();g.fillStyle=col;g.beginPath();g.ellipse(280,140,95,22,0,0,Math.PI*2);g.fill();
+  for(const b of bub){b.y-=b.v*dt;g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(b.x,b.y,4,0,7);g.fill();}while(bub.length&&bub[0].y<40)bub.shift();if(Math.random()<.2)bub.push({x:280+rnd(-60,60),y:140,v:rnd(15,40)});
+  if(phase==='ing'){for(const b of bt){g.fillStyle=b.s===seq[step]&&mist>1?'#7a6a2a':'#4a3a5a';g.fillRect(b.x,b.y-10,48,48);g.font='30px sans-serif';g.fillText(b.s[0],b.x+7,b.y+26);}g.fillStyle='#fff';g.font='16px sans-serif';g.fillText('ขั้นที่ '+(step+1)+'/4  พลาด '+mist,12,24);}
+  if(phase==='stir'||phase==='done'){ang+=dt*3.2;const z0=1.2+Math.min(stir,2)*1.3;g.strokeStyle='#ffd84a';g.lineWidth=10;g.beginPath();g.arc(280,140,60,z0-.45,z0+.45);g.stroke();g.strokeStyle='#fff';g.lineWidth=4;g.beginPath();g.moveTo(280,140);g.lineTo(280+Math.cos(ang)*70,140+Math.sin(ang)*70);g.stroke();g.fillStyle='#fff';g.font='16px sans-serif';g.fillText('คนครั้งที่ '+Math.min(stir+1,3)+'/3 · โดน '+hits,12,24);}
+  return phase!=='done'||true;});});}
+/* Charms: Wingardium Leviosa */
+function gCharms(){openV('✨ วิชาคาถา · วินการ์เดียม เลวิโอซา',B=>{B.append(h17('p',{},'กดค้าง (หรือกด Space) เพื่อยกขนนกให้อยู่ในแถบเรืองแสง 12 วินาที — "สะบัดแล้วพลิก!"'));const {c,g}=cnv(B,560,300);let hold=false,y=250,vy=0,band=150,bv=0,t=0,inT=0,done=false;const t0=performance.now();
+ c.onpointerdown=()=>hold=true;c.onpointerup=c.onpointerleave=()=>hold=false;const kd=e=>{if(e.code==='Space'){hold=e.type==='keydown';e.preventDefault();}};addEventListener('keydown',kd);addEventListener('keyup',kd);
+ gameLoop(dt=>{if(done)return false;t=(performance.now()-t0)/1000;vy+=(hold?-420:300)*dt;vy*=0.96;y=clamp(y+vy*dt,30,270);if(y>=270)vy=0;bv+=rnd(-300,300)*dt;bv*=0.97;band=clamp(band+bv*dt+Math.sin(t*1.3)*40*dt,60,240);const inn=Math.abs(y-band)<32;if(inn)inT+=dt;
+  g.fillStyle='#1c1838';g.fillRect(0,0,560,300);g.fillStyle=inn?'rgba(255,216,74,.35)':'rgba(168,224,255,.22)';g.fillRect(0,band-32,560,64);for(let i=0;i<20;i++){g.fillStyle='rgba(255,255,255,.4)';g.fillRect((i*97+t*20)%560,(i*53)%300,2,2);}
+  g.save();g.translate(280,y);g.rotate(Math.sin(t*3)*0.3);g.font='44px sans-serif';g.fillText('🪶',-22,14);g.restore();if(hold&&Math.random()<.5){g.fillStyle=V.wand.col;g.beginPath();g.arc(280+rnd(-20,20),y+rnd(-20,20),3,0,7);g.fill();}
+  g.fillStyle='#fff';g.font='16px sans-serif';g.fillText('เวลา '+Math.max(0,12-t).toFixed(1)+'  ในแถบ '+Math.round(inT/Math.max(t,0.01)*100)+'%',12,24);
+  if(t>=12){done=true;removeEventListener('keydown',kd);removeEventListener('keyup',kd);classDone('charms','วิชาคาถา',inT/12/0.85);return false;}});});}
+/* Herbology: plots grow over days */
+function gHerb(){openV('🌱 วิชาสมุนไพร · เรือนกระจก',B=>{B.append(h17('p',{},'ปลูกเมล็ด → รดน้ำทุกวัน → โตทีละขั้นเมื่อผ่านไปหนึ่งวัน (รดน้ำแล้วเท่านั้น) → เก็บเกี่ยวเมื่อโตเต็มที่ (3 ขั้น) · วันนี้วันที่ '+(SIM.day+1)));const g=h17('div',{className:'grid'});
+ V.plots.forEach((p,i)=>{let h,act;if(!p){h='<b>🟫</b>แปลงว่าง<br><u>แตะเพื่อปลูก</u>';act=()=>{const k=Math.floor(Math.random()*PLANTS.length);V.plots[i]={k,g:0,w:true,d:SIM.day};saveV();Audio.sfx('step');toast('🌱 ปลูก'+PLANTS[k][1]+'แล้ว (รดน้ำให้แล้ว)');gHerb();};}
+  else if(p.g>=3){h='<b>'+PLANTS[p.k][0]+'</b>'+PLANTS[p.k][1]+'<br><u>โตเต็มที่! แตะเพื่อเก็บ</u>';act=()=>{V.plots[i]=null;addInv('plant',1);discover('plants',p.k,PLANTS[p.k][0]+' '+PLANTS[p.k][1]);if(p.k===0){toast('🙉 แมนเดรกร้องเสียงดังลั่น!');Audio.sfx('door');}saveV();gHerbDone();};}
+  else{h='<b>'+['🌰','🌱','🪴'][p.g]+'</b>'+PLANTS[p.k][1]+' ขั้น '+(p.g+1)+'/3<br>'+(p.w?'💧 รดน้ำแล้ววันนี้':'<u>แตะเพื่อรดน้ำ</u>');act=()=>{if(p.w)return toast('รดน้ำวันนี้แล้ว รอพรุ่งนี้นะ');p.w=true;saveV();for(let k=0;k<10;k++)spawnP('drop',player.x+rnd(-1,1),player.y,0,.5,1,3,'#8ac8ff');Audio.sfx('chime');ev('water');gHerb();};}
+  g.append(h17('div',{className:'tile',on:{click:act}},h));});B.append(g,btn('⏩ ข้ามไปวันถัดไป (นอนพัก)',()=>{closeV();nextDay();}));});}
+function gHerbDone(){openV('🌱 เก็บเกี่ยวสำเร็จ',B=>{classDone('herb','วิชาสมุนไพร',0.9,'ได้ 🌿 สมุนไพร (ใช้เป็นของขวัญได้)');});}
+/* Care of Magical Creatures */
+const CMC=[['hippogriff','🦅','ฮิปโปกริฟฟ์'],['niffler','🦫','นิฟเฟลอร์'],['bowtruckle','🌱','โบว์ทรักเคิล'],['puffskein','🟡','พัฟสเกน'],['kneazle','🐱','นีซเซิล'],['unicorn','🦄','ยูนิคอร์น']];
+function gCreatures(){const cr=pick(CMC);openV('🐾 วิชาดูแลสัตว์วิเศษ · '+cr[2],B=>{B.append(h17('p',{},cr[1]+' '+cr[2]+' ต้องการอะไร? ดูไอคอนแล้วแตะปุ่มให้ตรงก่อนเวลาหมด (8 รอบ)'+(cr[0]==='hippogriff'?' — อย่าลืมโค้งคำนับก่อนนะ!':'')));const {c,g}=cnv(B,560,260);
+ const ACT=[['🍖','ให้อาหาร'],['🖐️','ลูบหัว'],['🪮','แปรงขน'],['🙇','โค้งคำนับ'],['💧','ให้น้ำ']];let round=0,want=0,tl=3,score=0,mood=0.5,res='',done=false;const nw=()=>{want=Math.floor(Math.random()*ACT.length);tl=Math.max(1.4,3-round*0.18);};nw();
+ const r=h17('div',{className:'row',style:'justify-content:center'});ACT.forEach(([ic,t],i)=>r.append(btn(ic+' '+t,()=>{if(done)return;if(i===want){score++;mood=Math.min(1,mood+.12);res='💖';Audio.sfx('chime');}else{mood=Math.max(0,mood-.15);res='💢';Audio.sfx('step');}round++;if(round>=8)fin();else nw();})));B.append(r);
+ const fin=()=>{done=true;discover('creatures',cr[0],cr[1]+' '+cr[2]);classDone('cmc','วิชาดูแลสัตว์วิเศษ',score/8);};
+ gameLoop(dt=>{if(done)return false;tl-=dt;if(tl<=0){round++;mood=Math.max(0,mood-.1);res='⌛';if(round>=8){fin();return false;}nw();}
+  g.fillStyle='#3a5a3a';g.fillRect(0,0,560,260);g.fillStyle='#5a8a4a';g.fillRect(0,180,560,80);const bob=Math.sin(performance.now()/200)*6;g.font='110px sans-serif';g.fillText(cr[1],210,170+bob);
+  g.fillStyle='#fff';g.beginPath();g.ellipse(410,60,48,34,0,0,7);g.fill();g.font='40px sans-serif';g.fillText(ACT[want][0],388,74);g.font='36px sans-serif';g.fillText(res,150,90);
+  g.fillStyle='rgba(0,0,0,.3)';g.fillRect(12,12,200,14);g.fillStyle='#ff8ac8';g.fillRect(12,12,200*mood,14);g.fillStyle='#ffd84a';g.fillRect(12,30,200*Math.max(0,tl/3),8);g.fillStyle='#fff';g.font='15px sans-serif';g.fillText('รอบ '+Math.min(round+1,8)+'/8  ถูกใจ '+score,12,60);});});}
+/* Astronomy */
+const CONST=[['กลุ่มดาวสิงโต',[[120,160],[170,110],[240,100],[290,140],[260,200],[330,220]]],['กลุ่มดาวหงส์',[[280,40],[280,120],[280,210],[190,120],[370,120]]],['กลุ่มดาวนายพราน',[[200,40],[340,50],[250,140],[275,145],[300,150],[190,240],[350,235]]],['กลุ่มดาวค้างคาวจันทรา (ตั้งชื่อโดยลูน่า)',[[150,150],[220,90],[280,140],[340,90],[410,150],[280,200]]]];
+function gAstro(){if(TIMES[timeIdx]!=='night'&&TIMES[timeIdx]!=='sunset'){openV('🔭 วิชาดาราศาสตร์',B=>{B.append(h17('p',{},'ต้องรอกลางคืนก่อนนะ ดาวถึงจะออก 🌙'),btn('🌙 รอจนค่ำ',()=>{timeIdx=3;timeClock=0;buildCandles();updateHud();persist();gAstro();},'gold'));});return;}
+ openV('🔭 วิชาดาราศาสตร์ · ลากเส้นกลุ่มดาว',B=>{let ci=0,idx=0,t0=performance.now(),miss=0,done=false;const info=h17('p');B.append(info);const {c,g,P}=cnv(B,560,280);const bg=[...Array(120)].map(()=>[rnd(0,560),rnd(0,280),rnd(.5,1.8)]);
+  const upd=()=>{info.innerHTML='แตะดาวตามลำดับเพื่อลากเส้น <b>'+CONST[ci][0]+'</b> ('+(ci+1)+'/3)';};upd();
+  c.onpointerdown=e=>{if(done)return;const p=P(e),S=CONST[ci][1];const hit=S.findIndex(s=>Math.hypot(p.x-s[0],p.y-s[1])<20);if(hit===idx){idx++;Audio.sfx('chime');if(idx>=S.length){V.stars=(V.stars||[]);if(!V.stars.includes(CONST[ci][0]))V.stars.push(CONST[ci][0]);ci++;idx=0;if(ci>=3){done=true;const tt=(performance.now()-t0)/1000;classDone('astro','วิชาดาราศาสตร์',1-miss*0.08-Math.max(0,tt-30)/90,'บันทึกกลุ่มดาว '+V.stars.length+' กลุ่ม');}else upd();}}else if(hit>=0||true){miss++;}};
+  gameLoop(()=>{if(done)return false;g.fillStyle='#0c0a24';g.fillRect(0,0,560,280);for(const s of bg){g.fillStyle='rgba(255,255,255,'+(0.4+Math.sin(performance.now()/400+s[0])*0.3)+')';g.fillRect(s[0],s[1],s[2],s[2]);}
+   const S=CONST[ci][1];g.strokeStyle='#ffe08a';g.lineWidth=2;g.beginPath();for(let i=0;i<idx;i++){i?g.lineTo(S[i][0],S[i][1]):g.moveTo(S[i][0],S[i][1]);}g.stroke();
+   S.forEach((s,i)=>{g.fillStyle=i<idx?'#ffe08a':i===idx?'#fff':'#a8b8ff';g.beginPath();g.arc(s[0],s[1],i===idx?7+Math.sin(performance.now()/150)*2:5,0,7);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.font='11px sans-serif';g.fillText(i+1,s[0]+8,s[1]-8);});});});}
+/* Fishing */
+function gFish(){openV('🎣 ตกปลาที่ทะเลสาบดำ',B=>{B.append(h17('p',{},'แตะ "เหวี่ยงเบ็ด" → รอทุ่นจม แล้วแตะทันที! → กดค้างให้แถบเขียวทับปลาจนเกจเต็ม'));const {c,g}=cnv(B,560,260);let st='idle',t=0,bite=0,fy=130,fv=0,by=130,bv=0,prog=0.3,hold=false,fish=null;
+ const r=h17('div',{className:'row',style:'justify-content:center'});const cast=btn('🎣 เหวี่ยงเบ็ด',()=>{if(st==='idle'||st==='end'){st='wait';t=0;bite=rnd(1.5,4.5);Audio.sfx('step');}else if(st==='bite'){st='reel';prog=0.3;const w=[30,18,16,10,6,12,3];let s=Math.random()*w.reduce((a,b)=>a+b),i=0;while((s-=w[i])>0)i++;fish=i;}else if(st==='wait'){st='idle';toast('เร็วไป! ปลาตกใจหนี');}});r.append(cast);B.append(r);
+ c.onpointerdown=()=>{hold=true;if(st==='bite')cast.click();};c.onpointerup=c.onpointerleave=()=>hold=false;
+ gameLoop(dt=>{t+=dt;g.fillStyle='#1a2a4a';g.fillRect(0,0,560,260);for(let i=0;i<6;i++){g.strokeStyle='rgba(168,200,255,.15)';g.beginPath();g.moveTo(0,60+i*35+Math.sin(t+i)*4);g.bezierCurveTo(180,50+i*35,380,70+i*35,560,60+i*35+Math.cos(t+i)*4);g.stroke();}
+  if(st==='wait'||st==='bite'){const yb=st==='bite'?150+Math.sin(t*30)*4:140+Math.sin(t*2)*3;g.fillStyle='#ff4a4a';g.beginPath();g.arc(280,yb,9,0,7);g.fill();g.fillStyle='#fff';g.fillRect(274,yb-12,12,6);if(st==='wait'&&t>bite){st='bite';t=0;Audio.sfx('chime');}if(st==='bite'){g.fillStyle='#fff';g.font='bold 22px sans-serif';g.fillText('❗ ตอนนี้!',240,100);if(t>0.9){st='idle';toast('ปลาหลุดไปแล้ว 😢');}}}
+  if(st==='reel'){fv+=rnd(-500,500)*dt*(1+fish*0.3);fv*=0.95;fy=clamp(fy+fv*dt,20,240);bv+=(hold?-600:500)*dt;bv*=0.9;by=clamp(by+bv*dt,20,240);const inn=Math.abs(fy-by)<30;prog=clamp(prog+(inn?0.28:-0.2)*dt,0,1);
+   g.fillStyle='rgba(0,0,0,.3)';g.fillRect(250,10,40,240);g.fillStyle=inn?'rgba(122,216,122,.7)':'rgba(122,216,122,.35)';g.fillRect(250,by-30,40,60);g.font='26px sans-serif';g.fillText('🐟',255,fy+9);g.fillStyle='#333';g.fillRect(310,10,14,240);g.fillStyle='#ffd84a';g.fillRect(310,250-240*prog,14,240*prog);
+   if(prog>=1){st='end';const f=FISHES[fish];discover('fish',fish,f[0]+' '+f[1]);if(f[2]>0){addInv('fishi',1);ev('fish');}V.fishN=(V.fishN||0)+1;Audio.sfx('chime');burst('#8ac8ff',20);addGal(2+f[2]*3,'จับ'+f[1]);if(f[2]>=3)addHP(f[2]*2,'ปลาหายาก');toast(f[0]+' ได้'+f[1]+'!');cast.innerHTML='🎣 เหวี่ยงอีกครั้ง';}
+   if(prog<=0){st='end';toast('ปลาหลุดไปแล้ว 😢');cast.innerHTML='🎣 เหวี่ยงอีกครั้ง';}}
+  if(st==='end'&&fish!=null&&prog>=1){g.font='60px sans-serif';g.fillText(FISHES[fish][0],250,150);g.fillStyle='#fff';g.font='18px sans-serif';g.fillText(FISHES[fish][1],230,190);}});});}
+/* Gobstones vs NPC */
+function gGob(name,skill){name=name||'เพื่อน';skill=skill==null?0.5:skill;openV('🔵 กอบสโตน กับ '+name,B=>{B.append(h17('p',{},'ผลัดกันดีดลูกแก้ว 3 ลูกให้ใกล้ลูกเป้าหมายสีทองที่สุด แตะค้างเพื่อเล็ง (เส้นแกว่ง) ปล่อยเพื่อดีด ระยะ = เวลากดค้าง · ลูกใครใกล้สุดได้แต้ม — ระวัง! ลูกที่แพ้จะพ่นน้ำเหม็นใส่ 💦'));const {c,g,P}=cnv(B,560,300);
+ const J={x:400,y:150};const st=[];let turn=0,aim=0,pow=0,charging=false,moving=false,res=null,done=false;const cur=()=>turn%2;
+ const shoot=(a,p)=>{st.push({x:60,y:150,vx:Math.cos(a)*p,vy:Math.sin(a)*p,o:cur()});moving=true;Audio.sfx('step');};
+ c.onpointerdown=()=>{if(cur()===0&&!moving&&!done){charging=true;pow=0;}};c.onpointerup=()=>{if(charging){charging=false;shoot(aim,120+pow*420);}};
+ gameLoop(dt=>{const T=performance.now()/1000;aim=Math.sin(T*1.6)*0.5;if(charging)pow=Math.min(1,pow+dt*0.7);
+  for(const s of st){s.x+=s.vx*dt;s.y+=s.vy*dt;s.vx*=Math.pow(0.35,dt);s.vy*=Math.pow(0.35,dt);if(s.y<20||s.y>280){s.vy*=-1;s.y=clamp(s.y,20,280);}if(s.x>545){s.vx*=-1;s.x=545;}}
+  for(let i=0;i<st.length;i++)for(let j=i+1;j<st.length;j++){const a=st[i],b=st[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<22&&d>0){const nx=dx/d,ny=dy/d,p=((a.vx-b.vx)*nx+(a.vy-b.vy)*ny);if(p>0){a.vx-=p*nx;a.vy-=p*ny;b.vx+=p*nx;b.vy+=p*ny;}const o=(22-d)/2;a.x-=nx*o;a.y-=ny*o;b.x+=nx*o;b.y+=ny*o;}}
+  if(moving&&st.every(s=>Math.hypot(s.vx,s.vy)<6)){moving=false;turn++;if(turn>=6&&!done){done=true;let best=null;for(const s of st){const d=Math.hypot(s.x-J.x,s.y-J.y);if(!best||d<best.d)best={d,o:s.o};}let pts=0;const od=st.filter(s=>s.o===best.o).map(s=>Math.hypot(s.x-J.x,s.y-J.y)).sort((a,b)=>a-b);const opp=Math.min(...st.filter(s=>s.o!==best.o).map(s=>Math.hypot(s.x-J.x,s.y-J.y)));pts=od.filter(d=>d<opp).length;res=best.o===0?'win':'lose';
+    V.wins.gob=(V.wins.gob||0)+(res==='win'?1:0);saveV();ev('gob');setTimeout(()=>{if(res==='win'){toast('🏆 ชนะกอบสโตน '+pts+' แต้ม!');addGal(6+pts*3,'ชนะกอบสโตน');addHP(5,'กอบสโตน');}else toast('💦 แพ้... โดนน้ำเหม็นพ่นใส่! ('+name+' ได้ '+pts+' แต้ม)');const B2=$('v17B');B2.append(h17('div',{style:'text-align:center;font-size:18px'},res==='win'?'🏆 เธอชนะ!':'💦 '+name+' ชนะ'),h17('div',{className:'row',style:'justify-content:center'},''));B2.lastChild.append(btn('🔁 อีกตา',()=>gGob(name,skill)),btn('ปิด',()=>closeV(),'gold'));},300);}
+   else if(cur()===1)setTimeout(()=>{if(done||uiOpen!=='v17M')return;const ideal=Math.atan2(J.y-150,J.x-60),dist=Math.hypot(J.x-60,J.y-150);const err=(1-skill)*0.35;shoot(ideal+rnd(-err,err),(dist*1.02+rnd(-60,60)*(1-skill))*Math.log(1/0.35)/0.97);},700);}
+  g.fillStyle='#4a6a3a';g.fillRect(0,0,560,300);g.strokeStyle='rgba(255,255,255,.2)';for(let r=30;r<160;r+=30){g.beginPath();g.arc(J.x,J.y,r,0,7);g.stroke();}
+  g.fillStyle='#ffd84a';g.beginPath();g.arc(J.x,J.y,9,0,7);g.fill();for(const s of st){g.fillStyle=s.o?'#c8282e':'#3a7aff';g.beginPath();g.arc(s.x,s.y,11,0,7);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(s.x-3,s.y-3,3,0,7);g.fill();}
+  if(cur()===0&&!moving&&!done){g.strokeStyle='#fff';g.setLineDash([6,6]);g.beginPath();g.moveTo(60,150);g.lineTo(60+Math.cos(aim)*(60+pow*200),150+Math.sin(aim)*(60+pow*200));g.stroke();g.setLineDash([]);}
+  g.fillStyle='#fff';g.font='15px sans-serif';g.fillText((done?'จบเกม':(cur()===0?'ตาเธอ 🔵':'ตา '+name+' 🔴'))+'  ลูกที่ '+Math.min(3,Math.floor(turn/2)+1)+'/3',12,22);if(charging){g.fillStyle='#ffd84a';g.fillRect(12,30,140*pow,8);}});});}
+/* Patronus lesson */
+function gPatronus(){openV('🦌 บทเรียนคาถาผู้พิทักษ์ (เอกซ์เปกโต พาโตรนุม)',B=>{B.append(h17('p',{},'ศาสตราจารย์ลูปิน: "ความทรงจำที่มีความสุขที่สุดของเธอคืออะไร?"'));const g0=h17('div',{className:'grid'});
+ [['🌅 วันแรกที่ขึ้นรถไฟสายด่วนฮอกวอตส์'],['🌙 คืนที่นอนนับดาวกับลูน่า'],['🏆 ตอนบ้านชนะถ้วยประจำบ้าน'],['🍫 กินช็อกโกแลตกับเพื่อนๆ ข้างเตาผิง']].forEach(([m])=>g0.append(h17('div',{className:'tile',on:{click:()=>stage2(m)}},m)));B.append(g0);
+ function stage2(m){B.innerHTML='';B.append(h17('p',{},'นึกถึง "'+m+'"... กดค้างเพื่อรวบรวมพลัง แล้วปล่อยเมื่อเข็มอยู่ในแถบสีเงิน! (3 ครั้ง)'));const {c,g}=cnv(B,560,220);let p=0,hold=false,ok=0,tries=0,fx=0,done=false;
+  c.onpointerdown=()=>{if(!done){hold=true;p=0;}};c.onpointerup=()=>{if(!hold||done)return;hold=false;tries++;if(p>0.68&&p<0.86){ok++;fx=1;Audio.sfx('chime');}else Audio.sfx('step');if(tries>=3){done=true;if(ok>=2)unlock();else setTimeout(()=>{B.append(h17('p',{},'มีแค่หมอกจางๆ... ลองใหม่นะ'),btn('🔁 ลองใหม่',()=>gPatronus()));},300);}};
+  gameLoop(dt=>{if(hold)p=Math.min(1,p+dt*0.55);fx=Math.max(0,fx-dt);g.fillStyle='#0c1020';g.fillRect(0,0,560,220);g.fillStyle='rgba(30,30,40,.9)';g.font='70px sans-serif';g.fillText('👻',420+Math.sin(performance.now()/500)*10,120);
+   g.fillStyle='rgba(200,230,255,'+(0.2+fx*0.6)+')';g.beginPath();g.arc(120,110,30+p*60+fx*40,0,7);g.fill();g.fillStyle='#333';g.fillRect(40,190,480,14);g.fillStyle='#c8d8f0';g.fillRect(40+480*0.68,190,480*0.18,14);g.fillStyle='#fff';g.fillRect(40+480*p-2,184,4,26);g.font='15px sans-serif';g.fillText('สำเร็จ '+ok+'/3 · ครั้งที่ '+Math.min(tries+1,3),12,22);return !done||fx>0;});}
+ function unlock(){V.patronus=true;saveV();closeV();patronusCine();}});}
+function patronusCine(){document.body.append(h17('div',{className:'fxflash'}));setTimeout(()=>document.querySelectorAll('.fxflash').forEach(f=>f.remove()),1000);Audio.sfx('spell');
+ for(let i=0;i<120;i++){const a=i/120*Math.PI*2;spawnP('spark',player.x+Math.cos(a)*0.5,player.y+Math.sin(a)*0.5,Math.cos(a)*4,Math.sin(a)*4,1.8,6,pick(['#e8f4ff','#b8d8ff','#ffffff']));}
+ setTimeout(()=>castSpell(2),300);toast('🦌 ปลดล็อกคาถาผู้พิทักษ์! กด 3 เพื่อร่ายได้ทุกเมื่อ');addHP(20,'คาถาผู้พิทักษ์');addGal(20,'คาถาผู้พิทักษ์');ev('class','patronus');}
+const CLASSES=[{k:'potions',ic:'🧪',t:'ปรุงยา',z:'potions',go:gPotions},{k:'charms',ic:'✨',t:'คาถา',z:'charms',go:gCharms},{k:'herb',ic:'🌱',t:'สมุนไพร',z:'greenhouses',go:gHerb},{k:'cmc',ic:'🐾',t:'ดูแลสัตว์วิเศษ',z:'hagrid_hut',go:gCreatures},{k:'astro',ic:'🔭',t:'ดาราศาสตร์',z:'astronomy',go:gAstro},{k:'fly',ic:'🧹',t:'บทเรียนบิน (ห่วงทอง)',z:'quidditch',go:()=>{closeV();if(!player.fly)toggleBroom();}},{k:'patronus',ic:'🦌',t:'คาถาผู้พิทักษ์',z:'dada',go:gPatronus}];
+
+/* ===================== v17 fixes (A) & character polish ===================== */
+/* A1: chess/gobstones seats must be reachable from the room entrance */
+function zoneOrigin(z){const d=z.doors&&z.doors[0];let o;if(d){o=d.side==='N'?{x:d.pos+.5,y:1.3}:d.side==='S'?{x:d.pos+.5,y:z.h-1.3}:d.side==='W'?{x:1.3,y:d.pos+.5}:{x:z.w-1.3,y:d.pos+.5};}else o={x:z.w/2,y:z.h/2};return findFree(z,o.x,o.y);}
+function seatOK(z,o,p){if(solidAt(z,p.x,p.y,R+.05))return false;const P=navPath(z,o.x,o.y,p.x,p.y);if(!P||!P.length)return false;const L=P[P.length-1];return Math.hypot(L.x-p.x,L.y-p.y)<0.75;}
+function reachSeat(z,x,y){const c0=findFree(z,x,y);let o;try{o=zoneOrigin(z);if(seatOK(z,o,c0))return c0;}catch(e){z._seatLater=1;return c0;}SIM.seatFix=(SIM.seatFix||0)+1;
+ for(let r=0.6;r<=3.2;r+=0.4)for(let a=0;a<12;a++){const p={x:x+Math.cos(a/12*6.283)*r,y:y+Math.sin(a/12*6.283)*r};if(p.x<0.8||p.y<0.8||p.x>z.w-0.8||p.y>z.h-0.8)continue;if(seatOK(z,o,p))return p;}
+ SIM.seatFail=(SIM.seatFail||0)+1;return c0;}
+/* A2: world map — separate overlapping area rectangles (drawing only) */
+function wmSeparate(cl,P){for(let it=0;it<60;it++){let moved=false;for(let i=0;i<cl.length;i++)for(let j=i+1;j<cl.length;j++){const a=cl[i],b=cl[j],A=ZONES[a],B=ZONES[b],pa=P[a],pb=P[b];
+  const ox=Math.min(pa.x+A.w,pb.x+B.w)-Math.max(pa.x,pb.x),oy=Math.min(pa.y+A.h,pb.y+B.h)-Math.max(pa.y,pb.y);if(ox>0.6&&oy>0.6){moved=true;const mv=j?b:a;const pm=P[mv],other=mv===b?pa:pb;
+   if(ox<oy){pm.x+=(pm.x>=other.x?1:-1)*(ox+0.4);}else{pm.y+=(pm.y>=other.y?1:-1)*(oy+0.4);}}}if(!moved){SIM.wmIter=it;return;}}SIM.wmIter=60;}
+function wmOverlaps(){const L=worldLayout();let n=0;for(const c of L.clusters){for(let i=0;i<c.ids.length;i++)for(let j=i+1;j<c.ids.length;j++){const a=c.ids[i],b=c.ids[j],A=ZONES[a],B=ZONES[b],pa=c.P[a],pb=c.P[b];const ox=Math.min(pa.x+A.w,pb.x+B.w)-Math.max(pa.x,pb.x),oy=Math.min(pa.y+A.h,pb.y+B.h)-Math.max(pa.y,pb.y);if(ox>0.6&&oy>0.6)n++;}}return n;}
+/* A3: forest god rays that follow the player so they are always on screen */
+let fRays=null;
+function forestRayTick(){const want=/forest|aragog|centaur|maze|stone_circle|whomping/.test(zone.id)&&TIMES[timeIdx]!=='night'&&Q!==QUALS.low;
+ if(!want){if(fRays){scene.remove(fRays);fRays=null;}return;}
+ if(!fRays){fRays=new THREE.Group();const t=TIMES[timeIdx];const col=t==='sunset'?'#ffb070':t==='morning'?'#ffe6b0':'#fff6d8';const m=new THREE.ShaderMaterial({uniforms:{uC:{value:new THREE.Color(col)},uA:{value:0.55},uT:SKYT},vertexShader:RAY_V,fragmentShader:RAY_F,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
+  const g=new THREE.PlaneGeometry(1,1);for(let i=0;i<7;i++){const r=new THREE.Mesh(g,m);const L=8;r.scale.set(1.3+hash(i,5)*1.2,L,1);r.userData.o={x:(hash(i,11)-0.5)*16,y:(hash(i,13)-0.5)*12};r.rotation.set(-0.3,cam.yaw,-0.28);r.position.y=L*0.42;r.renderOrder=3;fRays.add(r);}scene.add(fRays);fRays.userData.c={x:1e9,y:1e9};}
+ const c=fRays.userData.c;if(Math.hypot(player.x-c.x,player.y-c.y)>5){c.x=player.x;c.y=player.y;for(const r of fRays.children){r.position.x=c.x+r.userData.o.x;r.position.z=c.y+r.userData.o.y;r.rotation.y=cam.yaw;}}}
+/* A5: NPCs arriving from a seamless neighbour walk in from beyond the edge */
+function v17NbIn(n,from,to){if(SIM.ff||to!==zone.id)return;const A=ZONES[from],B=ZONES[to];if(!isOutZ(A)||!isOutZ(B)||!(NB_OF[to]||[]).find(e=>e.id===from))return;
+ const z=B,tx=n.x,ty=n.y;const d=[[tx,'W'],[z.w-tx,'E'],[ty,'N'],[z.h-ty,'S']].sort((a,b)=>a[0]-b[0])[0];if(d[0]>4)return;const k=2.4;
+ n.x=d[1]==='W'?-k:d[1]==='E'?z.w+k:tx;n.y=d[1]==='N'?-k:d[1]==='S'?z.h+k:ty;n.nbIn={x:tx,y:ty,mv:n.moving};n.moving=false;SIM.walkIn=(SIM.walkIn||0)+1;}
+function nbInTick(dt){for(const n of NPCS){if(!n.nbIn)continue;if(n.zone!==zone.id){n.x=n.nbIn.x;n.y=n.nbIn.y;n.nbIn=null;continue;}const dx=n.nbIn.x-n.x,dy=n.nbIn.y-n.y,d=Math.hypot(dx,dy);if(d<0.1){n.moving=n.nbIn.mv;n.nbIn=null;continue;}const st=Math.min(d,1.7*dt);n.x+=dx/d*st;n.y+=dy/d*st;n.dir={x:dx,y:dy};n.walk=(n.walk||0)+st*3;n.moving=false;n.wait=Math.max(n.wait||0,0.5);n.v17walk=true;}}
+/* A6: richer per-character reactions */
+Object.assign(REACT16,{ginny:['เจ๋ง! ไว้ไปบินแข่งกันนะ','ฉันว่าเธอทำได้แน่','ฮ่าๆ พี่ๆ ฉันต้องอิจฉาแน่'],cedric:['ยอดเยี่ยม ขอให้สนุกนะ','ถ้ามีอะไรให้ช่วย บอกได้เลย'],cho:['น่ารักจัง ฉันชอบนะ','ไว้เล่าให้ฟังอีกนะ'],dean:['ขอวาดรูปเก็บไว้ได้ไหม?','สุดยอด!'],seamus:['ระวังมันระเบิดนะ ฮ่าๆ','ฉันเคยลองแล้ว... ควันเต็มเลย'],parvati:['ดวงดาวบอกว่าวันนี้เป็นวันดีของเธอ','อุ๊ย น่าตื่นเต้น!'],padma:['ตามหลักแล้วก็สมเหตุสมผลนะ','น่าสนใจจริงๆ'],lavender:['ว้าย น่ารักกก!','ต้องเล่าให้ปาราวตีฟังแล้ว'],colin:['ขอถ่ายรูปหน่อย! แชะ!','เจ๋งสุดๆ ไปเลย!'],oliver:['นี่แหละจิตวิญญาณนักกีฬา!','ไว้มาซ้อมควิดดิชด้วยกัน'],hannah:['ใจดีจังเลยนะ','ไปจิบชาด้วยกันไหม?'],ernie:['ฉันว่าเป็นความคิดที่ดีมาก','สุภาพบุรุษต้องยอมรับเลย'],pansy:['หึ ก็ไม่เลว','อย่าให้ใครรู้ว่าฉันชมนะ'],blaise:['ก็พอไหว','น่าเบื่อน้อยกว่าที่คิด'],mcgonagall:['ทำได้ดีมาก ห้าแต้ม','ระวังอย่าให้เกินขอบเขตล่ะ'],flitwick:['โอ้โฮ! ยอดเยี่ยม!','สะบัดแล้วพลิก จำไว้นะ!'],sprout:['ดินดีพืชก็งามจ้ะ','มาช่วยรดน้ำที่เรือนกระจกสิ'],lupin:['ช็อกโกแลตช่วยได้เสมอนะ','ฉันภูมิใจในตัวเธอ'],trelawney:['ฉันเห็นมันในใบชาแล้ว...','ดวงชะตาเธอเปล่งประกาย!'],pomfrey:['อย่าลืมพักผ่อนนะ','กินช็อกโกแลตซะ แล้วจะดีขึ้น'],pince:['ชู่ว! เบาๆ หน่อย','อย่าพับมุมหนังสือนะ!'],filch:['หึ อย่าทำพื้นเลอะล่ะ','มิสซิสนอร์ริสจับตาดูอยู่นะ'],rosmerta:['บัตเตอร์เบียร์อุ่นๆ สักแก้วไหมจ๊ะ?','ดีใจที่ได้เจอนะ'],dobby:['ด็อบบี้ดีใจที่สุดเลย!','ด็อบบี้จะเล่าให้วิงกี้ฟัง!'],winky:['วิงกี้... ดีใจค่ะ','วิงกี้ขอบคุณค่ะ'],nick:['สมัยฉันยังมีหัวติดคอแน่นๆ...','ช่างน่ารื่นรมย์!'],greylady:['...น่าสนใจ','เงียบไว้จะดีกว่า'],friar:['ใจเย็นๆ ให้อภัยกันนะ','ช่างอบอุ่นเหลือเกิน'],baron:['...','(บารอนพยักหน้าเงียบๆ)'],fatlady:['ลาลาลา~ รหัสผ่านล่ะจ๊ะ?','น่ารักจริงๆ!']});
+/* character polish: talking mouth & happy face variants */
+function faceVar(AF,closed,talk){const base=closed?AF.closed:AF.open;const key=(talk?'t':'h')+(closed?'c':'o');AF.var=AF.var||{};if(AF.var[key])return AF.var[key];const img=base.image;const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.drawImage(img,0,0);
+ g.clearRect(108,180,40,22);if(talk){g.fillStyle='#6a2030';g.beginPath();g.ellipse(128,192,9,7,0,0,7);g.fill();g.fillStyle='#ff8a9a';g.beginPath();g.ellipse(128,196,6,3,0,0,7);g.fill();}
+ else{g.strokeStyle='#8a3a4a';g.lineWidth=3;g.beginPath();g.moveTo(114,186);g.quadraticCurveTo(128,202,142,186);g.stroke();g.fillStyle='rgba(255,120,140,.35)';for(const s of[-1,1]){g.beginPath();g.ellipse(128+s*70,166,26,15,0,0,7);g.fill();}}
+ const t=new THREE.CanvasTexture(c);t.colorSpace=base.colorSpace;t.flipY=base.flipY;t.anisotropy=base.anisotropy;t.needsUpdate=true;return AF.var[key]=t;}
+function talkTick(){try{for(const c of CONVS){const id=c.lines[c.i]&&c.lines[c.i][0];const m=npcModels[id];if(m&&m.userData.parts&&c.t<c.dur*0.85)m.userData.parts.talk=now+0.15;}
+ if(luna.bubble&&luna.bubbleT>3.2&&lunaModel.userData.parts)lunaModel.userData.parts.talk=now+0.15;
+ if(uiOpen==='dlg'&&V17P.dlgN){const m=npcModels[V17P.dlgN.c.id];if(m&&m.userData.parts){const te=$('dlgText');const typing=te&&V17P.dlgLen!==te.textContent.length;V17P.dlgLen=te?te.textContent.length:0;if(typing)m.userData.parts.talk=now+0.2;else m.userData.parts.happy=now+0.2;}}
+ if(playerModel&&playerModel.userData.parts&&(V17P.pose||uiOpen==='photo'))playerModel.userData.parts.happy=now+0.2;}catch(e){}}
+
+function fixSeats(z){if(!z._gs||z._seatsFixed)return;z._seatsFixed=1;for(const sp of z._gs){if(sp.kind==='group')continue;sp.seats.forEach((s,i)=>{const p=reachSeat(z,s.x,s.y);if(p!==s&&(p.x!==s.x||p.y!==s.y)){s.x=p.x;s.y=p.y;const n=sp.occ[i];if(n&&n.zone===z.id){n.hx=n.tx=p.x;n.hy=n.ty=p.y;if(!n.moving){n.x=p.x;n.y=p.y;}}}});}}
+
+/* ---------- Hub ---------- */
+function openHub(){if(uiOpen&&uiOpen!=='v17M')return;openV('🎒 เมนูกิจกรรม · '+(player.name||'')+' ('+HTH[player.house]+')',B=>{const g=h17('div',{className:'grid'});
+ const T=(ic,t,sub,f)=>g.append(h17('div',{className:'tile',on:{click:f}},'<b>'+ic+'</b>'+t+(sub?'<br><small>'+sub+'</small>':'')));
+ T('📖','สมุดบันทึก','การ์ด สัตว์ พืช สถานที่ (J)',()=>openJournal());T('🎒','กระเป๋า','🪙 '+V.gal+' · ของ '+Object.keys(V.inv).length+' ชนิด',()=>openInv());
+ const qd=V.quests&&V.quests.day===SIM.day?V.quests.list.filter(q=>q.done).length:0;T('📜','ภารกิจประจำวัน',qd+'/4 สำเร็จ (Q)',()=>openQuests());T('🏆','ถ้วยประจำบ้าน',HTH[player.house]+' '+(V.hp[player.house]||0)+' แต้ม',()=>openCup());
+ T('📅','ปฏิทินเทศกาล',(festToday()?festToday().ic+' '+festToday().th:'วันที่ '+(SIM.day+1))+' · '+SEASON[SIM.day%8],()=>openCalendar());
+ T('🧹',player.fly?'ลงจอด':'ขี่ไม้กวาด','กลางแจ้งเท่านั้น (B)',()=>{closeV();toggleBroom();});T('📷','โหมดถ่ายภาพ','ฟิลเตอร์ ท่าทาง บันทึก PNG (P)',()=>{closeV();openPhoto();});
+ const ev2=lunaEvAvail();T('💙','ลูน่า','ระดับความสนิท '+lunaLv()+'/10'+(ev2.length?' · ✨ มีเหตุการณ์พิเศษ!':''),()=>openLunaHub());
+ T('😴','นอนพักถึงวันใหม่','ข้ามไปเช้าวันถัดไป',()=>{closeV();nextDay();});T('⚙️','ตั้งค่า','เสียง กราฟิก ป้ายชื่อ บันทึก',()=>openSettings());
+ if(!V.sorted)T('🎩','พิธีคัดสรร','ให้หมวกเลือกบ้าน',()=>openSorting());
+ B.append(g,h17('h2',{style:'margin-top:12px;font-size:17px'},'🏫 คาบเรียน (มินิเกม)'));const g2=h17('div',{className:'grid'});
+ for(const c of CLASSES){const here=zone.id===c.z;g2.append(h17('div',{className:'tile',on:{click:()=>{if(here||c.k==='herb'&&zone.id==='greenhouses')c.go();else{closeV();goClass(c);}}}},'<b>'+c.ic+'</b>'+c.t+'<br><small>'+(here?'▶ เริ่มเรียนเลย':'🚶 เดินทางไป '+ZONES[c.z].th)+(V.cls[c.k]?' · เรียนแล้ว '+V.cls[c.k]:'')+(c.k==='patronus'&&V.patronus?' ✅':'')+'</small>'));}
+ g2.append(h17('div',{className:'tile',on:{click:()=>{if(['black_lake','lake_shore','boathouse'].includes(zone.id))gFish();else{closeV();goClass({z:'black_lake',t:'ตกปลา',go:gFish});}}}},'<b>🎣</b>ตกปลา<br><small>ทะเลสาบดำ</small>'));
+ g2.append(h17('div',{className:'tile',on:{click:()=>{const n=NPCS.find(n=>n.zone===zone.id&&!n.c.creature);gGob(n?n.c.th:'นักเรียนรุ่นพี่',0.5);}}},'<b>🔵</b>กอบสโตน<br><small>เล่นกับคนใกล้ตัว หรือคุยกับเพื่อน → 🔵</small>'));
+ B.append(g2,h17('p',{style:'font-size:12px;opacity:.8'},'ปุ่มลัด: H เมนู · J สมุดบันทึก · Q ภารกิจ · B ไม้กวาด · P ถ่ายภาพ · E คุย · L ลูน่า · M แผนที่ · 1-4 คาถา'));});}
+function goClass(c){changeZone(c.z,{x:ZONES[c.z].w/2,y:ZONES[c.z].h/2},false);toast('📍 มาถึง '+ZONES[c.z].th+' แล้ว · แตะปุ่มสีทองด้านล่างเพื่อเริ่ม');}
+function openLunaHub(){openV('💙 ลูน่า เลิฟกู๊ด',B=>{const lv=lunaLv();B.append(h17('p',{},'ระดับความสนิท: '+'💙'.repeat(lv)+'🤍'.repeat(10-lv)+' ('+lv+'/10)<br>เพิ่มได้จาก: ให้ของขวัญ (คุยกับลูน่า L → 🎁), จับนาร์เกิล, คุยทุกวัน'));
+ for(const e of LUNA_EV){const done=V.lunaEv.includes(e.id),ok=lv>=e.lv;B.append(h17('div',{className:'tile'+(ok?'':' lock'),style:'text-align:left;margin:6px 0',on:{click:()=>{if(ok)playLunaEvent(e);else toast('ต้องสนิทระดับ '+e.lv+' ก่อน');}}},'<b style="display:inline;font-size:16px">'+(done?'✅':ok?'✨':'🔒')+'</b> '+e.t+' — ระดับ '+e.lv+(done?' (ดูซ้ำได้)':ok?' แตะเพื่อเริ่ม!':'')));}
+ B.append(btn('🎁 ให้ของขวัญลูน่า',()=>giftMenu('luna','ลูน่า',()=>{lunaBubble('โอ้ ขอบใจนะ! นี่จะช่วยไล่ร็อกสเปิร์ตได้แน่ๆ');checkLunaEv();})));});}
+function checkLunaEv(){const a=lunaEvAvail();if(a.length)setTimeout(()=>toast('✨ ลูน่ามีเหตุการณ์พิเศษรอเธออยู่! (🎒 → 💙 ลูน่า)'),1200);}
+/* ---------- Settings ---------- */
+function openSettings(){openV('⚙️ ตั้งค่า',B=>{const vol=h17('input',{type:'range',min:0,max:100,value:Math.round(V.vol*100),style:'width:220px'});vol.oninput=()=>{V.vol=vol.value/100;applyVol();saveV();};
+ const r1=h17('div',{className:'row'},'🔊 ระดับเสียง ');r1.append(vol);B.append(r1);
+ const q=new URLSearchParams(location.search).get('q')||'auto';const r2=h17('div',{className:'row'},'🎨 คุณภาพกราฟิก: ');for(const [k,t] of [['low','ต่ำ (ลื่น)'],['auto','อัตโนมัติ'],['high','สูง']])r2.append(btn(t,()=>{const u=new URL(location.href);if(k==='auto')u.searchParams.delete('q');else u.searchParams.set('q',k);saveV();persist();location.href=u.toString();},q===k?'gold':''));B.append(r2);
+ const r3=h17('div',{className:'row'},'🏷️ ป้ายชื่อ: ');r3.append(btn('สลับโหมดป้ายชื่อ',()=>{$('bTags').click();}));B.append(r3);
+ const r4=h17('div',{className:'row'},'💾 เกมบันทึกอัตโนมัติใน localStorage · ');r4.append(btn('ส่งออกเซฟ',()=>{saveV();persist();const blob=new Blob([JSON.stringify({base:localStorage.getItem(SAVE_KEY),v17:localStorage.getItem(SAVE_KEY+'_v17')})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hogwarts-cozy-save.json';a.click();}),
+  btn('นำเข้าเซฟ',()=>{const i=h17('input',{type:'file',accept:'.json'});i.onchange=()=>{const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);if(d.base)localStorage.setItem(SAVE_KEY,d.base);if(d.v17)localStorage.setItem(SAVE_KEY+'_v17',d.v17);location.reload();}catch(e){toast('ไฟล์เซฟไม่ถูกต้อง');}};fr.readAsText(i.files[0]);};i.click();}),
+  btn('🗑️ เริ่มใหม่ (ลบความคืบหน้า v17)',()=>{if(!confirm('ลบความคืบหน้าเกลเลียน การ์ด ภารกิจ ทั้งหมด?'))return;localStorage.removeItem(SAVE_KEY+'_v17');location.reload();}));B.append(r4);
+ B.append(h17('p',{style:'font-size:12px'},'ตัวละคร/ทรงผม: ปุ่ม ⚙️ มุมขวาบน'));});}
+function applyVol(){if(Audio.master&&!Audio.muted)Audio.master.gain.value=V.vol;}
+/* ---------- Context buttons ---------- */
+const CTX={honeydukes:[['🍭 ซื้อขนม',()=>openShop('honeydukes')]],weasleys_wheezes:[['🎆 ร้านวีสลีย์',()=>openShop('weasleys_wheezes')]],ollivanders:[['🪄 ปรับแต่งไม้กายสิทธิ์',openOllivander]],malkins:[['👘 ร้านเสื้อคลุม',openMalkin]],eeylops:[['🦉 สัตว์เลี้ยง & อาหาร',()=>openShop('eeylops')]],flourish_blotts:[['📚 ร้านหนังสือ',()=>openShop('flourish_blotts')]],
+ hogsmeade:[['🍭 ฮันนี่ดุกส์',()=>openShop('honeydukes')],['💐 แผงของฝาก',()=>openShop('hogsmeade')]],diagon_alley:[['🪄 โอลลิแวนเดอร์',openOllivander],['👘 มาดามมัลกิ้น',openMalkin],['🎆 ร้านวีสลีย์',()=>openShop('weasleys_wheezes')],['🦉 อีล็อปส์',()=>openShop('eeylops')]],
+ potions:[['🧪 เรียนปรุงยา',gPotions]],charms:[['✨ เรียนคาถา',gCharms]],greenhouses:[['🌱 เรือนกระจก',gHerb]],hagrid_hut:[['🐾 ดูแลสัตว์วิเศษ',gCreatures]],astronomy:[['🔭 ดาราศาสตร์',gAstro]],quidditch:[['🧹 บทเรียนบิน',()=>{if(!player.fly)toggleBroom();}]],dada:[['🦌 คาถาผู้พิทักษ์',gPatronus]],
+ black_lake:[['🎣 ตกปลา',gFish]],lake_shore:[['🎣 ตกปลา',gFish]],boathouse:[['🎣 ตกปลา',gFish]],great_hall:[['📜 กระดานภารกิจ',openQuests],['🏆 ถ้วยประจำบ้าน',openCup]],entrance_hall:[['📜 กระดานภารกิจ',openQuests]]};
+function ctxRefresh(){const C=$('v17ctx');C.innerHTML='';const L=CTX[zone.id]||[];for(const [t,f] of L)C.append(btn(t,()=>{if(uiOpen&&uiOpen!=='v17M')return;f();}));if(lunaEvAvail().length&&!uiOpen)C.append(btn('💙 เหตุการณ์ลูน่า',openLunaHub));}
+/* ---------- keys ---------- */
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;if(uiOpen==='photo'&&(e.code==='KeyP'||e.code==='Escape')){closePhoto();return;}if(uiOpen==='v17M'&&e.code==='Escape'){closeV();return;}if(uiOpen)return;
+ if(e.code==='KeyH')openHub();else if(e.code==='KeyJ')openJournal();else if(e.code==='KeyQ')openQuests();else if(e.code==='KeyB')toggleBroom();else if(e.code==='KeyP')openPhoto();});
+/* ---------- tick ---------- */
+let v17Z='',v17Acc=0,postT=4,qmWas=false;
+function v17Tick(dt){try{
+ if(uiOpen!=="photo"&&document.body.classList.contains("photo")){document.body.classList.remove("photo");renderer.domElement.style.filter="";V17P.pose=null;}
+ if(zone.id!==v17Z){v17Z=zone.id;if(discover('places',zone.id,'📍 '+zone.th))ev('zone');ctxRefresh();if(player.fly&&!isOut())land(true);}
+ if(SIM.day!==V.lastDay)onNewDay();
+ if(zone._gs&&!zone._seatsFixed)fixSeats(zone);nbInTick(dt);talkTick();forestRayTick();flyTick(dt);ringTick(dt);nargTick(dt);petTick(dt);festTick(dt);rainbowTick(dt);snowTick(dt);seasonTick(dt);castleTick();
+ if(V17P.post>0&&!uiOpen){postT-=dt;if(postT<=0){postT=6;deliverPost();}}
+ v17Acc+=dt;if(v17Acc>1){v17Acc=0;hudV();ctxRefresh();for(const n of NPCS){if(n.zone===zone.id&&n.c.creature&&CREAT.includes(n.c.id)&&Math.hypot(n.x-player.x,n.y-player.y)<3.5)discover('creatures',n.c.id,CREAT_TH[n.c.id]);}
+  if(!V.sorted&&!uiOpen&&player.name&&!V17P.sortAsked){V17P.sortAsked=true;openSorting();}}
+ if(QM.on&&QM.done&&!qmWas){qmWas=true;const f=festToday();const my=QM.score&&QM.myTeam!=null?QM.score[QM.myTeam]:0;addHP(10,'แข่งควิดดิช');if(f&&f.id==='qcup'){addGal(40,'นัดชิงควิดดิช');toast('🏟️ จบนัดชิงถ้วยควิดดิช!');}ev('qm');}if(!QM.on||!QM.done)qmWas=false;
+}catch(err){console.error(err);}}
+/* spell hook: wand colour sparks + quests */
+function v17Spell(i){ev('spell',i);const c=V.wand.col;for(let k=0;k<14;k++)spawnP('spark',player.x+player.dir.x*0.6+rnd(-.3,.3),player.y+player.dir.y*0.6+rnd(-.3,.3),rnd(-1,1),rnd(-1,1),1,4,c);
+ if(i===2){document.body.append(h17('div',{className:'fxflash',style:'background:radial-gradient(circle,rgba(200,230,255,.6),rgba(200,230,255,0) 60%)'}));setTimeout(()=>document.querySelectorAll('.fxflash').forEach(f=>f.remove()),1000);for(let k=0;k<50;k++){const a=k/50*Math.PI*2;spawnP('spark',player.x,player.y,Math.cos(a)*3,Math.sin(a)*3,1.4,5,'#d8ecff');}}
+ if(i===0&&TIMES[timeIdx]==='night'){for(let k=0;k<20;k++)spawnP('spark',player.x+rnd(-3,3),player.y+rnd(-3,3),0,-.3,2,3,'#fff4c8');}}
+/* dialogue extras */
+function v17DlgOpts(n){const c=n.c;ev('talk',c.id);V17P.dlgN=n;const o=[['🎁 ให้ของขวัญ',()=>{closeModal();giftMenu(c.id,c.th,()=>{});}]];if(!c.creature)o.push(['🔵 เล่นกอบสโตน',()=>{closeModal();gGob(c.th,c.house==='N'?0.75:0.45);}]);return o;}
+hudV();applyVol();
+setTimeout(()=>{if(Audio.master)applyVol();},3000);
+window.__v17={V,openHub,openJournal,openSorting,openShop,openOllivander,openMalkin,openQuests,openCup,openCalendar,openPhoto,closePhoto,savePhoto,toggleBroom,land,gPotions,gCharms,gHerb,gCreatures,gAstro,gFish,gGob,gPatronus,playLunaEvent,LUNA_EV,nextDay,giftMenu,openLunaHub,openSettings,P:V17P,NARG,saveV,closeV,useItem,openInv,cupAward,deliverPost,queueLetter,get rings(){return V17P.rings;},castleG:()=>castleG,festG:()=>festG,setDay(d){SIM.day=d;},wmOverlaps,reachSeat,get zone(){return zone.id;}};
+function v17LunaOpts(){ev('luna');if(V.lunaTalkDay!==SIM.day){V.lunaTalkDay=SIM.day;V.lunaH=(V.lunaH||0)+1;saveV();}const o=[['🎁 ให้ของขวัญ',()=>{closeModal();giftMenu('luna','ลูน่า',()=>{lunaBubble('โอ้ ขอบใจนะ! นี่จะช่วยไล่ร็อกสเปิร์ตได้แน่ๆ');checkLunaEv();});}],['💙 ความสนิท & เหตุการณ์',()=>{closeModal();openLunaHub();}]];return o;}
+
+
 /* ===================== MAIN LOOP ===================== */
 let fpsAcc=0,fpsN=0,fps=60;
 function frame(ts){let dt=(ts-last)/1000;last=ts;if(!(dt>0))dt=1/60;dt=Math.min(dt,0.05);lastDt=dt;fpsAcc+=dt;fpsN++;if(fpsAcc>1){fps=fpsN/fpsAcc;fpsAcc=0;fpsN=0;}
-  try{update(dt);bunTick(dt);npcGreetTick();npcEmoteTick(dt);lunaPairTick(dt);gatherTick(dt);nbWalkTick(dt);lodTick(dt);render();}catch(err){console.error(err);}requestAnimationFrame(frame);}
+  try{update(dt);bunTick(dt);npcGreetTick();npcEmoteTick(dt);lunaPairTick(dt);gatherTick(dt);nbWalkTick(dt);lodTick(dt);v17Tick(dt);render();}catch(err){console.error(err);}requestAnimationFrame(frame);}
 window.__dh=drawHuman;window.__qi=qInfo;window.__dc2=drawCreature2;window.__game={checkDoors:()=>checkDoors(),get doorCD(){return doorCooldown;},set doorCD(v){doorCooldown=v;},LUNA_LOOK,THREE,renderer,scene,camera,get PXI(){return [PX,LW,LH]},MAIN_ZONE_IDS,ZONES,CHARACTERS,NPCS,player,luna,get zone(){return zone;},changeZone,unstuck,castSpell,openDirectory,openMap,openLuna,closeModal,get fps(){return fps;},get uiOpen(){return uiOpen;},solidAt,doorSpawn,findFree,setTime:i=>{timeIdx=i;buildCandles();updateHud();},setWeather:w=>{weather=w;updateHud();}};
 changeZone('entrance_hall',{x:10,y:9},true);updateHud();
 if(!save.name)openSetup();else setTimeout(()=>lunaBubble('ยินดีต้อนรับกลับมาจ้ะ '+player.name+'~'),800);
