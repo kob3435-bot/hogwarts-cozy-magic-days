@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest"><meta name="screen-orientation" content="landscape"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><link rel="apple-touch-icon" href="icon.svg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1530'/%3E%3Cline x1='12' y1='54' x2='44' y2='18' stroke='%238b5a2b' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='16' r='4' fill='%23fff6b0'/%3E%3Cellipse cx='22' cy='30' rx='10' ry='8' fill='%23ff8fc8' stroke='%23fff' stroke-width='2'/%3E%3Cellipse cx='42' cy='38' rx='10' ry='8' fill='%2380d8ff' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M31 32 Q32 30 33 35' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <script>/* Tailwind is optional: the game is fully styled by the embedded CSS below if the CDN is unavailable. */</script>
-<script src="https://cdn.tailwindcss.com" async onerror="void 0"></script>
+
 <style>
 :root{--gold:#f2d68a;--ink:#2a2140;--panel:rgba(30,22,52,.92)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -2700,7 +2700,7 @@ function buildElfAnime(L,house,opt){opt=opt||{};const lite=!!opt.lite;const id=L
   root.userData.parts={elf:1,rig,AF,float:false,L,look:0,lids:[],fem:false,adult:false};root.userData.h=0.9;styleModel(root,{w:1.4});return root;}
 function buildHuman(L,house,opt){opt=opt||{};if(L.elf)return buildElfAnime(L,house,opt);if(!QOK)return buildHumanV7(L,house,opt);const lite=!!opt.lite;const id=L.id||'';const H=HOUSES[house||'N']||HOUSES.N;const stu=!!(house&&house!=='N'&&!L.robe);
   const fem=isFem(L);const base=(fem?'f':'m')+((lite||Q===QUALS.low)&&!opt.hi?'_lo':'');const I=qInfo(base);const ghost=!!L.ghost;
-  const M=(c,o)=>pbr(c,Object.assign({ghost},o||{}));const skinC=L.skin||SK.l,hairC=L.hair||'#3a2a1a',robeC=L.robe||(stu?'#2a2c48':'#3e3858');
+  const M=(c,o)=>pbr(c,Object.assign({ghost},o||{}));const skinC=L.skin||SK.l,hairC=L.hair||'#3a2a1a',robeC=L.robe||(stu?'#3a3e66':'#4c4470');
   const root=new THREE.Group(),rig=new THREE.Group();root.add(rig);const sc=SkeletonUtils.clone(QB[base].scene);rig.add(sc);sc.updateMatrixWorld(true);
   const bones={};sc.traverse(o=>{if(o.isBone)bones[o.name]=o;});const body=qBody(sc);
   const ghostify=m=>{m.transparent=true;m.opacity=0.5;m.depthWrite=false;m.emissive=new THREE.Color('#8fa8ff');m.emissiveIntensity=0.45;return m;};
@@ -2742,7 +2742,7 @@ function buildHuman(L,house,opt){opt=opt||{};if(L.elf)return buildElfAnime(L,hou
   if(ghost)root.traverse(o=>{if(o.isMesh)o.castShadow=false;});
   const blob=new THREE.Mesh(PLANE,new THREE.MeshBasicMaterial({map:BLOBTEX,transparent:true,depthWrite:false,opacity:0.5}));blob.rotation.x=-Math.PI/2;blob.position.y=0.015;blob.scale.set(0.75*target/1.68*xz/0.9,0.5*target/1.68,1);root.add(blob);
   const D={};for(const n of QORDER)D[n]=new THREE.Quaternion();
-  root.userData.parts={human:1,q:1,hand,rig,bones,rest:I.rest,D,F:{},k,AF,float:ghost||!!L.peeves,L,look:0,lids:[],fem,adult};root.userData.h=target+(L.hat?0.25:0);try{animQ(root,0,false,0,0,null,0.016,false);}catch(e){}return root;}
+  if(bones.Head&&!/hagrid|dumbledore|snape|mcgonagall|filch|lupin|sirius/.test(id))bones.Head.scale.setScalar(1.1);root.userData.parts={human:1,q:1,hand,rig,bones,rest:I.rest,D,F:{},k,AF,float:ghost||!!L.peeves,L,look:0,lids:[],fem,adult};root.userData.h=target+(L.hat?0.25:0);try{animQ(root,0,false,0,0,null,0.016,false);}catch(e){}return root;}
 function qSkirtTrim(base,gap,flare,len){const key='tr'+base+gap+flare+len;if(QSHELL[key])return QSHELL[key];const g=qSkirt(base,gap,flare+0.006,len).clone();// keep only first/last columns as a lining stripe
   const S=40,R=14,ix=[];for(let r=0;r<R;r++)for(const s of[0,S-1]){const a=r*(S+1)+s,b=a+S+1;ix.push(a,b,a+1,b,b+1,a+1);}g.setIndex(ix);return QSHELL[key]=g;}
 let _CLOTH=null,_KNIT=null;
@@ -3125,9 +3125,9 @@ const lumosLight=new THREE.PointLight(0xcfe8ff,0,8,1.4);scene.add(lumosLight);co
 const _m4=new THREE.Matrix4(),_q=new THREE.Quaternion(),_p=new THREE.Vector3(),_s=new THREE.Vector3();
 function render(){const dt=lastDt;ensurePlayer();
   const _sk=(QM.on&&QM.mode==='seeker'&&!QM.done)||!!player.fly;if(playerModel.userData.parts&&playerModel.userData.parts.q)applyActVisual(playerModel,_sk?'fly':V17P.pose&&!player.moving?V17P.pose:(QM.watchSit&&!player.moving?'sit':'none'),_sk?false:player.moving,now,true);if(QM.watchSit&&player.moving)QM.watchSit=false;playerModel.position.set(player.x,_sk?(player.fly?V17P.alt:(QM.palt||2)):player.boat?0.12:0,player.y);animChar(playerModel,now,_sk?false:player.moving,player.walk,0,player.dir,dt,!!player.sit||_sk||(QM.watchSit&&!player.moving));
-  lunaModel.position.set(luna.x,player.boat?0.12:0,luna.y);animChar(lunaModel,now+1.3,luna.moving,luna.walk,1.3,player.sit?{x:player.x-luna.x,y:player.y-luna.y}:luna.dir,dt,!!player.sit||player.boat);
+  lunaModel.position.set(luna.x,player.boat?0.12:0,luna.y);animChar(lunaModel,now+1.3,luna.moving,luna.walk,1.3,player.sit?{x:player.x-luna.x,y:player.y-luna.y}:luna.dir,dt,!!player.sit||player.boat);lunaLife(dt,!!player.sit||player.boat);
   if(boatMesh){if(player.boat){boatMesh.position.set(player.x-0.25,Math.sin(now*2)*0.03,player.y);boatMesh.rotation.y=playerModel.rotation.y;}else{const d=zone.dock;boatMesh.position.set(d[0]+1,Math.sin(now*2)*0.03,d[1]+d[3]+0.9);}}
-  for(const n of NPCS){if(n.inMatch)continue;const m=npcModels[n.c.id];if(!m)continue;const fly=n.act==='fly'&&!n.moving&&(zone.out||zone.outdoorSky);const act=fly||n.act!=='fly'?n.act:'chat';const seat=!isGhost(n.c)&&applyActVisual(m,act,n.moving,now+n.phase,n.c.house!=='N');const _o=VZ[n.zone]||Z0;m.position.set(n.x+_o.x,fly?1.4+Math.sin(now*1.6+n.phase)*0.3:isGhost(n.c)?0.12+Math.sin(now*1.2+n.phase)*0.1:0,n.y+_o.y);animChar(m,now+n.phase,n.moving||!!n.nbT,n.walk,n.phase,n.dir,dt,!n.moving&&!n.nbT&&seat);}
+  for(const n of NPCS){if(n.inMatch)continue;const m=npcModels[n.c.id];if(!m)continue;const fly=n.act==='fly'&&!n.moving&&(zone.out||zone.outdoorSky);const act=fly||n.act!=='fly'?n.act:'chat';const seat=!isGhost(n.c)&&applyActVisual(m,act,n.moving,now+n.phase,n.c.house!=='N');const _o=VZ[n.zone]||Z0;m.position.set(n.x+_o.x,fly?1.4+Math.sin(now*1.6+n.phase)*0.3:isGhost(n.c)?0.12+Math.sin(now*1.2+n.phase)*0.1:0,n.y+_o.y);animChar(m,now+n.phase,n.moving||!!n.nbT,n.walk,n.phase,n.dir,dt,!n.moving&&!n.nbT&&seat);lifeTick(n,m,now+n.phase,dt,!n.moving&&!n.nbT&&seat);}
   for(const g of animFurn){if(g.userData.owl)g.userData.owl.rotation.y=Math.sin(now*0.7+g.position.x)*0.6;if(g.userData.sway)g.rotation.y=Math.sin(now*0.3)*0.05;if(g.userData.spin)g.userData.spin.rotation.y=now;if(g.userData.hand)g.userData.hand.rotation.z=-now*0.3;if(g.userData.willow)g.userData.willow.rotation.y=Math.sin(now*0.8)*0.6;
     for(const c of g.children){if(c.userData.flame)c.scale.y=0.45+Math.sin(now*12+c.position.x*5)*0.08;if(c.userData.float!=null)c.position.y=0.95+Math.sin(now*2+c.userData.float)*0.12;}}
   updateAmbient(dt);
@@ -4694,6 +4694,50 @@ buildCandles=function(){if(!zone)return;if(BUN_SYNC||!bunActive||!bunActive.read
 function tcaTick(){const c=TCA.on;if(!c)return;if(c.id!==zone.id||c.key!==bunKey()){scene.remove(c.b.root);TCA.on=null;if(bunActive&&bunActive.key!==bunKey())_buildCandlesSync();return;}
  const t0=performance.now();try{while(!c.b.ready&&performance.now()-t0<4)bunStep(c.b);}catch(e){console.warn('tca',e);scene.remove(c.b.root);TCA.on=null;_buildCandlesSync();return;}
  if(c.b.ready){TCA.on=null;const old=bunActive;if(old)bunDispose(old);BUN[c.id]=c.b;bunActivate(c.b);}}
+
+/* ===================== v20: character liveliness (personality idles & walk styles) ===================== */
+var PERS={luna:{w:'skip',a:['sky','spin','hum','look'],e:['🎵','🌙','🦋','👓','✨']},ron:{a:['eat','yawn','look'],e:['🍫','🥱','🍗','😋']},
+ hermione:{a:['read','hand','look'],e:['📖','☝️','📚','✨']},harry:{a:['look','snitch','wand'],e:['⚡','🟡','🧹','😊']},
+ neville:{a:['trip','plant','look'],e:['🌱','🐸','😅']},fred:{a:['spin','firework','wave'],e:['🎆','😜','💥','🎉']},george:{a:['firework','spin','wave'],e:['🎇','😝','💥','🎉']},
+ draco:{w:'strut',a:['behind','smug'],e:['😏','🐍','💚']},hagrid:{a:['wave','look'],e:['👋','🐉','🎃','😄']},dumbledore:{w:'stroll',a:['behind','sky'],e:['🍬','✨','🎶','🌟']},
+ snape:{a:['swirl','behind'],e:['😒','🧪','…']},mcgonagall:{a:['behind','look'],e:['📜','🐈','😌']},dobby:{w:'bounce',a:['hop','spin','wave'],e:['🧦','😊','💖']},
+ ginny:{a:['wand','wave','look'],e:['🧹','💪','😄']},cedric:{a:['wave','look'],e:['😊','🏆']},cho:{a:['look','wave'],e:['🌸','😊']},seamus:{a:['firework','wand'],e:['💥','😅']},
+ dean:{a:['look','wave'],e:['⚽','🎨']},colin:{w:'bounce',a:['camera','hop'],e:['📸','🤩']},flitwick:{w:'bounce',a:['wand','hop'],e:['✨','🎵']},sprout:{a:['plant','wave'],e:['🌱','🌻']},
+ filch:{a:['behind','look'],e:['😠','🐈']},lavender:{a:['wave','hop'],e:['💕','😄']},parvati:{a:['wave','look'],e:['🔮','💕']},trelawney:{w:'stroll',a:['sky','hum'],e:['🔮','👁️','🌫️']},
+ lupin:{w:'stroll',a:['read','look'],e:['🍫','🌕']},sirius:{a:['look','wave'],e:['🐕','😄']},tonks:{w:'bounce',a:['hop','spin'],e:['💗','😝']},oliver:{a:['wand','look'],e:['🏆','🧹']}};
+var PERS_HOUSE={G:['wave','look','hop'],R:['read','sky','look'],H:['wave','plant','look'],S:['behind','smug','look'],N:['look','behind']};
+var LIFE_DUR={sky:2.6,spin:1.2,hum:3,look:2.4,eat:3,yawn:2.2,read:4,hand:2.2,snitch:3,wand:2.4,trip:1.4,plant:3,firework:1.6,wave:2.2,behind:5,smug:2.4,swirl:0.9,hop:1.4,camera:1.6};
+var UPPER={sky:1,look:1,eat:1,yawn:1,read:1,hand:1,wand:1,wave:1,smug:1,camera:1,firework:1,snitch:1,hum:1};var _lq=new THREE.Quaternion(),_lq2=new THREE.Quaternion(),LIFE_ST={acts:0};
+function lifeArm(P,s,sw,lw){const sd=s==='l'?1:-1;const ua=qF(P,'upperarm_'+s);qrot(_QA,_Z,-sd*1.3*0.82);qrot(_QB,_X,sw);ua.copy(_QB).multiply(_QA);qrot(qF(P,'lowerarm_'+s),_X,lw);}
+function lifeHead(P,ax,ay){if(ax){_lq.setFromAxisAngle(_X,ax);qF(P,'Head').multiply(_lq);}if(ay){_lq2.setFromAxisAngle(_Y,ay);qF(P,'neck_01').multiply(_lq2);}}
+function lifeTick(n,m,now,dt,seat){try{const P=m.userData.parts;if(!P||!P.rig||n.inMatch||n.act==='fly'||n.act==='sleep')return;const rig=P.rig;const id=n.c.id;const pe=PERS[id];
+ n._m=m;let L=n._lf;if(!L)L=n._lf={next:now+1+Math.random()*5,a:null,t0:0,d:1};
+ if(L.force){L.a=L.force;L.force=null;L.t0=now;L.d=LIFE_DUR[L.a]||2;}rig.rotation.set(0,0,0);let bones=false;
+ if(n.moving){const w=pe&&pe.w,s=Math.sin(n.walk*0.62);if(w==='skip')rig.position.y+=Math.abs(s)*0.11;else if(w==='bounce')rig.position.y+=Math.abs(s)*0.08;else if(w==='strut'){rig.rotation.z=s*0.06;if(P.q){lifeHead(P,-0.12,0);bones=true;}}else if(w==='stroll'&&P.q){lifeArm(P,'l',0.45,-0.9);lifeArm(P,'r',0.45,-0.9);bones=true;}
+  L.a=null;if(bones)qPose(P);return;}
+ if(!seat)rig.rotation.z=Math.sin(now*0.6+n.phase*3)*0.02;
+ if(!L.a&&now>L.next&&!uiOpen&&Math.hypot(n.x-player.x,n.y-player.y)<18){let list=(pe&&pe.a)||PERS_HOUSE[n.c.house]||PERS_HOUSE.N;if(seat){list=list.filter(a=>UPPER[a]);if(!list.length)list=['look','sky'];}L.a=list[(Math.random()*list.length)|0];L.t0=now;L.d=LIFE_DUR[L.a]||2;LIFE_ST.acts++;
+  if(Math.random()<0.55&&!n.inConv){const em=(pe&&pe.e)?pe.e[(Math.random()*pe.e.length)|0]:({wave:'👋',read:'📖',sky:'☁️',plant:'🌱',smug:'😏',hop:'😄',look:'👀',behind:'🙂'}[L.a]||'✨');CONVS.push({mem:[n],lines:[[id,em]],i:0,t:0,dur:1.6});n.inConv=true;}
+  if(P.happy!==undefined||P.AF)P.happy=now+1.5;}
+ if(!L.a)return;if(seat&&!UPPER[L.a]){L.a=null;return;}const p=(now-L.t0)/L.d;if(p>=1){L.a=null;L.next=now+4+Math.random()*7;return;}
+ const e=Math.sin(Math.min(1,p)*Math.PI);const X=m.position.x,Z=m.position.z;
+ switch(L.a){case 'spin':rig.rotation.y=p*Math.PI*2;break;case 'swirl':rig.rotation.y=p*Math.PI*2;if(Math.random()<0.4)spawnP('smoke',X+rnd(-.3,.3),Z+rnd(-.3,.3),rnd(-.5,.5),rnd(-.5,.5),0.8,4,'rgba(30,20,40,.5)');break;
+  case 'hop':rig.position.y+=Math.abs(Math.sin(p*Math.PI*3))*0.22;break;case 'trip':rig.rotation.x=e*0.45;break;case 'hum':rig.rotation.z=Math.sin(now*3)*0.08;if(Math.random()<dt*2)spawnP('spark',X,Z,rnd(-.2,.2),-0.5,1.2,3,'#ffe08a');break;
+  case 'firework':if(Math.random()<0.5){const col=['#ff6a6a','#ffd04a','#6affb0','#7ab0ff','#ff8ae0'][(Math.random()*5)|0];spawnP('spark',X+rnd(-.2,.2),Z-0.3,rnd(-1.5,1.5),rnd(-1.5,1.5),rnd(.6,1.1),rnd(3,5),col);}if(P.q){lifeArm(P,'r',-2.4,-0.3);bones=true;}break;
+  case 'snitch':{const a=now*6;spawnP('spark',X+Math.cos(a)*0.7,Z+Math.sin(a)*0.7,0,0,0.35,3,'#ffd84a');if(P.q){lifeHead(P,-0.15,Math.sin(a)*0.5);bones=true;}break;}
+  case 'camera':if(P.q){lifeArm(P,'l',-1.05,-1.75);lifeArm(P,'r',-1.05,-1.75);bones=true;}if(p>0.5&&p<0.55)for(let k=0;k<5;k++)spawnP('spark',X,Z-0.2,rnd(-1,1),rnd(-1,1),0.4,5,'#ffffff');break;
+  case 'plant':rig.position.y-=e*0.12;if(P.q){lifeArm(P,'l',-0.7,-0.3);lifeArm(P,'r',-0.7,-0.3);lifeHead(P,0.3*e,0);bones=true;}if(Math.random()<dt*1.5)spawnP('flower',X+rnd(-.4,.4),Z+0.3,0,0,1.2,3,'#ff9ad0');break;
+  default:if(!P.q)break;bones=true;
+   if(L.a==='sky')lifeHead(P,-0.5*e,0);else if(L.a==='look')lifeHead(P,0,Math.sin(p*Math.PI*2)*0.8);else if(L.a==='smug')lifeHead(P,-0.2*e,0.2*e);
+   else if(L.a==='wave'){lifeArm(P,'r',-2.7*e,-0.5+Math.sin(now*10)*0.4);}else if(L.a==='hand'){lifeArm(P,'r',-2.9*e,-0.15);}
+   else if(L.a==='yawn'){lifeArm(P,'l',-2.6*e,-0.4);lifeArm(P,'r',-2.6*e,-0.4);lifeHead(P,-0.25*e,0);}else if(L.a==='behind'){lifeArm(P,'l',0.5*e,-1.0*e);lifeArm(P,'r',0.5*e,-1.0*e);}
+   else if(L.a==='read'){lifeArm(P,'l',-0.7,-1.2);lifeArm(P,'r',-0.7,-1.2);lifeHead(P,0.25,0);}else if(L.a==='eat'){const f=(Math.sin(now*1.8)+1)/2;lifeArm(P,'l',-0.45-f*0.55,-0.9-f*1.2);}
+   else if(L.a==='wand'){lifeArm(P,'r',-1.3+Math.sin(now*3.2)*0.35,-0.25);if(Math.random()<0.3)spawnP('spark',X+0.3,Z-0.4,rnd(-.4,.4),rnd(-.4,.4),0.6,3,'#a8e0ff');}
+   else bones=false;}
+ if(bones)qPose(P);}catch(e){if(!window.__lerr)window.__lerr=String(e.stack||e).slice(0,300);}}
+window.__life={PERS,LIFE_ST,get now(){return SKYT.value},force(id,a){const n=NPCS.find(n=>n.c.id===id);if(n){n._lf=Object.assign(n._lf||{next:0},{force:a});}return !!n;}};
+var LUNA_N={c:{id:'luna',house:'R'},moving:false,walk:0,phase:1.3,x:0,y:0,inConv:true,act:'none'};
+function lunaLife(dt,seat){LUNA_N.moving=luna.moving;LUNA_N.walk=luna.walk;LUNA_N.x=luna.x;LUNA_N.y=luna.y;lifeTick(LUNA_N,lunaModel,now+1.3,dt,seat);}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
