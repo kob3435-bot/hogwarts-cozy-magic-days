@@ -827,7 +827,7 @@ const V22Z={
   sits:[[13,25.3,'มองม้าบินตัวโตกระพือปีกช้าๆ']]},
  glenfinnan_viaduct:{th:'สะพานรถไฟโค้งแห่งหุบเขา',en:'Highland Railway Viaduct',w:70,h:34,floor:'grass',wall:'#4a6a4a',out:1,region:'hogsmeade',
   water:[3,24,64,9],dock:[33,22,3,3],
-  furn:[[0,0,12,7,'hill'],[52,0,18,7,'hill'],[26,0,14,5,'hill'],[6,14,58,2,'viaductarch'],[14,14,28,2,'steamtrainhigh','ฮอกวอตส์เอ็กซ์เพรส'],[3,10,1,1,'pine'],[16,8,1,1,'pine'],[45,9,1,1,'pine'],[62,11,1,1,'pine'],[2,20,1,1,'pine'],[66,20,1,1,'pine'],[22,20,1,1,'rock'],[48,21,1,1,'rock'],[30,9,2,1,'bench'],[40,8,1,1,'lantern'],[24,8,1,1,'lantern'],[34,7,1,1,'sign','จุดชมรถไฟข้ามหุบเขา'],[10,20,3,1,'flowers'],[56,19,3,1,'flowers'],[12,10,1,1,'tuft'],[50,12,1,1,'tuft']],
+  furn:[[0,0,12,7,'hill'],[52,0,18,7,'hill'],[26,0,14,5,'hill'],[6,14,58,2,'viaductarch'],[3,10,1,1,'pine'],[16,8,1,1,'pine'],[45,9,1,1,'pine'],[62,11,1,1,'pine'],[2,20,1,1,'pine'],[66,20,1,1,'pine'],[22,20,1,1,'rock'],[48,21,1,1,'rock'],[30,9,2,1,'bench'],[40,8,1,1,'lantern'],[24,8,1,1,'lantern'],[34,7,1,1,'sign','จุดชมรถไฟข้ามหุบเขา'],[10,20,3,1,'flowers'],[56,19,3,1,'flowers'],[12,10,1,1,'tuft'],[50,12,1,1,'tuft']],
   sits:[[31,10.3,'นั่งรอดูรถไฟพ่นไอน้ำข้ามสะพานโค้ง']]},
  little_hangleton:{th:'สุสานลิตเติลแฮงเกิลตัน',en:'Little Hangleton Graveyard',w:40,h:30,floor:'forest',wall:'#2a2a34',out:1,region:'far',
   furn:[[17,5,3,3,'angel','รูปปั้นเทวดาถือเคียว'],[28,3,7,6,'mausoleum'],[4,3,1,1,'yew'],[11,2,1,1,'yew'],[36,13,1,1,'yew'],[3,22,1,1,'yew'],[34,25,1,1,'yew'],
@@ -4620,7 +4620,7 @@ function czaTick(){const c=CZA.on;if(!c)return;let b=BUN[c.id];if(b&&b.key!==bun
 const DYNRES={base:0,scale:1,acc:0,n:0,on:!/[?&]nodr/.test(location.search)};
 function dynResTick(dt){if(!DYNRES.on||CZA.on)return;if(!DYNRES.base)DYNRES.base=renderer.getPixelRatio();DYNRES.acc+=dt;DYNRES.n++;if(DYNRES.acc<2)return;const avg=DYNRES.acc/DYNRES.n;DYNRES.acc=0;DYNRES.n=0;
  let s=DYNRES.scale;const _tn=performance.now();if(avg>0.030&&s>0.7){s=Math.max(0.7,s-0.15);DYNRES.hold=_tn+(DYNRES.ups>1?60000:20000);}else if(avg<0.015&&s<1&&_tn>(DYNRES.hold||0)){s=Math.min(1,s+0.15);DYNRES.ups=(DYNRES.ups||0)+1;}if(s!==DYNRES.scale){DYNRES.scale=s;renderer.setPixelRatio(DYNRES.base*s);renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}}
-function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
+function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
 setTimeout(prewarmInit,1200);
 window.__v18={buildChibi:(L,h)=>buildChibi(L,h),NPCQ,PREWARM,CZA,DYNRES,get steps(){return BUN_STATS.steps;}};
 
@@ -5025,6 +5025,21 @@ function a22Tick(dt){if(!zone)return;const k=zone.id+'|'+timeIdx;if(k!==A22K){A2
  for(const f of A22F){const t=now*0.35+f.userData.ph;f.position.x=f.userData.bx+Math.sin(t)*0.28;f.position.y=1.55+Math.abs(Math.sin(t*3))*0.03;f.rotation.z=Math.sin(t*3)*0.06;}
  if(typeof lunaModel!=='undefined'&&lunaModel&&typeof luna!=='undefined'&&luna)umb22(luna,lunaModel);
  if(typeof playerModel!=='undefined'&&playerModel)umb22(player,playerModel);}
+/* moving Hogwarts Express on the highland viaduct */
+let TR22=null;
+function train22Build(f){const g=new THREE.Group();const T=(c,o)=>toon(c,o);const red='#b3202a',blk='#1e1a1e',gold='#e0b040';
+ const add=(geo,c,x,y,z,sx,sy,sz,o)=>{const m=new THREE.Mesh(geo,T(c,o));m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;g.add(m);return m;};
+ const BX=new THREE.BoxGeometry(1,1,1),CY=new THREE.CylinderGeometry(1,1,1,14),SP=new THREE.SphereGeometry(1,10,8);
+ const b=add(CY,red,1.4,1.0,0,0.5,2.6,0.5);b.rotation.z=Math.PI/2;add(CY,gold,2.75,1.0,0,0.52,0.1,0.52).rotation.z=Math.PI/2;add(BX,red,-0.4,1.05,0,1.2,1.5,1.15);add(BX,blk,-0.4,1.9,0,1.35,0.14,1.3);add(CY,blk,2.2,1.75,0,0.16,0.7,0.16);add(BX,blk,3.0,0.35,0,0.5,0.4,1.0);
+ for(let i=0;i<4;i++)for(const sz of[-0.55,0.55]){const w=add(CY,i<3?red:blk,-0.2+i*0.85,0.4,sz,0.36,0.08,0.36);w.rotation.x=Math.PI/2;}
+ for(let c=0;c<5;c++){const cx=-2.4-c*3.0;add(BX,red,cx,1.0,0,2.8,1.25,1.1);add(BX,blk,cx,1.7,0,2.9,0.14,1.2);add(BX,blk,cx,0.3,0,2.6,0.25,0.9);for(let k=0;k<4;k++)for(const sz of[-0.56,0.56])add(BX,'#ffe2a0',cx-1.0+k*0.66,1.15,sz,0.42,0.4,0.03,{emissive:'#ffb040',ei:0.7});}
+ g.userData.puffs=[];const pm=new THREE.MeshBasicMaterial({color:'#f6f6fa',transparent:true,opacity:0.85,depthWrite:false});for(let i=0;i<14;i++){const p=new THREE.Mesh(SP,pm.clone());p.visible=false;p.userData.t=-i*0.25;scene.add(p);g.userData.puffs.push(p);}
+ return g;}
+function train22Tick(dt){const z=zone;if(!z||z.id!=='glenfinnan_viaduct'){if(TR22){scene.remove(TR22.g);for(const p of TR22.g.userData.puffs)scene.remove(p);TR22=null;}return;}
+ if(!TR22){const f=z.furn.find(f=>(f.k||f[4])==='viaductarch');if(!f)return;const fx=f.x??f[0],fy=f.y??f[1],fw=f.w??f[2],fh=f.h??f[3];const g=train22Build();g.position.set(fx,5.62,fy+fh/2);scene.add(g);TR22={g,x0:fx-18,x1:fx+fw+4,x:fx+22};}
+ const T=TR22;T.x+=dt*3.2;if(T.x>T.x1)T.x=T.x0;T.g.position.x=T.x;
+ const hx=T.x+2.2,hy=5.62+2.2,hz=T.g.position.z;for(const p of T.g.userData.puffs){p.userData.t+=dt;if(p.userData.t>3.2)p.userData.t=0;const t=p.userData.t;if(t<0){p.visible=false;continue;}
+  if(t<0.05){p.userData.x=hx;}p.visible=true;p.position.set(p.userData.x-t*0.9,hy+t*1.1,hz+Math.sin(t*2+p.id)*0.3);p.scale.setScalar(0.25+t*0.35);p.material.opacity=Math.max(0,0.85-t*0.27);}}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
