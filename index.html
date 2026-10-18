@@ -1902,6 +1902,7 @@ function gradeTick(){const z=zone,t=TIMES[timeIdx];const key=z.id+t+weather+(SIM
  if(/chamber|slytherin|merpeople|underwater/.test(z.id)||z.underwater){tint=[tint[0]*0.9,tint[1]*1.04,tint[2]*1.04];}
  if(/knockturn|borgin|malfoy|forbidden_corridor/.test(z.id)){sat=0.92;tint=[tint[0]*0.95,tint[1]*0.95,tint[2]*1.03];vig+=0.08;}
  if(weather==='rain'||weather==='fog'){sat-=0.1;con-=0.03;}if(weather==='aurora'&&out){tint=[tint[0]*0.95,tint[1]*1.05,tint[2]*1.05];}
+ sat*=1.05;con+=0.02;if(out&&TIMES[timeIdx]==='sunset'){tint=[tint[0]*1.04,tint[1]*1.0,tint[2]*0.95];vig+=0.02;}
  RIMC.value.set(rim);if(!GRADE)return;const U=GRADE.uniforms;U.uTint.value.setRGB(...tint);U.uLift.value.setRGB(...lift);U.uSat.value=sat;U.uCon.value=con;U.uVig.value=vig;
  U.uTilt.value=TILT==='1'||(TILT!=='0'&&Q===QUALS.high)?1:0;U.uRes.value.set(VW,VH);}
 let composer=null,bloomPass=null;if(Q.bloom||Q.ssao){composer=window.__composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));if(Q.ssao){const ss=new SSAOPass(scene,camera,VW,VH);ss.kernelRadius=0.6;ss.minDistance=0.0006;ss.maxDistance=0.02;composer.addPass(ss);}if(Q.bloom){bloomPass=new UnrealBloomPass(new THREE.Vector2(VW,VH),0.5,0.55,0.84);composer.addPass(bloomPass);}GRADE=new ShaderPass(GRADE_SH);composer.addPass(GRADE);composer.addPass(new OutputPass());composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(VW,VH);}
