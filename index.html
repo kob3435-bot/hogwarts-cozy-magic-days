@@ -835,7 +835,7 @@ const V22Z={
    [18,12,1,1,'lantern'],[20,20,1,1,'sign','ที่นี่เงียบมาก... อย่าอยู่นาน']],
   sits:[[19,22,'ยืนนิ่งท่ามกลางหมอกเย็นๆ ของสุสานเก่า']]},
  gringotts_vaults:{th:'ห้องนิรภัยกริงกอตส์ (ใต้ดิน)',en:'Gringotts Underground Vaults',w:40,h:24,floor:'stone',wall:'#2e2a30',light:'torch',region:'london',
-  furn:[[5,1,3,1,'vaultdoor'],[13,1,3,1,'vaultdoor'],[21,1,3,1,'vaultdoor'],[29,1,3,1,'vaultdoor'],[2,6,36,1,'rail'],[2,10,36,1,'rail'],[8,5,1,1,'cart'],[27,9,1,1,'cart'],[14,14,9,6,'dragon','มังกรขาวเฝ้าห้องนิรภัย'],[3,15,1,1,'stalag'],[34,16,1,1,'stalag'],[6,20,1,1,'stalag'],[30,21,1,1,'stalag'],[10,3,1,1,'torch'],[26,3,1,1,'torch'],[18,3,1,1,'sign','รถรางไปห้องนิรภัย · จับให้แน่น!']],
+  furn:[[5,1,3,1,'vaultdoor'],[13,1,3,1,'vaultdoor'],[21,1,3,1,'vaultdoor'],[29,1,3,1,'vaultdoor'],[2,6,36,1,'rail'],[2,10,12,1,'rail'],[14,9,10,3,'chasm'],[14,10,10,1,'trestle'],[24,10,14,1,'rail'],[8,5,1,1,'cart'],[29,9,1,1,'cart'],[35,13,4,3,'waterfall'],[1,13,3,3,'waterfall'],[13,8,1,1,'torch'],[24,8,1,1,'torch'],[13,13,1,1,'torch'],[24,13,1,1,'torch'],[14,14,9,6,'dragon','มังกรขาวเฝ้าห้องนิรภัย'],[3,15,1,1,'stalag'],[34,16,1,1,'stalag'],[6,20,1,1,'stalag'],[30,21,1,1,'stalag'],[10,3,1,1,'torch'],[26,3,1,1,'torch'],[18,3,1,1,'sign','รถรางไปห้องนิรภัย · จับให้แน่น!']],
   sits:[[34,12,'มองรางรถที่ดิ่งหายไปในความมืดลึก']]}
 };
 (function(){let n=0;for(const id in ZONES)if(ZONES[id].num>n)n=ZONES[id].num;for(const id in V22Z){const z=V22Z[id];z.x6=1;z.v11=1;z.v15=1;z.v22=1;z.num=++n;ZONES[id]=z;}
@@ -3069,6 +3069,11 @@ function buildFurnV7(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f
      for(const [lx,lz] of[[-1.1,0.8],[1.1,0.8],[-1.1,-0.8],[1.1,-0.8]]){q(A(mesh(CYL,T(c),lx,0.5,lz,0.28,1.0,0.28)));q(A(mesh(SPH,T('#b8b4bc'),lx+0.15,0.08,lz,0.3,0.1,0.25)));}
      for(let i=0;i<7;i++)q(A(rot(mesh(geo('chain22',()=>new THREE.TorusGeometry(1,0.3,4,8)),T('#5a5a62'),1.2+i*0.32,0.25+Math.sin(i*0.7)*0.1,1.3+i*0.2,0.14,0.14,0.14),0,i%2?Math.PI/2:0,0)));break;}
    case'hill':{A(mesh(SPH,T('#5e9a48'),0,0,0,w*0.55,2.6,d*0.55));break;}
+   case'chasm':{B(w,0.04,d,'#050308').castShadow=false;for(const sz of[-1,1]){B(w,0.5,0.35,'#3a3440',0,0,sz*(d/2-0.1));B(w,0.06,0.12,'#ff9a3a',0,0.5,sz*(d/2-0.1),{emissive:'#ff7a20',ei:0.6});}
+     const mist=A(mesh(BOX,new THREE.MeshBasicMaterial({color:'#18223c',transparent:true,opacity:0.5,depthWrite:false}),0,0.08,0,w,0.05,d*0.8));mist.castShadow=false;break;}
+   case'waterfall':{B(w,3.2,0.6,'#3a3440',0,0,-d/2+0.3);const wm=new THREE.MeshBasicMaterial({color:'#9ad8ff',transparent:true,opacity:0.7,depthWrite:false});for(let i=0;i<3;i++){const p=A(mesh(BOX,wm,-w/3+i*w/3,1.55,-d/2+0.68,w/3.6,3.1,0.06));p.castShadow=false;}
+     for(let i=0;i<5;i++)A(mesh(SPH,T('#eaf6ff'),-w/2+0.4+i*(w-0.8)/4,0.15,-d/2+0.9,0.35,0.2,0.3));B(w,0.05,d*0.6,'#4a8ac0',0,0,0.1,{emissive:'#1a4a7a',ei:0.4}).castShadow=false;break;}
+   case'trestle':{for(let i=0;i<w;i+=2)for(const sz of[-0.4,0.4])A(mesh(CYL,T('#4a3626'),-w/2+i+0.5,0.6,sz,0.07,1.2,0.07));B(w,0.12,1.0,'#5a4030',0,1.2,0);for(const sz of[-0.3,0.3])B(w,0.06,0.07,'#8a8a92',0,1.32,sz);break;}
 
    case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
@@ -3962,7 +3967,7 @@ const MAPXY={chamber_secrets:[24,57],shrieking_shack:[101,64],aragog_hollow:[104
 
 /* ===== v11 Floo / Portkey travel ===== */
 const FLOO_REGIONS=[['hogwarts','🏰 ฮอกวอตส์',['great_hall','gryffindor_dorm','ravenclaw_balcony','hufflepuff_barrels','boats_arrival']],['hogsmeade','🏘️ ฮอกส์มี้ด',['hogsmeade','hogsmeade_station','express_carriage']],
- ['london','🎩 ลอนดอน',['leaky_cauldron','diagon_alley','ollivanders','gringotts','flourish_blotts','eeylops','fortescue','quality_quidditch','weasleys_wheezes','malkins','knockturn_entrance','kings_cross','ministry_atrium','grimmauld_place','knockturn_alley','borgin_burkes','hall_of_prophecy']],
+ ['london','🎩 ลอนดอน',['leaky_cauldron','diagon_alley','ollivanders','gringotts','gringotts_vaults','flourish_blotts','eeylops','fortescue','quality_quidditch','weasleys_wheezes','malkins','knockturn_entrance','kings_cross','ministry_atrium','grimmauld_place','knockturn_alley','borgin_burkes','hall_of_prophecy']],
  ['ottery','🌾 ออตเทอรี เซนต์แคทช์โพล',['burrow_garden','burrow_house','lovegood_hill','lovegood_house']],['far','🗺️ สถานที่ไกล',['malfoy_manor','shell_cottage','privet_drive']],['godric','❄️ ก็อดริกส์ฮอลโลว์',['godrics_hollow']]];
 function flooTravel(id,kind){const z=ZONES[id];if(!z)return;closeModal();let fx=document.getElementById('flooFx');if(!fx){fx=document.createElement('div');fx.id='flooFx';document.body.appendChild(fx);}
  fx.className=kind==='pk'?'pk':'floo';void fx.offsetWidth;fx.classList.add('go');try{Audio.sfx('spell');}catch(e){}
