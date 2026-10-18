@@ -3781,7 +3781,7 @@ function bunCandidates(){const c=[];for(const n of NB_OF[zone.id]||[])c.push(n.i
 let bunCool=0;
 function bunTick(dt){if(!bunActive||!zone)return;bunCool-=dt;
   if(bunActive.key!==bunKey()){if(!TCA.on)buildCandles();return;}
-  if(bunCool<=0&&lastDt<0.045&&!SIM.ff&&!BUN_IDLE.busy){const cand=bunCandidates();for(const id of cand){let b=BUN[id];if(b&&b.key!==bunKey()){bunDispose(b);b=null;}if(b&&b.ready)continue;if(!b)b=newBundle(id);if(window.requestIdleCallback&&!window.__noIdle){BUN_IDLE.busy=true;const bb=b;requestIdleCallback(()=>{BUN_IDLE.busy=false;if(BUN[bb.id]!==bb||bb.ready)return;bunStep(bb);if(bb.ready)bunLayout();BUN_IDLE.n++;},{timeout:400});}else{bunStep(b);if(b.ready)bunLayout();}bunCool=0.08;break;}
+  if(bunCool<=0&&(lastDt<0.045||(player.fly&&lastDt<0.12))&&!SIM.ff&&!BUN_IDLE.busy){const cand=bunCandidates();for(const id of cand){let b=BUN[id];if(b&&b.key!==bunKey()){bunDispose(b);b=null;}if(b&&b.ready)continue;if(!b)b=newBundle(id);if(window.requestIdleCallback&&!window.__noIdle){BUN_IDLE.busy=true;const bb=b;requestIdleCallback(()=>{BUN_IDLE.busy=false;if(BUN[bb.id]!==bb||bb.ready)return;bunStep(bb);if(bb.ready)bunLayout();BUN_IDLE.n++;},{timeout:400});}else{bunStep(b);if(b.ready)bunLayout();}bunCool=0.08;break;}
     // memory: keep at most 10 bundles (active + neighbours + preloaded doors), dispose least-recently-used
     const ids=Object.keys(BUN);if(ids.length>10){const keep=new Set([zone.id,...cand]);ids.filter(i=>!keep.has(i)).sort((a,b)=>BUN[a].used-BUN[b].used).slice(0,ids.length-10).forEach(i=>bunDispose(BUN[i]));}}
   // streaming by distance: neighbour areas appear as you approach their edge; heavy layers (grass, crowds) only when close
