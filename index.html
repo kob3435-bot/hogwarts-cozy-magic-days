@@ -4223,7 +4223,7 @@ const HSE=['G','S','R','H'];const HTH={G:'กริฟฟินดอร์',S:'
 #v17M canvas{display:block;margin:6px auto;max-width:100%;border-radius:12px;border:2px solid #8a6a2a;background:#1a1430;touch-action:none}
 #v17M .bar{height:14px;border-radius:7px;background:rgba(0,0,0,.15);overflow:hidden}#v17M .bar i{display:block;height:100%}
 @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
-#v17hud{position:fixed;left:10px;top:44px;z-index:5;display:flex;gap:6px;pointer-events:auto;font-size:12px}
+#v17hud{position:fixed;left:10px;top:44px;z-index:5;display:flex;gap:6px;pointer-events:auto;font-size:12px}body.rotated #v17hud{left:calc(100vw - 44px);top:10px;transform-origin:top left;transform:rotate(90deg);width:max-content;white-space:nowrap}
 #v17hud span{background:rgba(30,20,10,.72);color:#ffe9b0;border:1px solid #c8a050;border-radius:999px;padding:3px 9px;cursor:pointer}
 #v17ctx{position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:6;display:flex;gap:6px}
 #v17ctx .btn{background:linear-gradient(180deg,#d8a840,#8a5a18);animation:pulse 1.6s infinite}
@@ -4734,7 +4734,7 @@ function navTo(t){if(!t||!ZONES[t.zone])return false;if(player.fly)land(true);if
 function navCancel(msg){if(!NAV.on)return;NAV.on=false;$('navBar').classList.remove('show');navTrailClear();if(msg)toast('🧭 '+msg);}
 function navGoal(){const t=NAV.t;if(t.npc){const n=t.npc;if(n.zone!==t.zone){t.zone=n.zone;NAV.route=zonePath(zone.id,t.zone)||NAV.route;}t.x=n.x;t.y=n.y;}
  if(zone.id===t.zone)return{x:t.x,y:t.y,final:true};const i=NAV.route.indexOf(zone.id);if(i<0||i>=NAV.route.length-1){NAV.route=zonePath(zone.id,t.zone);if(!NAV.route){navCancel('หาทางไม่เจอ');return null;}return navGoal();}
- const nx=NAV.route[i+1];const d=zone.doors.find(d=>d.to===nx);if(!d){if(!NAV.floo||performance.now()-NAV.floo>4000){NAV.floo=performance.now();toast('🔥 ใช้ผงฟลูไป '+(ZONES[nx].th||nx));flooTravel(nx,'floo');}return null;}const p=doorTrigger(zone,d);return{x:p.x,y:p.y,door:d,final:false};}
+ const nx=NAV.route[i+1];if(zone.id==='triwizard_maze'&&nx==='little_hangleton'){if(!NAV.floo||performance.now()-NAV.floo>4000){NAV.floo=performance.now();toast('🏆 แตะถ้วยพอร์ตคีย์... วูบ! ไปสุสาน');flooTravel(nx,'floo');}return null;}const d=zone.doors.find(d=>d.to===nx);if(!d){if(!NAV.floo||performance.now()-NAV.floo>4000){NAV.floo=performance.now();toast('🔥 ใช้ผงฟลูไป '+(ZONES[nx].th||nx));flooTravel(nx,'floo');}return null;}const p=doorTrigger(zone,d);return{x:p.x,y:p.y,door:d,final:false};}
 function navVec(){if(!NAV.on)return{x:0,y:0};const g=navGoal();if(!g)return{x:0,y:0};NAV.g=g;
  const dx0=g.x-player.x,dy0=g.y-player.y,dg=Math.hypot(dx0,dy0);
  if(g.final&&dg<(NAV.t.npc?1.4:1.0)){navArrive();return{x:0,y:0};}
