@@ -858,6 +858,12 @@ const V22Z={
  if(id==='ministry_atrium'){z.furn=z.furn.filter(f=>!(f[4]==='fountain'||f[4]==='fire'));z.furn.push([16,7,8,6,'goldfountain','น้ำพุแห่งภราดรภาพเวทมนตร์']);z.furn.unshift([2,2,36,20,'darktile']);z.floor='stone';}
  if(id==='kings_cross'){z.furn=z.furn.filter(f=>f[4]!=='crate');}
  for(const f of X[id])z.furn.push(f);z.v22=1;}})();
+(function(){const R=(id,from,k,lab)=>{const z=ZONES[id];if(!z)return;for(const f of z.furn)if(f[4]===from&&(lab===undefined||f[5]===lab)){f[4]=k;return;}};
+ {const z=ZONES.burrow_garden;for(const f of z.furn)if(f[4]==='house'){f[4]='burrowhouse';f[0]=8;f[1]=1;f[2]=12;f[3]=8;}}R('godrics_hollow','house','church','โบสถ์ประจำหมู่บ้าน');R('godrics_hollow','statue','memorial');R('shell_cottage','house','shellhouse');
+ const add=(id,L)=>{const z=ZONES[id];if(z){for(const f of L)z.furn.push(f);z.v22=1;}};
+ add('burrow_garden',[[12,8,1,1,'gnome'],[15,10,1,1,'gnome'],[9,14,1,1,'gnome'],[27,16,1,1,'gnome'],[33,10,1,1,'chicken'],[35,11,1,1,'chicken'],[31,12,1,1,'chicken'],[18,9,1,1,'chicken']]);
+ add('godrics_hollow',[[10,8,1,1,'lamp'],[36,8,1,1,'lamp'],[14,14,1,1,'pine'],[34,14,1,1,'pine'],[2,9,4,1,'fence']]);
+ add('shell_cottage',[[2,13,8,3,'cliff'],[33,13,9,3,'cliff'],[10,14,2,2,'shells'],[24,14,2,2,'shells'],[30,15,2,2,'shells'],[14,12,2,2,'shells']]);})();
 
 /* ===== v14: enlarge every zone again (outdoor x1.5, interiors x1.3) ===== */
 const XW20={courtyard:1.2,hagrid_hut:1.2,stone_circle:1.2,whomping_willow:1.2,lake_shore:1.2,boats_arrival:1.2,hogsmeade:1.2,diagon_alley:1.25,knockturn_alley:1.2};
@@ -3109,6 +3115,20 @@ function buildFurnV7(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f
      for(let i=0;i<6;i++){const a=i/6*Math.PI*2;A(mesh(CYL,T('#bfe8ff',{emissive:'#60a0d0',ei:0.5}),Math.cos(a)*w*0.25,1.1,Math.sin(a)*d*0.25,0.05,1.0,0.05)).castShadow=false;}break;}
    case'darkcol':{A(outlined(mesh(CYL,T('#1e3a30'),0,3,0,0.45,6,0.45),1.02));A(mesh(CYL,T('#c9a24a'),0,6.05,0,0.6,0.25,0.6));A(mesh(CYL,T('#c9a24a'),0,0.1,0,0.6,0.2,0.6));break;}
    case'darktile':{B(w,0.015,d,'#14211d').castShadow=false;for(let x=0;x<=w;x+=2)B(0.05,0.02,d,'#8a7030',-w/2+x,0,0).castShadow=false;for(let y=0;y<=d;y+=2)B(w,0.02,0.05,'#8a7030',0,0,-d/2+y).castShadow=false;break;}
+   case'burrowhouse':{const lv=[[0,0,1.0,0.9,2.0,'#c8a078'],[0.5,2.0,0.75,0.7,1.6,'#b88a6a'],[-0.6,3.6,0.6,0.6,1.5,'#d0b088'],[0.2,5.1,0.5,0.5,1.4,'#a87a5a'],[-0.3,6.5,0.38,0.4,1.3,'#c09070']];
+     for(const [ox,y,sx,sz,h,c] of lv){const b=B(w*0.6*sx,h,d*0.7*sz,c,ox,y,0);b.rotation.z=ox*0.05;for(let i=0;i<3;i++)B(0.35,0.45,0.04,'#ffe0a0',ox-w*0.15*sx+i*w*0.15*sx,y+h*0.45,d*0.35*sz+0.02,{emissive:'#ffb040',ei:0.5});
+       A(rot(mesh(geo('pyr22',()=>new THREE.ConeGeometry(1,1,4)),T('#7a3a2a'),ox,y+h+0.35,0,w*0.45*sx,0.8,d*0.52*sz),0,Math.PI/4,ox*0.06));}
+     for(const [cx,cy] of[[w*0.2,3],[-w*0.22,5.4],[0.3,8.1]]){B(0.4,1.2,0.4,'#8a5a40',cx,cy,0);}B(0.3,1.5,0.3,'#6a4a30',w*0.32,0,d*0.36);break;}
+   case'gnome':{A(mesh(SPH,T('#c8a070'),0,0.25,0,0.18,0.22,0.16));A(mesh(SPH,T('#e0b890'),0,0.52,0,0.13));A(mesh(CONE,T('#c03030'),0,0.75,0,0.12,0.3,0.12));A(mesh(SPH,T('#f0f0f0'),0,0.44,0.08,0.09,0.08,0.05));break;}
+   case'chicken':{A(mesh(SPH,T('#f4ead8'),0,0.25,0,0.2,0.18,0.25));A(mesh(SPH,T('#f4ead8'),0,0.45,0.18,0.1));A(mesh(CONE,T('#e04030'),0,0.58,0.18,0.04,0.08,0.06));A(rot(mesh(CONE,T('#f0a020'),0,0.45,0.3,0.03,0.08,0.03),Math.PI/2,0,0));break;}
+   case'church':{const st='#9a9890';B(w*0.6,3.2,d*0.75,st,-w*0.12,0,0);A(rot(mesh(geo('pyr22',()=>new THREE.ConeGeometry(1,1,4)),T('#4a4a58'),-w*0.12,4.0,0,w*0.44,1.6,d*0.55),0,Math.PI/4,0));
+     B(w*0.22,6.5,w*0.22,st,w*0.32,0,0);A(rot(mesh(geo('pyr22',()=>new THREE.ConeGeometry(1,1,4)),T('#4a4a58'),w*0.32,8.0,0,w*0.17,3,w*0.17),0,Math.PI/4,0));A(mesh(SPH,T('#e8c050'),w*0.32,9.6,0,0.15));
+     for(let i=0;i<3;i++)B(0.5,1.2,0.05,['#d04a4a','#4a7ad0','#e0c040'][i],-w*0.32+i*w*0.2,1.2,d*0.375+0.02,{emissive:'#ffb060',ei:0.7});B(0.9,1.6,0.05,'#4a2a1a',w*0.32,0,w*0.11+0.02);B(w*0.6,0.25,d*0.78,'#f8f8ff',-w*0.12,3.2,0);break;}
+   case'memorial':{B(1.8,0.5,1.8,'#8a8a8e');A(outlined(mesh(geo('obel22',()=>new THREE.CylinderGeometry(0.25,0.55,3.5,4)),T('#a8a8ae'),0,2.25,0,1,1,1),1.03));for(const [x,h] of[[-0.5,1.1],[0.4,1.0],[0,0.6]]){A(mesh(CONE,T('#c8c8d0'),x,0.5+h/2,0.75,0.2,h,0.2));A(mesh(SPH,T('#c8c8d0'),x,0.6+h,0.75,0.13));}break;}
+   case'shellhouse':{const wh='#f4f2ec';A(outlined(mesh(CYL,T(wh),0,1.3,0,w*0.32,2.6,d*0.36),1.02));A(outlined(mesh(SPH,T('#e8c8b0'),0,2.6,0,w*0.36,1.4,d*0.4),1.02));for(let i=0;i<24;i++){const a=i*0.7,yy=2.6+(i%4)*0.32;A(mesh(SPH,T(['#f8e8e0','#f0c8b8','#fff8f0'][i%3]),Math.cos(a)*w*0.33*(1-(i%4)*0.15),yy,Math.sin(a)*d*0.37*(1-(i%4)*0.15),0.16,0.1,0.16));}
+     B(0.9,1.5,0.06,'#5a8ab0',0,0,d*0.36+0.02);for(const sx of[-1,1])B(0.5,0.5,0.05,'#ffe8b0',sx*w*0.18,1.4,d*0.35,{emissive:'#ffb060',ei:0.5});B(0.35,1.0,0.35,'#d8d4cc',w*0.2,3.6,0);break;}
+   case'shells':{for(let i=0;i<6;i++)A(mesh(SPH,T(['#f8e0d8','#f0c0a8','#fff4e8','#e8d0f0'][i%4]),Math.sin(i*2.3)*w*0.4,0.05,Math.cos(i*1.7)*d*0.4,0.14,0.07,0.12)).castShadow=false;break;}
+   case'cliff':{for(let i=0;i<4;i++)A(outlined(mesh(ICO,T(['#b8a888','#a89878','#c0b090','#9a8a70'][i]),-w/2+(i+0.5)*w/4,0.8+i%2*0.5,Math.sin(i)*0.4,w/4*0.7,1.6+i%2*0.6,d*0.5),1.02));A(mesh(SPH,T('#6a9a48'),0,2.2,0,w*0.5,0.3,d*0.5));break;}
 
    case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
