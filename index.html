@@ -2745,8 +2745,8 @@ function buildDistantCastle(z,t){const g=new THREE.Group();const night=t==='nigh
 function addClouds(grp,z,t){if(t==='night')return;const cm=toonify(new THREE.MeshStandardMaterial({color:t==='sunset'?'#ffd0d8':'#ffffff',emissive:new THREE.Color(t==='sunset'?'#ff9a8a':'#d8e8ff'),emissiveIntensity:0.35}));const ld=geo('cloudlump',()=>new THREE.IcosahedronGeometry(1,3));
   for(let i=0;i<15;i++){const c=new THREE.Group();const n=6+(i%3);for(let k=0;k<n;k++){const m=new THREE.Mesh(ld,cm);const s=1.9+hash(i,k)*1.9+Math.sin((k+0.5)/n*Math.PI)*1.1;m.scale.set(s*1.2,s*0.95,s);m.position.set((k-n/2)*2.1,Math.sin((k+0.5)/n*Math.PI)*2.0+Math.sin(k*1.7)*0.35,hash(k,i)*1.8-0.9);c.add(m);}const fb=new THREE.Mesh(ld,cm);fb.scale.set(n*1.6,1.2,2.5);c.add(fb);
     const x0=z.w/2-80+i*12,y0=20+hash(i,2)*18,z0=-38-hash(i,5)*20;c.position.set(x0,y0,z0);grp.add(c);ANIM8.push(tt=>{c.position.x=x0+((tt*0.4+i*30)%40)-20;});}}
-function addGodRays(grp,z,t){if(t==='night'||weather==='rain'||weather==='snow')return;const mat=new THREE.MeshBasicMaterial({map:shaftTex(),color:new THREE.Color(t==='sunset'?'#ffb070':'#fff0c0').multiplyScalar(1.1),transparent:true,opacity:0.16,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
-  for(let i=0;i<7;i++){const m=new THREE.Mesh(PLANE,mat);m.scale.set(3+hash(i,1)*4,30,1);m.position.set(z.w*(0.1+i*0.14),9,z.h*(0.2+hash(i,3)*0.6));m.rotation.set(0,Math.PI/4,0.55);grp.add(m);const ph=i;ANIM8.push(tt=>{m.material.opacity=0.12+0.05*Math.sin(tt*0.3+ph);});}}
+function addGodRays(grp,z,t){try{addMagic23(grp,z,t);}catch(e){}if(t==='night'||weather==='rain'||weather==='snow')return;const mat=new THREE.MeshBasicMaterial({map:shaftTex(),color:new THREE.Color(t==='sunset'?'#ffa050':t==='morning'?'#ffd8a0':'#fff0c0').multiplyScalar(t==='afternoon'?1.1:t==='sunset'?1.05:1.3),transparent:true,opacity:0.16,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,fog:false});
+  const _gold=t!=='afternoon',_n=_gold?11:7,_ob=_gold?(t==='sunset'?0.15:0.18):0.12;for(let i=0;i<_n;i++){const m=new THREE.Mesh(PLANE,_gold?mat.clone():mat);m.scale.set(3+hash(i,1)*(_gold?6:4),30,1);m.position.set(z.w*(0.06+i*(0.9/_n)),9,z.h*(0.2+hash(i,3)*0.6));m.rotation.set(0,Math.PI/4,t==='sunset'?0.85:0.55);grp.add(m);const ph=i;ANIM8.push(tt=>{m.material.opacity=_ob+0.06*Math.sin(tt*0.3+ph*1.7);});}}
 
 
 function buildElfAnime(L,house,opt){opt=opt||{};const lite=!!opt.lite;const id=L.id||'';const ghost=!!L.ghost;
@@ -2922,7 +2922,7 @@ void main(){vec3 d=normalize(vP);float y=d.y;vec3 c=mix(hor,bot,smoothstep(-0.02
  c=mix(c,cc,cl*smoothstep(-0.02,0.15,y)*0.8);
  if(uN>0.0){vec2 sp=d.xz/(y+1.05)*150.0;vec2 ci=floor(sp);float h=h21(ci);float st=step(0.982,h)*smoothstep(0.38,0.0,length(fract(sp)-0.5))*(0.55+0.45*sin(uT*2.5+h*80.0));c+=vec3(st*1.4)*uN*(1.0-cl)*smoothstep(0.03,0.3,y);
   float mw=fbm(d.xz*3.0+vec2(4.0,1.0));c+=vec3(0.18,0.12,0.3)*uN*smoothstep(0.55,0.8,mw)*smoothstep(0.1,0.6,y)*0.6;}
- gl_FragColor=vec4(c,1.0);}`;const SKYT={value:0};const HOR={morning:'#ffe2c4',afternoon:'#e4f6ff',sunset:'#ffa860',night:'#2a2a5e'};
+ gl_FragColor=vec4(c,1.0);}`;const SKYT={value:0};const HOR={morning:'#ffd2b0',afternoon:'#e4f6ff',sunset:'#ff9050',night:'#3a2e70'};
 function skyUniforms(TL,t){const sp=TL.sp||[0,1,0];return {top:{value:new THREE.Color(TL.sky[0])},bot:{value:new THREE.Color(TL.sky[1])},hor:{value:new THREE.Color(HOR[t]||TL.sky[1])},sunC:{value:new THREE.Color(TL.sc)},sunD:{value:new THREE.Vector3(sp[0],Math.max(0.12,sp[1]*(t==='sunset'?0.25:0.6)),sp[2]).normalize()},uT:SKYT,uN:{value:t==='night'?1:0},uCl:{value:weather==='rain'||weather==='fog'?1:weather==='snow'?0.8:0.35}};}
 const WATER_V=`uniform float uT;varying vec2 vUv;void main(){vUv=uv;vec3 p=position;p.z+=0.03+sin(position.x*1.3+uT*1.5)*0.012+cos(position.y*1.7+uT*1.2)*0.012;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}`;
 const WATER_F=`uniform float uT,uN;uniform vec3 cDeep,cShal,cSky;uniform vec2 uS;varying vec2 vUv;
@@ -5201,6 +5201,12 @@ function warm23Tick(){const W=WARM23;if(W.done||!window.__game)return;const G=wi
  W.i++;W.f=0;if(W.i>=W.seq.length){G.setTime(W.t0);G.setWeather(W.w0);W.done=true;warm23End();return;}const s=W.seq[W.i];G.setTime(s[0]!=null?s[0]:W.t0);G.setWeather(s[1]||W.w0);}
 
 function warm23End(){const l=window.__ld23;if(l){window.__ld23=null;l.style.transition='opacity .4s';l.style.opacity='0';setTimeout(()=>l.remove(),450);}}
+/* v23: floating magic sparkles in every outdoor area (one Points object, drifts) */
+function addMagic23(grp,z,t){const n=Math.min(260,Math.round(z.w*z.h*0.06)),pos=new Float32Array(n*3),col=new Float32Array(n*3);const C=[new THREE.Color('#ffe08a'),new THREE.Color('#ffa8e0'),new THREE.Color('#a8f0ff'),new THREE.Color('#ffffff')];
+ for(let i=0;i<n;i++){pos[i*3]=Math.random()*z.w;pos[i*3+1]=0.4+Math.random()*4.5;pos[i*3+2]=Math.random()*z.h;const c=C[i%4];col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+ const m=new THREE.PointsMaterial({size:t==='night'?0.16:0.11,vertexColors:true,transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending,fog:false});
+ const P=new THREE.Points(g,m);P.frustumCulled=false;grp.add(P);ANIM8.push(tt=>{P.position.y=Math.sin(tt*0.4)*0.35;P.position.x=Math.sin(tt*0.13)*0.6;m.opacity=0.6+0.3*Math.sin(tt*1.3);});}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
