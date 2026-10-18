@@ -4882,13 +4882,13 @@ window.__l21=L21;
 var V21G=null,V21K='',V21C=[];
 function v21Canvas(w,h,f){const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
 const V21T={};
-function reflTex(mode){const k='r'+mode;return V21T[k]||(V21T[k]=v21Canvas(512,256,(g,w,h)=>{const src=castleTex().image;const sky={night:['#4a5ca0','#2a3460'],sunset:['#ffb48a','#d07a8a'],day:['#d8ecff','#a8cce8']}[mode];
+function reflTex(mode){const k='r'+mode;return V21T[k]||(V21T[k]=v21Canvas(512,256,(g,w,h)=>{const src=castle22Tex().image;const sky={night:['#4a5ca0','#2a3460'],sunset:['#ffb48a','#d07a8a'],day:['#d8ecff','#a8cce8']}[mode];
  const sg=g.createLinearGradient(0,0,0,h);sg.addColorStop(0,sky[0]);sg.addColorStop(1,sky[1]);g.fillStyle=sg;g.fillRect(0,0,w,h);
  if(mode==='night'){g.fillStyle='#fffbe8';g.beginPath();g.arc(w*0.8,h*0.72,14,0,7);g.fill();}
- g.filter='blur(2px)';g.drawImage(src,0,0,w,h);g.filter='none';
+ g.globalAlpha=0.92;g.filter='blur(0.6px)';g.drawImage(src,0,0,w,h);g.filter='none';g.globalAlpha=1;
  const m=g.createLinearGradient(0,0,0,h);m.addColorStop(0,'rgba(0,0,0,0)');m.addColorStop(0.75,'rgba(0,0,0,0.35)');m.addColorStop(1,'rgba(0,0,0,1)');g.globalCompositeOperation='destination-out';g.fillStyle=m;g.fillRect(0,0,w,h);
  const s=g.createLinearGradient(0,0,w,0);s.addColorStop(0,'rgba(0,0,0,1)');s.addColorStop(0.15,'rgba(0,0,0,0)');s.addColorStop(0.85,'rgba(0,0,0,0)');s.addColorStop(1,'rgba(0,0,0,1)');g.fillStyle=s;g.fillRect(0,0,w,h);}));}
-function winTex(){return V21T.win||(V21T.win=v21Canvas(512,256,(g,w,h)=>{const src=castleTex().image;g.drawImage(src,0,0,w,h);const d=g.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){if(d.data[i]<120)d.data[i+3]=0;}g.putImageData(d,0,0);const c2=document.createElement('canvas');c2.width=w;c2.height=h;const g2=c2.getContext('2d');g2.filter='blur(2px)';g2.drawImage(g.canvas,0,0);g2.filter='none';g2.globalCompositeOperation='lighter';g2.drawImage(g.canvas,0,0);g.clearRect(0,0,w,h);g.drawImage(c2,0,0);}));}
+function winTex(){return V21T.win||(V21T.win=v21Canvas(512,256,(g,w,h)=>{const src=castle22Tex().image;g.drawImage(src,0,0,w,h);const d=g.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){if(d.data[i]<120)d.data[i+3]=0;}g.putImageData(d,0,0);const c2=document.createElement('canvas');c2.width=w;c2.height=h;const g2=c2.getContext('2d');g2.filter='blur(2px)';g2.drawImage(g.canvas,0,0);g2.filter='none';g2.globalCompositeOperation='lighter';g2.drawImage(g.canvas,0,0);g.clearRect(0,0,w,h);g.drawImage(c2,0,0);}));}
 function candleGlowTex(){return V21T.cg||(V21T.cg=v21Canvas(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,240,200,1)');r.addColorStop(0.25,'rgba(255,200,110,.6)');r.addColorStop(1,'rgba(255,160,60,0)');g.fillStyle=r;g.fillRect(0,0,64,64);}));}
 function vis21Build(){const z=zone,t=TIMES[timeIdx],G=new THREE.Group();const night=t==='night',sun=t==='sunset';V21C=[];G.userData.cand=null;
  const out=isOut();const hogw=out&&(!z.region||z.region==='hogwarts')&&!z.underwater;
@@ -4898,9 +4898,9 @@ function vis21Build(){const z=zone,t=TIMES[timeIdx],G=new THREE.Group();const ni
   const P=new THREE.Points(pg,new THREE.PointsMaterial({map:candleGlowTex(),size:night?26:20,sizeAttenuation:false,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:night?0.95:0.7}));P.frustumCulled=false;
   for(let i=0;i<N;i++)V21C.push({x:0,y:0,h:2.6+Math.random()*1.4,ph:Math.random()*6.28,init:0});
   G.add(wax,P);G.userData.cand={wax,P,pos,N};}
- const W=z.water;if(W&&out&&!z.underwater&&(z.id==='black_lake'||z.id==='lake_shore'||z.id==='boats_arrival')){const [wx,wy,ww,wh]=W;const pw=Math.min(ww*0.75,46),pd=Math.min(wh*0.45,pw*0.32);
+ const W=z.water;if(W&&out&&!z.underwater&&(z.id==='black_lake'||z.id==='lake_shore'||z.id==='boats_arrival')){const [wx,wy,ww,wh]=W;const pw=Math.min(ww*0.5,24),pd=Math.min(wh*0.5,pw*0.45);
   const mat=new THREE.MeshBasicMaterial({map:reflTex(night?'night':sun?'sunset':'day'),transparent:true,depthWrite:false,opacity:night?0.7:sun?0.7:0.6,color:'#ffffff',fog:false});
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(pw,pd),mat);m.rotation.x=-Math.PI/2;m.position.set(wx+ww/2,0.13,wy+pd/2+0.4);m.renderOrder=6;m.userData.refl=1;G.add(m);if(night||sun){const wm=new THREE.MeshBasicMaterial({map:winTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:night?1:0.6,color:'#ffffff',fog:false});const w2=new THREE.Mesh(m.geometry,wm);w2.rotation.copy(m.rotation);w2.position.copy(m.position);w2.position.y+=0.01;w2.renderOrder=7;w2.userData.win=1;G.add(w2);}}
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(pw,pd),mat);m.rotation.x=-Math.PI/2;m.position.set(wx+ww/2,0.095,wy+pd/2+1.2);m.renderOrder=6;m.userData.refl=1;G.add(m);if(night||sun){const wm=new THREE.MeshBasicMaterial({map:winTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:night?1:0.6,color:'#ffffff',fog:false});const w2=new THREE.Mesh(m.geometry,wm);w2.rotation.copy(m.rotation);w2.position.copy(m.position);w2.position.y+=0.01;w2.renderOrder=7;w2.userData.win=1;G.add(w2);}}
  return G;}
 function vis21Tick(dt){if(!zone)return;const k=zone.id+'|'+timeIdx;if(k!==V21K){const zc=V21K.split('|')[0]!==zone.id;V21K=k;if(V21G){scene.remove(V21G);V21G.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material.dispose)o.material.dispose();});}V21G=vis21Build();scene.add(V21G);
   if(zc&&typeof FLOOR_TEX!=='undefined'){const ks=Object.keys(FLOOR_TEX);if(ks.length>6)for(const id of ks){if(id!==zone.id&&FLOOR_TEX[id]&&FLOOR_TEX[id].dispose)FLOOR_TEX[id].dispose();}}}
@@ -4971,6 +4971,32 @@ function glance22(n,m){const P=m&&m.userData.parts;if(!P||!P.bones||!P.bones.Hea
 window.__lunaM=()=>lunaModel;
 window.__tree22=()=>{const W=lumpGeo('cW2',6,1,0.15);let w=0;if(scatterGrp)scatterGrp.traverse(m=>{if(m.isInstancedMesh&&m.geometry===W)w+=m.count;});return {z:zone.id,willowDrops:w,gnarled:zone.furn.filter(f=>f.k==='oak'&&hash(f.x,f.y)>0.62).length,oaks:zone.furn.filter(f=>f.k==='oak').length,birch:zone.furn.filter(f=>f.k==='birch').length};};
 window.__floo=(id)=>flooTravel(id,'floo');window.__photo=()=>openPhoto();
+
+/* ===== v22 stage A ===== */
+const V22T={};
+function castle22Tex(){return V22T.c||(V22T.c=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=512;const g=c.getContext('2d');const w=1024,h=512;
+ // drawn upside-down (base at top) as it is a reflection
+ const R=(x,y,ww,hh)=>g.fillRect(x,y,ww,hh);g.fillStyle='#000';
+ // cliff/rock base
+ g.beginPath();g.moveTo(0,0);for(let x=0;x<=w;x+=32)g.lineTo(x,40+Math.sin(x*0.02)*14+Math.sin(x*0.07)*6);g.lineTo(w,0);g.fill();
+ // curtain walls with battlements
+ const wall=(x0,x1,y)=>{R(x0,0,x1-x0,y);for(let x=x0;x<x1;x+=12)R(x,y,7,8);};
+ wall(90,930,118);wall(300,700,150);
+ // great hall: long block with steep gabled roof
+ R(380,0,250,190);g.beginPath();g.moveTo(372,190);g.lineTo(638,190);g.lineTo(505,262);g.fill();
+ // towers: [x, height, width, spireLen, turrets]
+ const T=[[70,150,34,60,0],[150,210,30,80,1],[215,170,44,70,0],[290,250,34,110,1],[340,195,26,70,0],[455,215,22,85,0],[560,225,22,90,0],[700,330,40,150,1],[770,215,30,85,1],[840,180,40,70,0],[905,240,30,100,1],[965,150,26,55,0]];
+ for(const [x,hh,ww,sl,tu] of T){R(x-ww/2,0,ww,hh);g.beginPath();g.moveTo(x-ww/2-5,hh);g.lineTo(x+ww/2+5,hh);g.lineTo(x+ww/2+5,hh+6);g.lineTo(x-ww/2-5,hh+6);g.fill();
+  g.beginPath();g.moveTo(x-ww/2-4,hh+6);g.lineTo(x+ww/2+4,hh+6);g.lineTo(x,hh+6+sl);g.fill();R(x-1,hh+sl,2,14);
+  if(tu){for(const s of[-1,1]){const tx=x+s*(ww/2+6);R(tx-6,hh*0.55,12,hh*0.25);g.beginPath();g.moveTo(tx-8,hh*0.8);g.lineTo(tx+8,hh*0.8);g.lineTo(tx,hh*0.8+30);g.fill();}}}
+ // viaduct bridge on the right
+ g.save();R(930,60,94,16);for(let x=938;x<1024;x+=22){R(x,0,6,60);}g.restore();
+ // windows (warm) - red channel > 120 for winTex
+ g.fillStyle='#ffcf6a';const win=(x,y)=>R(x,y,4,7);
+ for(const [x,hh,ww] of T)for(let yy=40;yy<hh-14;yy+=26)if(((x*7+yy)%3)!==0)win(x-2,yy);
+ for(let x=396;x<620;x+=26){R(x,80,5,16);R(x,130,5,16);}
+ for(let x=110;x<920;x+=34)if(x<380||x>630)if((x*13)%5!==0)win(x,60);
+ return new THREE.CanvasTexture(c);})());}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
