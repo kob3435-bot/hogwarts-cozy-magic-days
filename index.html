@@ -834,6 +834,13 @@ const V22Z={
    [6,10,1,1,'grave'],[9,10,1,1,'grave'],[12,10,1,1,'grave'],[6,14,1,1,'grave'],[9,14,1,1,'grave'],[12,14,1,1,'grave'],[24,13,1,1,'grave'],[27,13,1,1,'grave'],[30,13,1,1,'grave'],[24,17,1,1,'grave'],[27,17,1,1,'grave'],[30,17,1,1,'grave'],[8,20,1,1,'grave'],[12,20,1,1,'grave'],[26,22,1,1,'grave'],[30,22,1,1,'grave'],
    [18,12,1,1,'lantern'],[20,20,1,1,'sign','ที่นี่เงียบมาก... อย่าอยู่นาน'],[17,10,2,2,'bigcauldron'],[15,8,1,1,'grave'],[22,8,1,1,'grave'],[15,12,1,1,'grave'],[22,12,1,1,'grave'],[4,7,1,1,'wisp'],[14,17,1,1,'wisp'],[33,9,1,1,'wisp'],[26,26,1,1,'wisp'],[7,26,1,1,'wisp'],[2,1,14,1,'ironfence'],[24,1,14,1,'ironfence']],
   sits:[[19,22,'ยืนนิ่งท่ามกลางหมอกเย็นๆ ของสุสานเก่า']]},
+ triwizard_lake:{th:'ภารกิจที่สองแห่งทะเลสาบ (ประลองเวทไตรภาคี)',en:'Triwizard Lake Task',w:52,h:34,floor:'grass',wall:'#3a4a5a',out:1,region:'hogwarts',
+  water:[2,12,48,21],dock:[24,9,4,4],
+  furn:[[4,2,6,5,'stand22'],[12,1,6,5,'stand22'],[32,1,6,5,'stand22'],[40,2,6,5,'stand22'],[21,1,8,4,'stand22','อัฒจันทร์กรรมการ'],[10,18,4,4,'stand22'],[38,19,4,4,'stand22'],[24,22,4,4,'stand22'],[20,8,1,1,'lantern'],[30,8,1,1,'lantern'],[2,8,1,1,'pine'],[48,8,1,1,'pine'],[46,1,1,1,'pine'],[17,6,1,1,'sign','ภารกิจที่สอง: ชิงสิ่งล้ำค่าคืนจากใต้ทะเลสาบในหนึ่งชั่วโมง'],[34,7,2,1,'bench']],
+  sits:[[35,8.3,'เชียร์ตัวแทนโรงเรียนที่ดำดิ่งลงใต้ทะเลสาบ']]},
+ owlery_hill:{th:'ทางเดินขึ้นเนินหอนกฮูก',en:'Owlery Hill Path',w:40,h:34,floor:'grass',wall:'#5a6a4a',out:1,region:'hogwarts',
+  furn:[[25,2,8,8,'tower22','หอนกฮูก'],[18,10,2,2,'stonestep'],[18,13,2,2,'stonestep'],[17,17,2,2,'stonestep'],[16,21,2,2,'stonestep'],[15,25,2,2,'stonestep'],[6,4,4,3,'rock'],[30,6,4,3,'rock'],[4,14,1,1,'pine'],[34,14,1,1,'pine'],[8,24,1,1,'birch'],[30,26,1,1,'oak'],[24,12,1,1,'lantern'],[12,20,1,1,'lantern'],[22,24,1,1,'sign','ขึ้นเนินไปส่งจดหมายที่หอนกฮูก'],[10,10,3,1,'flowers'],[26,20,3,1,'flowers'],[13,15,2,1,'bench']],
+  sits:[[14,15.3,'นั่งพักกลางเนินมองนกฮูกบินวนรอบหอคอย']]},
  gringotts_vaults:{th:'ห้องนิรภัยกริงกอตส์ (ใต้ดิน)',en:'Gringotts Underground Vaults',w:40,h:24,floor:'stone',wall:'#2e2a30',light:'torch',region:'london',
   furn:[[5,1,3,1,'vaultdoor'],[13,1,3,1,'vaultdoor'],[21,1,3,1,'vaultdoor'],[29,1,3,1,'vaultdoor'],[2,6,36,1,'rail'],[2,10,12,1,'rail'],[14,9,10,3,'chasm'],[14,10,10,1,'trestle'],[24,10,14,1,'rail'],[8,5,1,1,'cart'],[29,9,1,1,'cart'],[35,13,4,3,'waterfall'],[1,13,3,3,'waterfall'],[13,8,1,1,'torch'],[24,8,1,1,'torch'],[13,13,1,1,'torch'],[24,13,1,1,'torch'],[14,14,9,6,'dragon','มังกรขาวเฝ้าห้องนิรภัย'],[3,15,1,1,'stalag'],[34,16,1,1,'stalag'],[6,20,1,1,'stalag'],[30,21,1,1,'stalag'],[10,3,1,1,'torch'],[26,3,1,1,'torch'],[18,3,1,1,'sign','รถรางไปห้องนิรภัย · จับให้แน่น!']],
   sits:[[34,12,'มองรางรถที่ดิ่งหายไปในความมืดลึก']]}
@@ -841,7 +848,7 @@ const V22Z={
 (function(){let n=0;for(const id in ZONES)if(ZONES[id].num>n)n=ZONES[id].num;for(const id in V22Z){const z=V22Z[id];z.x6=1;z.v11=1;z.v15=1;z.v22=1;z.num=++n;ZONES[id]=z;}
  const F=(id,side,f)=>{const z=ZONES[id];return Math.max(1,Math.min((side==='N'||side==='S'?z.w:z.h)-2,Math.round((side==='N'||side==='S'?z.w:z.h)*f)));};
  CONNS.push(['lake_shore','E',F('lake_shore','E',0.5),'durmstrang_dock','W',15],['boats_arrival','E',F('boats_arrival','E',0.5),'beauxbatons_lawn','W',15],
-  ['hogsmeade_station','S',F('hogsmeade_station','S',0.5),'glenfinnan_viaduct','N',35],['triwizard_maze','S',F('triwizard_maze','S',0.5),'little_hangleton','N',20,'pk'],['gringotts','N',F('gringotts','N',0.5),'gringotts_vaults','S',20]);
+  ['hogsmeade_station','S',F('hogsmeade_station','S',0.5),'glenfinnan_viaduct','N',35],['triwizard_maze','S',F('triwizard_maze','S',0.5),'little_hangleton','N',20,'pk'],['gringotts','N',F('gringotts','N',0.5),'gringotts_vaults','S',20],['durmstrang_dock','S',F('durmstrang_dock','S',0.5),'triwizard_lake','N',8],['owlery_hill','N',12,'owlery','S',F('owlery','S',0.5)],['courtyard','E',F('courtyard','E',0.3),'owlery_hill','W',17]);
 })();
 
 /* ===== v14: enlarge every zone again (outdoor x1.5, interiors x1.3) ===== */
@@ -867,7 +874,7 @@ function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const
 function openOutdoorSides(z){return{N:!!outdoorEdge(z,'N'),S:!!outdoorEdge(z,'S'),W:!!outdoorEdge(z,'W'),E:!!outdoorEdge(z,'E')};}
 
 // ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
-const NONSOLID_K=['rail','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
+const NONSOLID_K=['rail','stonestep','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
 (function dress(){const R=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
  const conn=CONNS;for(const id in ZONES){const z=ZONES[id];const doors=[];for(const c of conn){if(c[0]===id)doors.push([c[1],c[2]]);if(c[3]===id)doors.push([c[4],c[5]]);}
   const occ=z.furn.map(f=>({x:f[0]-0.6,y:f[1]-0.6,w:f[2]+1.2,h:f[3]+1.2}));for(const s of(z.sits||[]))occ.push({x:s[0]-1.6,y:s[1]-1.6,w:3.2,h:3.2});
@@ -3077,6 +3084,12 @@ function buildFurnV7(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f
    case'wisp':{for(let i=0;i<3;i++){const m=A(mesh(SPH,T('#9affc0',{emissive:'#40ff90',ei:1.6}),Math.sin(i*2.1)*0.5,1.2+i*0.45,Math.cos(i*2.1)*0.5,0.09,0.09,0.09));m.castShadow=false;}break;}
    case'ironfence':{for(let i=0;i<=w*2;i++)A(mesh(CYL,T('#2a2a30'),-w/2+i*0.5,0.6,0,0.035,1.2,0.035));B(w,0.06,0.06,'#2a2a30',0,1.0,0);B(w,0.06,0.06,'#2a2a30',0,0.3,0);break;}
    case'bigcauldron':{A(outlined(mesh(SPH,T('#26242a'),0,0.9,0,1.0,0.8,1.0),1.03));A(mesh(CYL,T('#1a3a2a',{emissive:'#30ff80',ei:0.7}),0,1.55,0,0.85,0.05,0.85));for(let i=0;i<3;i++)A(mesh(CYL,T('#26242a'),Math.cos(i*2.1)*0.7,0.2,Math.sin(i*2.1)*0.7,0.08,0.4,0.08));break;}
+   case'stand22':{const cols=['#8a1a1a','#1a3a8a','#c9a020','#1a6a3a'];const c=cols[(f.x+f.y)%4];for(let i=0;i<5;i++)B(w-i*0.3,0.5,d-i*0.5,'#7a5a3a',0,i*0.9,-i*0.25);for(const sx of[-1,1])for(const sz of[-1,1])A(mesh(CYL,T('#5a4028'),sx*(w/2-0.2),2.7,sz*(d/2-0.2),0.1,5.4,0.1));
+     B(w,0.9,d*0.3,c,0,4.5,-d/2+0.3);A(mesh(CONE,T(c),0,6.3,0,w*0.6,1.6,d*0.6));A(mesh(CYL,T('#3a2a1a'),0,7.6,0,0.04,1.2,0.04));B(0.7,0.4,0.03,c,0.35,7.9,0);break;}
+   case'tower22':{const st='#9a9288';A(outlined(mesh(CYL,T(st),0,3.5,0,w*0.45,7,w*0.45),1.02));A(mesh(CYL,T('#8a8278'),0,7.1,0,w*0.5,0.3,w*0.5));A(outlined(mesh(CONE,T('#4a4a5a'),0,8.8,0,w*0.55,3.2,w*0.55),1.03));
+     for(let i=0;i<8;i++){const a=i/8*Math.PI*2;A(mesh(BOX,T('#2a2030'),Math.cos(a)*w*0.452,5.6-(i%2)*2.2,Math.sin(a)*w*0.452,0.35,0.55,0.35));}
+     for(let i=0;i<6;i++){const a=i*1.1;const o=A(mesh(SPH,T(i%2?'#c8b090':'#f4f0e8'),Math.cos(a)*w*0.5,7.4,Math.sin(a)*w*0.5,0.18,0.22,0.18));}B(1.0,1.8,0.1,'#3a2a1a',0,0,w*0.45);break;}
+   case'stonestep':{for(let i=0;i<3;i++)B(w*0.9-i*0.1,0.12,d*0.28,['#a8a090','#9a9284','#b0a898'][i],(i-1)*0.15,0,-d/3+i*d/3).castShadow=false;break;}
 
    case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
@@ -3966,7 +3979,7 @@ const MAPXY={chamber_secrets:[24,57],shrieking_shack:[101,64],aragog_hollow:[104
  dada:[44,23],great_hall:[21,31],entrance_hall:[34,30],slytherin_common:[21,44],potions:[32,42],dungeon_corridor:[30,50],kitchens:[42,42],kitchen_corridor:[42,50],hufflepuff_common:[52,47],
  courtyard:[54,34],owlery:[46,32],clock_tower:[56,26],bell_tower:[61,30],wooden_bridge:[67,29],stone_circle:[76,36],greenhouses:[64,40],viaduct:[62,51],hogsmeade_station:[73,57],
  black_lake:[44,60],boathouse:[36,57],lake_shore:[50,67],whomping_willow:[30,64],hagrid_hut:[62,62],quidditch:[80,24],forest_trail:[90,18],centaur_glade:[97,10],changing_rooms:[86,31],stands_tower:[80,14],
- hogsmeade:[86,52],three_broomsticks:[81,44],honeydukes:[88,43],zonkos:[95,45],scrivenshafts:[96,52],dervish_banges:[93,38],shrieking_overlook:[97,59],gladrags:[92,62],hogs_head:[80,66],puddifoots:[87,68],post_office:[94,68],durmstrang_dock:[42,64],beauxbatons_lawn:[60,77],glenfinnan_viaduct:[78,63],little_hangleton:[70,82]};
+ hogsmeade:[86,52],three_broomsticks:[81,44],honeydukes:[88,43],zonkos:[95,45],scrivenshafts:[96,52],dervish_banges:[93,38],shrieking_overlook:[97,59],gladrags:[92,62],hogs_head:[80,66],puddifoots:[87,68],post_office:[94,68],durmstrang_dock:[42,64],beauxbatons_lawn:[60,77],glenfinnan_viaduct:[78,63],little_hangleton:[70,82],triwizard_lake:[42,74],owlery_hill:[64,12]};
 
 /* ===== v11 Floo / Portkey travel ===== */
 const FLOO_REGIONS=[['hogwarts','🏰 ฮอกวอตส์',['great_hall','gryffindor_dorm','ravenclaw_balcony','hufflepuff_barrels','boats_arrival']],['hogsmeade','🏘️ ฮอกส์มี้ด',['hogsmeade','hogsmeade_station','express_carriage']],
