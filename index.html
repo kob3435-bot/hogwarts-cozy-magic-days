@@ -820,7 +820,7 @@ const V15Z={
 const V22Z={
  durmstrang_dock:{th:'ท่าเรือเดิร์มสแตรง (ทะเลสาบดำ)',en:'Durmstrang Ship Mooring',w:48,h:30,floor:'grass',wall:'#3a4a5a',out:1,region:'hogwarts',
   water:[22,1,25,28],dock:[18,13,4,3],
-  furn:[[26,9,16,8,'ship','เรือเดิร์มสแตรง'],[4,4,1,1,'pine'],[9,2,1,1,'pine'],[4,24,1,1,'pine'],[12,26,1,1,'birch'],[7,12,2,1,'bench'],[15,8,1,1,'lantern'],[15,20,1,1,'lantern'],[10,18,3,1,'flowers'],[3,16,1,1,'rock'],[18,24,1,1,'rock'],[12,5,1,1,'sign','เรือจากเดิร์มสแตรงโผล่ขึ้นจากใต้ทะเลสาบ'],[5,8,1,1,'tuft'],[13,22,1,1,'tuft'],[19,4,1,1,'tuft']],
+  furn:[[22,8,20,9,'ship','เรือเดิร์มสแตรง'],[4,4,1,1,'pine'],[9,2,1,1,'pine'],[4,24,1,1,'pine'],[12,26,1,1,'birch'],[7,12,2,1,'bench'],[15,8,1,1,'lantern'],[15,20,1,1,'lantern'],[10,18,3,1,'flowers'],[3,16,1,1,'rock'],[18,24,1,1,'rock'],[12,5,1,1,'sign','เรือจากเดิร์มสแตรงโผล่ขึ้นจากใต้ทะเลสาบ'],[5,8,1,1,'tuft'],[13,22,1,1,'tuft'],[19,4,1,1,'tuft']],
   sits:[[8,13.3,'นั่งมองเสากระโดงเรือที่ลอยอยู่กลางหมอกทะเลสาบ']]},
  beauxbatons_lawn:{th:'สนามรถม้าโบซ์บาตงส์',en:'Beauxbatons Carriage Lawn',w:44,h:30,floor:'grass',wall:'#5a7a5a',out:1,region:'hogwarts',
   furn:[[17,4,9,6,'bcarriage','รถม้าโบซ์บาตงส์'],[6,6,2,2,'abraxan'],[33,6,2,2,'abraxan'],[9,13,2,2,'abraxan'],[30,14,2,2,'abraxan'],[19,16,5,5,'fountain'],[4,22,4,1,'flowers'],[34,22,4,1,'flowers'],[14,12,1,1,'lantern'],[28,12,1,1,'lantern'],[2,2,1,1,'birch'],[40,3,1,1,'birch'],[3,27,1,1,'oak'],[40,26,1,1,'oak'],[12,24,2,1,'bench'],[29,25,2,1,'bench'],[22,12,1,1,'sign','ม้าบินอาบรักซันดื่มเฉพาะวิสกี้มอลต์เดี่ยว'],[8,18,1,1,'tuft'],[36,18,1,1,'tuft']],
@@ -3026,9 +3026,18 @@ function buildFurnV7(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f
      for(let i=0;i<3;i++)A(rot(mesh(CYL,T(blk),ex-0.6+i*0.7,y0+0.35,0.5,0.32,0.08,0.32),Math.PI/2,0,0));for(let i=0;i<3;i++)A(rot(mesh(CYL,T(blk),ex-0.6+i*0.7,y0+0.35,-0.5,0.32,0.08,0.32),Math.PI/2,0,0));
      B(L-0.2,0.15,0.9,blk,0.1,y0+0.1,0);for(let c=0;c<Math.floor((L-3.4)/2.6);c++){const cx=ex-3.2-c*2.6;if(cx<-L/2+1)break;B(2.4,1.1,1.0,red,cx,y0+0.3,0);B(2.5,0.12,1.1,blk,cx,y0+1.4,0);for(let k=0;k<3;k++){B(0.45,0.35,0.02,'#ffe2a0',cx-0.75+k*0.75,y0+0.85,0.51,{emissive:'#ffb040',ei:0.6});B(0.45,0.35,0.02,'#ffe2a0',cx-0.75+k*0.75,y0+0.85,-0.51,{emissive:'#ffb040',ei:0.6});}}
      for(let k=0;k<4;k++){const p=A(mesh(SPH,T('#f4f4f8'),ex+0.9-k*0.35,y0+2.0+k*0.45,0,0.25+k*0.12,0.22+k*0.1,0.25+k*0.12,false));p.userData.puff=k;}break;}
-   case'ship':{const wood='#4a3424',dk='#2e2018';B(w*0.86,1.2,d*0.62,wood,0,0,0);A(outlined(mesh(SPH,T(wood),w*0.43,0.6,0,w*0.16,0.6,d*0.31),1.03));A(mesh(SPH,T(wood),-w*0.42,0.75,0,w*0.1,0.75,d*0.31));B(w*0.9,0.12,d*0.66,dk,0,1.2,0);B(w*0.2,0.9,d*0.55,wood,-w*0.36,1.3,0);
-     for(const [mx,mh] of [[-w*0.12,5.2],[w*0.18,4.4]]){A(mesh(CYL,T(dk),mx,1.2+mh/2,0,0.1,mh,0.1));for(let s=0;s<2;s++){const sl=B(0.06,1.3-s*0.25,d*0.9-s*0.4,s?'#7a1a24':'#d8ccb4',mx+0.1,1.9+s*1.6,0);sl.castShadow=true;}}
-     for(let i=0;i<5;i++)B(0.2,0.2,0.04,'#ffd070',-w*0.3+i*w*0.14,0.75,d*0.31+0.02,{emissive:'#ffb040',ei:0.8});A(mesh(CYL,T('#c9a24a'),w*0.5,1.4,0,0.06,1.2,0.06));break;}
+   case'ship':{const wood='#4a3020',dk='#2a1c14',trim='#b8902a',L=w*0.92,Bm=Math.min(d*0.5,5),H=2.2;
+     const hg=geo('hull22_'+L+'_'+Bm,()=>{const s=new THREE.Shape();s.moveTo(-L/2,H*1.15);s.lineTo(-L/2+0.4,0.2);s.quadraticCurveTo(0,-0.6,L/2-1.2,0.3);s.quadraticCurveTo(L/2,0.9,L/2+0.6,H*1.25);s.lineTo(-L/2,H*1.15);const g=new THREE.ExtrudeGeometry(s,{depth:Bm,bevelEnabled:true,bevelThickness:0.5,bevelSize:0.4,bevelSegments:3,curveSegments:8});g.translate(0,0,-Bm/2);return g;});
+     const hu=A(outlined(mesh(hg,T(wood),0,0,0,1,1,1),1.01));hu.castShadow=true;
+     B(L*0.95,0.12,Bm+0.4,dk,0,H*1.12,0);for(const sz of[-1,1]){B(L*0.95,0.18,0.12,trim,0,H*0.8,sz*(Bm/2+0.5));B(L*0.95,0.1,0.1,trim,0,H*0.35,sz*(Bm/2+0.45));for(let i=0;i<9;i++)B(0.32,0.28,0.05,'#ffd070',-L*0.38+i*L*0.095,H*0.58,sz*(Bm/2+0.52),{emissive:'#ffaa40',ei:1});}
+     B(L*0.22,1.4,Bm*0.9,wood,-L*0.36,H*1.12,0);B(L*0.24,0.15,Bm+0.2,trim,-L*0.36,H*1.12+1.4,0);for(let i=0;i<3;i++)B(0.4,0.4,0.05,'#ffe0a0',-L*0.45+i*0.6,H*1.12+0.7,Bm*0.46,{emissive:'#ffb040',ei:1});
+     A(rot(mesh(CYL,T(dk),L/2+1.6,H*1.4,0,0.1,4,0.1),0,0,1.2));A(outlined(mesh(SPH,T(trim),L/2+0.5,H*1.15,0,0.35,0.45,0.3),1.05));
+     const masts=[[-L*0.18,9],[L*0.08,10.5],[L*0.3,8]];for(const [mx,mh] of masts){A(mesh(CYL,T(dk),mx,H+mh/2,0,0.14,mh,0.14));
+       for(let s=0;s<3;s++){const y=H+2+s*(mh-2.5)/3,sw=Bm*1.5-s*0.9;B(0.1,0.1,sw+0.4,dk,mx,y+(mh-2.5)/3,0);const sl=B(0.08,(mh-2.5)/3-0.25,sw,s===1?'#6a1420':'#e4d8bc',mx+0.15,y+0.1,0);sl.castShadow=true;}
+       A(mesh(CONE,T('#8a1420'),mx,H+mh+0.35,0,0.12,0.7,0.12));
+       for(const sz of[-1,1]){const dx=0,dz=sz*(Bm/2+0.4),len=Math.hypot(mh,dz);A(rot(mesh(CYL,T('#2a2018'),mx,H+mh/2,dz/2,0.025,len,0.025),-sz*Math.atan2(Math.abs(dz),mh),0,0));}}
+     for(let i=0;i<masts.length-1;i++){const a=masts[i],b=masts[i+1],dx=b[0]-a[0],dy=(H+b[1])-(H+a[1]*0.9);A(rot(mesh(CYL,T('#2a2018'),(a[0]+b[0])/2,H+a[1]*0.9+dy/2,0,0.025,Math.hypot(dx,dy),0.025),0,0,-Math.atan2(dx,dy)));}
+     for(const lx of[-L*0.45,L*0.4]){A(mesh(CYL,T(dk),lx,H*1.12+0.6,Bm/2,0.04,1.2,0.04));const lp=A(mesh(SPH,T('#ffd27a',{emissive:'#ffb040',ei:1.4}),lx,H*1.12+1.3,Bm/2,0.2,0.26,0.2));lp.userData.lamp=1;}break;}
    case'bcarriage':{const bl='#a8d0f4',gold='#e8c050';A(outlined(mesh(SPH,T(bl),0,1.9,0,w*0.42,1.25,d*0.4),1.03));A(mesh(SPH,T(bl),0,3.05,0,w*0.22,0.45,d*0.2));A(mesh(CYL,T(gold),0,3.5,0,0.08,0.5,0.08));
      for(const sx of[-1,1])for(const sz of[-1,1])A(rot(mesh(geo('wheel22',()=>new THREE.TorusGeometry(1,0.12,6,20)),T(gold),sx*w*0.3,0.75,sz*d*0.42,0.72,0.72,0.72),0,0,0));
      B(0.9,1.4,0.06,'#7aa8d8',0,1.1,d*0.4,{emissive:'#304a80',ei:0.3});B(1.2,0.1,0.1,gold,0,2.55,d*0.4);for(let i=0;i<4;i++)B(0.35,0.45,0.04,'#fff0c0',-1.2+i*0.8,2.1,d*0.39,{emissive:'#ffd080',ei:0.7});break;}
