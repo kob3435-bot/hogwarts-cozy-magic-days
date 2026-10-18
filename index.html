@@ -3753,7 +3753,7 @@ function bunLoadG(s){zone=s.zone;world=s.world;scatterGrp=s.scatterGrp;poolGrp=s
 function newBundle(id){const b={id,key:bunKey(),phase:0,ready:false,root:new THREE.Group(),used:performance.now(),lights:[],
   s:{zone:ZONES[id],world:null,scatterGrp:null,poolGrp:null,ambGrp:null,MG:null,amb:[],wallSides:{},waterMat:null,boatMesh:null,candleInst:null,flameInst:null,auroraMesh:null,WL:[],lightsDyn:[],sitRings:[],animFurn:[],anim:[]}};
   b.root.name='bundle:'+id;b.root.visible=false;scene.add(b.root);BUN[id]=b;return b;}
-const BUN_PHASES=['zone','furn','scatter','pools','ambient','magic','style','warm'];var BUN_FB={furn:null};
+const BUN_PHASES=['zone','furn','scatter','pools','ambient','magic','magic15','style','warm'];var BUN_FB={furn:null};
 
 /* ===== v16 perf: static-mesh merging per streamed area (by material + spatial cell) ===== */
 const UDOK=new Set(['own','noOutline','isOutline','cs0','small']);
@@ -3776,11 +3776,12 @@ function bunStep(b){if(b.ready)return;const t0=performance.now();const S=bunSave
   try{bunLoadG(b.s);zone=ZONES[b.id];const ph=BUN_PHASES[b.phase];
     if(ph==='zone'){FURN_DEFER=true;BUN_FB.furn=null;try{buildZone3D();}finally{FURN_DEFER=false;}b._furn=BUN_FB.furn||[];b._fi=0;applyEnv(actEnv||zone);
       world.traverse(o=>{if(o.userData.skyDome||o.userData.skyish)o.visible=false;});}
-    else if(ph==='furn'){if(!bunFurnStep(b))b._again=1;}else if(ph==='scatter')buildScatter();else if(ph==='pools')buildPools();else if(ph==='ambient')buildAmbient();else if(ph==='magic'){buildMagic();try{magic15(MG,zone);}catch(e){console.warn('m15',e);}}
-    else if(ph==='warm'){if(!b._warm1){b._warm1=1;try{staticMerge(b);}catch(e){console.warn('merge',e);}// pre-compile shaders + upload textures now, so the first time the area comes into view there is no stall
+    else if(ph==='furn'){if(!bunFurnStep(b))b._again=1;}else if(ph==='scatter')buildScatter();else if(ph==='pools')buildPools();else if(ph==='ambient')buildAmbient();else if(ph==='magic'){buildMagic();}else if(ph==='magic15'){try{magic15(MG,zone);}catch(e){console.warn('m15',e);}}
+    else if(ph==='warm'&&!b._warm0&&!BUN_SYNC){b._warm0=1;try{staticMerge(b);}catch(e){console.warn('merge',e);}b._again=1;}
+    else if(ph==='warm'){if(!b._warm1){b._warm1=1;if(!b._warm0){b._warm0=1;try{staticMerge(b);}catch(e){console.warn('merge',e);}}// pre-compile shaders + upload textures now, so the first time the area comes into view there is no stall
       const v0=b.root.visible;b.root.visible=true;try{if(renderer.compileAsync&&!BUN_SYNC){renderer.compileAsync(b.root,camera,scene).catch(()=>{});}else renderer.compile(b.root,camera,scene);}catch(e){}b.root.visible=v0;}const v=b.root.visible;b.root.visible=true;
       if(!b._tex){b._tex=[];b.root.traverse(o=>{const m=o.material;if(!m)return;for(const mm of(Array.isArray(m)?m:[m]))for(const k of['map','normalMap','emissiveMap','alphaMap','roughnessMap'])if(mm[k]&&!mm[k].__warm&&!b._tex.includes(mm[k]))b._tex.push(mm[k]);});}const _tt=performance.now();while(b._tex.length){const tx=b._tex.shift();if(!tx.__warm){try{renderer.initTexture(tx);tx.__warm=1;}catch(e){}}if(!BUN_SYNC&&performance.now()-_tt>4)break;}if(b._tex.length)b._again=1;b.root.visible=v;}
-    else if(ph==='style'){for(const g of[world,scatterGrp,MG,ambGrp])if(g)styleModel(g,{w:1.0,minSize:Q===QUALS.low?0.2:0.08,noOutline:Q===QUALS.low});}
+    else if(ph==='style'){const G=[world,scatterGrp,MG,ambGrp],o={w:1.0,minSize:Q===QUALS.low?0.2:0.08,noOutline:Q===QUALS.low};if(BUN_SYNC){for(let j=(b._st||0);j<4;j++)if(G[j])styleModel(G[j],o);}else{const i=b._st||0;if(G[i])styleModel(G[i],o);b._st=i+1;if(b._st<4)b._again=1;}}
     for(const g of[world,scatterGrp,poolGrp,ambGrp,MG])if(g&&g.parent!==b.root)b.root.add(g);
     b.s=bunSaveG();b.s.zone=ZONES[b.id];}
   finally{bunLoadG(S);BUN_BG=false;}
@@ -5000,7 +5001,8 @@ function reflTex(mode){const k='r'+mode;return V21T[k]||(V21T[k]=v21Canvas(512,2
  g.globalAlpha=0.92;g.filter='blur(0.6px)';g.drawImage(src,0,0,w,h);g.filter='none';g.globalAlpha=1;
  const m=g.createLinearGradient(0,0,0,h);m.addColorStop(0,'rgba(0,0,0,0)');m.addColorStop(0.75,'rgba(0,0,0,0.35)');m.addColorStop(1,'rgba(0,0,0,1)');g.globalCompositeOperation='destination-out';g.fillStyle=m;g.fillRect(0,0,w,h);
  const s=g.createLinearGradient(0,0,w,0);s.addColorStop(0,'rgba(0,0,0,1)');s.addColorStop(0.15,'rgba(0,0,0,0)');s.addColorStop(0.85,'rgba(0,0,0,0)');s.addColorStop(1,'rgba(0,0,0,1)');g.fillStyle=s;g.fillRect(0,0,w,h);}));}
-function winTex(){return V21T.win||(V21T.win=v21Canvas(512,256,(g,w,h)=>{const src=castle22Tex().image;g.drawImage(src,0,0,w,h);const d=g.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){if(d.data[i]<120)d.data[i+3]=0;}g.putImageData(d,0,0);const c2=document.createElement('canvas');c2.width=w;c2.height=h;const g2=c2.getContext('2d');g2.filter='blur(2px)';g2.drawImage(g.canvas,0,0);g2.filter='none';g2.globalCompositeOperation='lighter';g2.drawImage(g.canvas,0,0);g.clearRect(0,0,w,h);g.drawImage(c2,0,0);}));}
+function v21CanvasR(w,h,f){const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d',{willReadFrequently:true}),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+function winTex(){return V21T.win||(V21T.win=v21CanvasR(512,256,(g,w,h)=>{const src=castle22Tex().image;g.drawImage(src,0,0,w,h);const d=g.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){if(d.data[i]<120)d.data[i+3]=0;}g.putImageData(d,0,0);const c2=document.createElement('canvas');c2.width=w;c2.height=h;const g2=c2.getContext('2d');g2.filter='blur(2px)';g2.drawImage(g.canvas,0,0);g2.filter='none';g2.globalCompositeOperation='lighter';g2.drawImage(g.canvas,0,0);g.clearRect(0,0,w,h);g.drawImage(c2,0,0);}));}
 function candleGlowTex(){return V21T.cg||(V21T.cg=v21Canvas(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,240,200,1)');r.addColorStop(0.25,'rgba(255,200,110,.6)');r.addColorStop(1,'rgba(255,160,60,0)');g.fillStyle=r;g.fillRect(0,0,64,64);}));}
 function vis21Build(){const z=zone,t=TIMES[timeIdx],G=new THREE.Group();const night=t==='night',sun=t==='sunset';V21C=[];G.userData.cand=null;
  const out=isOut();const hogw=out&&(!z.region||z.region==='hogwarts')&&!z.underwater;
@@ -5086,7 +5088,7 @@ window.__floo=(id)=>flooTravel(id,'floo');window.__photo=()=>openPhoto();
 
 /* ===== v22 stage A ===== */
 const V22T={};
-function castle22Tex(){return V22T.c||(V22T.c=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=512;const g=c.getContext('2d');const w=1024,h=512;
+function castle22Tex(){return V22T.c||(V22T.c=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=512;const g=c.getContext('2d',{willReadFrequently:true});const w=1024,h=512;
  // drawn upside-down (base at top) as it is a reflection
  const R=(x,y,ww,hh)=>g.fillRect(x,y,ww,hh);g.fillStyle='#000';
  // cliff/rock base
