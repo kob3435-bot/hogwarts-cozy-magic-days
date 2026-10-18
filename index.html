@@ -832,7 +832,7 @@ const V22Z={
  little_hangleton:{th:'สุสานลิตเติลแฮงเกิลตัน',en:'Little Hangleton Graveyard',w:40,h:30,floor:'forest',wall:'#2a2a34',out:1,region:'far',
   furn:[[17,5,3,3,'angel','รูปปั้นเทวดาถือเคียว'],[28,3,7,6,'mausoleum'],[4,3,1,1,'yew'],[11,2,1,1,'yew'],[36,13,1,1,'yew'],[3,22,1,1,'yew'],[34,25,1,1,'yew'],
    [6,10,1,1,'grave'],[9,10,1,1,'grave'],[12,10,1,1,'grave'],[6,14,1,1,'grave'],[9,14,1,1,'grave'],[12,14,1,1,'grave'],[24,13,1,1,'grave'],[27,13,1,1,'grave'],[30,13,1,1,'grave'],[24,17,1,1,'grave'],[27,17,1,1,'grave'],[30,17,1,1,'grave'],[8,20,1,1,'grave'],[12,20,1,1,'grave'],[26,22,1,1,'grave'],[30,22,1,1,'grave'],
-   [18,12,1,1,'lantern'],[20,20,1,1,'sign','ที่นี่เงียบมาก... อย่าอยู่นาน']],
+   [18,12,1,1,'lantern'],[20,20,1,1,'sign','ที่นี่เงียบมาก... อย่าอยู่นาน'],[17,10,2,2,'bigcauldron'],[15,8,1,1,'grave'],[22,8,1,1,'grave'],[15,12,1,1,'grave'],[22,12,1,1,'grave'],[4,7,1,1,'wisp'],[14,17,1,1,'wisp'],[33,9,1,1,'wisp'],[26,26,1,1,'wisp'],[7,26,1,1,'wisp'],[2,1,14,1,'ironfence'],[24,1,14,1,'ironfence']],
   sits:[[19,22,'ยืนนิ่งท่ามกลางหมอกเย็นๆ ของสุสานเก่า']]},
  gringotts_vaults:{th:'ห้องนิรภัยกริงกอตส์ (ใต้ดิน)',en:'Gringotts Underground Vaults',w:40,h:24,floor:'stone',wall:'#2e2a30',light:'torch',region:'london',
   furn:[[5,1,3,1,'vaultdoor'],[13,1,3,1,'vaultdoor'],[21,1,3,1,'vaultdoor'],[29,1,3,1,'vaultdoor'],[2,6,36,1,'rail'],[2,10,12,1,'rail'],[14,9,10,3,'chasm'],[14,10,10,1,'trestle'],[24,10,14,1,'rail'],[8,5,1,1,'cart'],[29,9,1,1,'cart'],[35,13,4,3,'waterfall'],[1,13,3,3,'waterfall'],[13,8,1,1,'torch'],[24,8,1,1,'torch'],[13,13,1,1,'torch'],[24,13,1,1,'torch'],[14,14,9,6,'dragon','มังกรขาวเฝ้าห้องนิรภัย'],[3,15,1,1,'stalag'],[34,16,1,1,'stalag'],[6,20,1,1,'stalag'],[30,21,1,1,'stalag'],[10,3,1,1,'torch'],[26,3,1,1,'torch'],[18,3,1,1,'sign','รถรางไปห้องนิรภัย · จับให้แน่น!']],
@@ -3074,6 +3074,9 @@ function buildFurnV7(W,f){const g=new THREE.Group();g.position.set(f.x+f.w/2,0,f
    case'waterfall':{B(w,3.2,0.6,'#3a3440',0,0,-d/2+0.3);const wm=new THREE.MeshBasicMaterial({color:'#9ad8ff',transparent:true,opacity:0.7,depthWrite:false});for(let i=0;i<3;i++){const p=A(mesh(BOX,wm,-w/3+i*w/3,1.55,-d/2+0.68,w/3.6,3.1,0.06));p.castShadow=false;}
      for(let i=0;i<5;i++)A(mesh(SPH,T('#eaf6ff'),-w/2+0.4+i*(w-0.8)/4,0.15,-d/2+0.9,0.35,0.2,0.3));B(w,0.05,d*0.6,'#4a8ac0',0,0,0.1,{emissive:'#1a4a7a',ei:0.4}).castShadow=false;break;}
    case'trestle':{for(let i=0;i<w;i+=2)for(const sz of[-0.4,0.4])A(mesh(CYL,T('#4a3626'),-w/2+i+0.5,0.6,sz,0.07,1.2,0.07));B(w,0.12,1.0,'#5a4030',0,1.2,0);for(const sz of[-0.3,0.3])B(w,0.06,0.07,'#8a8a92',0,1.32,sz);break;}
+   case'wisp':{for(let i=0;i<3;i++){const m=A(mesh(SPH,T('#9affc0',{emissive:'#40ff90',ei:1.6}),Math.sin(i*2.1)*0.5,1.2+i*0.45,Math.cos(i*2.1)*0.5,0.09,0.09,0.09));m.castShadow=false;}break;}
+   case'ironfence':{for(let i=0;i<=w*2;i++)A(mesh(CYL,T('#2a2a30'),-w/2+i*0.5,0.6,0,0.035,1.2,0.035));B(w,0.06,0.06,'#2a2a30',0,1.0,0);B(w,0.06,0.06,'#2a2a30',0,0.3,0);break;}
+   case'bigcauldron':{A(outlined(mesh(SPH,T('#26242a'),0,0.9,0,1.0,0.8,1.0),1.03));A(mesh(CYL,T('#1a3a2a',{emissive:'#30ff80',ei:0.7}),0,1.55,0,0.85,0.05,0.85));for(let i=0;i<3;i++)A(mesh(CYL,T('#26242a'),Math.cos(i*2.1)*0.7,0.2,Math.sin(i*2.1)*0.7,0.08,0.4,0.08));break;}
 
    case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
