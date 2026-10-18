@@ -864,6 +864,17 @@ const V22Z={
  add('burrow_garden',[[12,8,1,1,'gnome'],[15,10,1,1,'gnome'],[9,14,1,1,'gnome'],[27,16,1,1,'gnome'],[33,10,1,1,'chicken'],[35,11,1,1,'chicken'],[31,12,1,1,'chicken'],[18,9,1,1,'chicken']]);
  add('godrics_hollow',[[10,8,1,1,'lamp'],[36,8,1,1,'lamp'],[14,14,1,1,'pine'],[34,14,1,1,'pine'],[2,9,4,1,'fence']]);
  add('shell_cottage',[[2,13,8,3,'cliff'],[33,13,9,3,'cliff'],[10,14,2,2,'shells'],[24,14,2,2,'shells'],[30,15,2,2,'shells'],[14,12,2,2,'shells']]);})();
+/* v22: NPCs + quest hooks at new places */
+(function(){const N=[
+['ivo22','Ivo Brandt','อีโว นักเรียนเดิร์มสแตรง','durmstrang_dock',{hair:'#3a2a1a',hs:'short',eye:'#4a6a8a',skin:SK.l,robe:'#7a2a24'},['เรือลำนี้ดำดิ่งใต้ทะเลสาบมาทั้งลำ ผ้าใบยังเปียกอยู่เลย','ที่โรงเรียนผม หิมะตกจนลืมสีหญ้าไปแล้ว'],['ลูน่า เธอเคยเห็นสัตว์ใต้ทะเลเหนือไหม','เคยฝันถึงค่ะ มันร้องเพลงเป็นภาษาน้ำแข็ง'],'ขอบใจนะ อบอุ่นกว่าขนมปังดำบนเรือเยอะ',[20,20]],
+['celine22','Céline Moreau','เซลีน นักเรียนโบซ์บาตงส์','beauxbatons_lawn',{hair:'#e8d8a8',hs:'long',eye:'#6a8ac8',skin:SK.l,robe:'#7aa0d8'},['ม้าปีกพวกนี้ดื่มแต่วิสกี้มอลต์เดี่ยวนะ เชื่อไหม','รถม้าของเราบินข้ามทะเลมาทั้งคืน'],['ลูน่า ผมเธอมีกลิ่นดอกไม้ป่า','เป็นกลิ่นต้นดิริจิเบิลค่ะ ช่วยกันนาร์เกิลได้'],'แมร์ซี! น่ารักจัง',[30,20]],
+['conductor22','Mr Alder','ลุงอัลเดอร์ พนักงานรถไฟ','glenfinnan_viaduct',{hair:'#8a8a8a',hs:'short',eye:'#5a4a3a',skin:SK.m,robe:'#2a3a5a',beard:1},['รถไฟผ่านสะพานโค้งนี้วันละสองรอบ ฟังเสียงหวูดสิ','ห้ามยืนบนรางนะเด็กๆ ถึงจะเป็นพ่อมดก็เถอะ'],['ลูน่าจ๋า ตั๋วอยู่ไหน','ในรองเท้าข้างซ้ายค่ะ ปลอดภัยที่สุด'],'โอ้ ขนมรถไฟ! ลุงชอบที่สุดเลย',[34,24]],
+['griphook22','Bogrod the Younger','บอกรอดน้อย ก๊อบลินผู้คุมห้องนิรภัย','gringotts_vaults',{hair:'#d8d8c8',hs:'thin',eye:'#2a2a2a',skin:'#c8b890',robe:'#3a2a1a',stout:1},['ห้องนิรภัยยิ่งลึก ยิ่งเก่า ยิ่งมีมังกรเฝ้า','รถรางวิ่งเร็วเกินห้าสิบไมล์ อย่ายื่นหน้าออกไปนะ'],['เด็กผมทอง จะฝากอะไร','ฝากความฝันค่ะ ไม่ต้องใช้กุญแจ'],'...ของขวัญ? ก๊อบลินจะจดบันทึกไว้',[14,18]],
+['warden22','Moira Finch','มอยรา ผู้ดูแลทะเลสาบ','triwizard_lake',{hair:'#a83a2a',hs:'bun',eye:'#3a8a6a',skin:SK.l,robe:'#3a6a6a'},['ทุ่นลอยพวกนั้นคือจุดดำน้ำของภารกิจที่สอง','ชาวเงือกยังเก็บไข่มุกที่ผู้แข่งทำหล่นไว้อยู่เลย'],['ลูน่า ชาวเงือกฝากความคิดถึงมา','บอกพวกเขาว่าเพลงเมื่อคืนเพราะมากค่ะ'],'ขอบใจ จะเอาไปแบ่งเงือกตัวน้อย',[26,8]],
+['owlkeep22','Old Tamsin','ยายแทมซิน คนเลี้ยงนกฮูก','owlery_hill',{hair:'#e8e8e8',hs:'bun',eye:'#6a5a3a',skin:SK.m,robe:'#5a4a3a'},['ขั้นบันไดนี้มีสามร้อยขั้น ยายนับทุกเช้า','นกฮูกสีขาวตัวนั้นชอบหิมะมากกว่าใคร'],['ลูน่า หนูมาส่งจดหมายถึงพ่ออีกแล้วเหรอ','ค่ะยาย เรื่องสัตว์ประหลาดตัวใหม่'],'ขนมนกฮูก! เด็กดีจริง',[16,22]],
+['caretaker22','Silas Grey','ไซลาส ผู้เฝ้าสุสาน','little_hangleton',{hair:'#5a5a5a',hs:'thin',eye:'#8a8a6a',skin:'#d8d0c0',robe:'#2a2a2a',beard:1},['หมอกที่นี่ไม่เคยจางเลยตั้งแต่คืนนั้น','แสงสีเขียวลอยๆ นั่น... อย่าตามไปนะ'],['เด็กน้อย ไม่กลัวที่นี่เหรอ','กลัวนิดหน่อยค่ะ แต่คนที่จากไปก็แค่อยู่หลังม่านเท่านั้น'],'ขอบใจ... นานแล้วที่ไม่มีใครให้อะไรข้า',[10,22]]];
+const T=[];for(const [id,en,th,zn,look,lines,l3,gift,at] of N){if(!ZONES[zn])continue;{const c=C(id,en,th,'N',zn,look,lines,l3,gift,null,at);c.pin22=1;CHARACTERS.push(c);}T.push([id,'ไปคุยกับ'+th.split(' ')[0]+'ที่'+ZONES[zn].th,zn]);}
+window.Q22=T;})();
 
 /* ===== v14: enlarge every zone again (outdoor x1.5, interiors x1.3) ===== */
 const XW20={courtyard:1.2,hagrid_hut:1.2,stone_circle:1.2,whomping_willow:1.2,lake_shore:1.2,boats_arrival:1.2,hogsmeade:1.2,diagon_alley:1.25,knockturn_alley:1.2};
@@ -1048,7 +1059,7 @@ const FIXED={fatlady:1};
 const GROUPS=[[['harry','ron','hermione'],0.7],[['fred','george'],0.85],[['parvati','lavender'],0.75],[['dean','seamus'],0.6],[['hannah','ernie'],0.6],[['draco','pansy','blaise'],0.65],[['hagrid','fang'],0.8],[['filch','mrsnorris'],0.8],[['neville','trevor'],0.5],[['hermione','crookshanks'],0.35],[['ginny','cho'],0.2]];
 const LEADER={};for(const [g,p] of GROUPS)for(let i=1;i<g.length;i++)if(!LEADER[g[i]])LEADER[g[i]]=[g[0],p,g];
 const MATES={};for(const [g] of GROUPS)for(const a of g)for(const b of g)if(a!==b)(MATES[a]=MATES[a]||new Set()).add(b);
-function schedFor(c,ph){if(SCH[c.id])return SCH[c.id][ph];const h=c.house in COMMON?c.house:'G';const b=Object.assign({},STU(h)[ph]);const a=(SADD[c.id]||[])[ph]||{};for(const k in a)b[k]=(b[k]||0)+a[k];return b;}
+function schedFor(c,ph){if(c.pin22)return {[c.zone]:1};if(SCH[c.id])return SCH[c.id][ph];const h=c.house in COMMON?c.house:'G';const b=Object.assign({},STU(h)[ph]);const a=(SADD[c.id]||[])[ph]||{};for(const k in a)b[k]=(b[k]||0)+a[k];return b;}
 function wpick(o){let s=0;for(const k in o)if(ZONES[k])s+=o[k];let r=Math.random()*s;for(const k in o){if(!ZONES[k])continue;r-=o[k];if(r<=0)return k;}return Object.keys(o).find(k=>ZONES[k]);}
 const NPCBY={};for(const n of NPCS)NPCBY[n.c.id]=n;
 function zonePath(a,b){if(a===b)return[a];const prev={[a]:null},q=[a];while(q.length){const z=q.shift();if(z===b)break;for(const d of ZONES[z].doors){if(!(d.to in prev)){prev[d.to]=z;q.push(d.to);}}}if(!(b in prev))return null;const p=[];let c=b;while(c){p.unshift(c);c=prev[c];}return p;}
@@ -4288,7 +4299,7 @@ function nextDay(){SIM.day++;persist();timeIdx=0;if(typeof applyTime==='function
 function onNewDay(){if(V.lastDay===SIM.day)return;V.lastDay=SIM.day;genQuests();rivalTick();V.plots=V.plots.map(p=>p?Object.assign(p,{g:p.w?Math.min(3,p.g+1):p.g,w:false}):p);if(Math.random()<0.9)queueLetter();const f=festToday();if(f){toast(f.ic+' วันนี้: '+f.th+'! '+f.d);if(f.id==='yule')setTimeout(cupAward,1500);}saveV();hudV();}
 /* ---------- Daily quests ---------- */
 const QPOOL=[['talk','คุยกับเพื่อน 3 คน',3,8],['gift','ให้ของขวัญเพื่อน 1 ชิ้น',1,10],['class','เข้าเรียนคาบมินิเกม 1 คาบ',1,12],['fish','ตกปลาที่ทะเลสาบดำ 2 ตัว',2,10],['spell','ร่ายคาถา 5 ครั้ง',5,6],['nargle','ตามหานาร์เกิล 1 ตัว',1,12],['zone','สำรวจสถานที่ 4 แห่ง',4,8],['buy','ซื้อของจากร้านค้า 1 ชิ้น',1,6],['ring','บินลอดห่วงที่สนามควิดดิช 5 ห่วง',5,12],['luna','คุยกับลูน่า 2 ครั้ง',2,6],['gob','เล่นกอบสโตน 1 ตา',1,10],['pet','ให้อาหารสัตว์เลี้ยง',1,5]];
-function genQuests(){const pool=[...QPOOL].sort(()=>Math.random()-0.5).slice(0,4);V.quests={day:SIM.day,list:pool.map(([type,t,need,rew])=>({type,t,need,rew,n:0,done:false}))};saveV();}
+function genQuests(){const pool=[...QPOOL].sort(()=>Math.random()-0.5).slice(0,4);V.quests={day:SIM.day,list:pool.map(([type,t,need,rew])=>({type,t,need,rew,n:0,done:false}))};if(window.Q22&&Q22.length){const q=Q22[SIM.day%Q22.length];V.quests.list.push({type:'talk',arg:q[0],t:'📍 '+q[1],need:1,rew:15,n:0,done:false});}saveV();}
 function openQuests(){if(!V.quests||V.quests.day!==SIM.day)genQuests();openV('📜 กระดานภารกิจประจำวัน',B=>{for(const q of V.quests.list)B.append(h17('div',{className:'tile',style:'text-align:left;margin:6px 0',on:{click:()=>questGo(q)}},(q.done?'':'🧭 ')+(q.done?'✅ ':'⬜ ')+'<b style="display:inline;font-size:14px">'+q.t+'</b> — '+Math.min(q.n,q.need)+'/'+q.need+' · รางวัล 🪙'+q.rew+' +5🏆'));B.append(h17('p',{},'💡 แตะภารกิจเพื่อให้ตัวละครเดินไปยังจุดหมายอัตโนมัติ (มีแสงนำทาง) · ขยับเองเมื่อไหร่ก็ยกเลิก · ภารกิจใหม่ทุกวัน'));});}
 /* ---------- Chocolate frog cards ---------- */
 const CARDS=[['🧙','ดัมเบิลดอร์','ค้นพบการใช้เลือดมังกร 12 วิธี'],['🧪','นิโคลัส แฟลเมล','ผู้สร้างศิลาอาถรรพ์'],['🦁','กอดริก กริฟฟินดอร์','ผู้ก่อตั้งผู้กล้าหาญ'],['🦅','โรวีนา เรเวนคลอ','ปัญญาคือทรัพย์อันยิ่งใหญ่'],['🦡','เฮลกา ฮัฟเฟิลพัฟ','ยินดีต้อนรับทุกคน'],['🐍','ซัลลาซาร์ สลิธีริน','ผู้ก่อตั้งผู้ทะเยอทะยาน'],['🧹','ไซเปรียน ยูดล์','เกี่ยวข้องกับควิดดิชยุคแรก'],['🐉','นิวท์ สคามันเดอร์','นักสัตววิเศษวิทยา'],['🌙','เมอร์ลิน','พ่อมดในตำนาน'],['🔮','คาสซานดรา','นักพยากรณ์ชื่อดัง'],['⚗️','ปาราเซลซัส','นักเล่นแร่แปรธาตุ'],['🎻','เซเลสติน่า วอร์เบ็ค','นักร้องแม่มดเสียงหวาน'],['🦉','อาร์ชิบอลด์ นกฮูก','(การ์ดแต่งขึ้นใหม่) ส่งจดหมายเร็วที่สุด'],['🍄','มันโก้ ปุ๋ยดี','(การ์ดแต่งขึ้นใหม่) ปลูกเห็ดเรืองแสงได้'],['⭐','ดวงดาว ราตรี','(การ์ดแต่งขึ้นใหม่) วาดแผนที่กลุ่มดาว'],['🫖','ป้าน้ำชา','(การ์ดแต่งขึ้นใหม่) ชงชาให้ตัวลอยได้']];
@@ -4598,7 +4609,7 @@ function fixSeats(z){if(!z._gs||z._seatsFixed)return;z._seatsFixed=1;for(const s
 function openHub(){if(uiOpen&&uiOpen!=='v17M')return;openV('🎒 เมนูกิจกรรม · '+(player.name||'')+' ('+HTH[player.house]+')',B=>{const g=h17('div',{className:'grid'});
  const T=(ic,t,sub,f)=>g.append(h17('div',{className:'tile',on:{click:f}},'<b>'+ic+'</b>'+t+(sub?'<br><small>'+sub+'</small>':'')));
  T('📖','สมุดบันทึก','การ์ด สัตว์ พืช สถานที่ (J)',()=>openJournal());T('🎒','กระเป๋า','🪙 '+V.gal+' · ของ '+Object.keys(V.inv).length+' ชนิด',()=>openInv());
- const qd=V.quests&&V.quests.day===SIM.day?V.quests.list.filter(q=>q.done).length:0;T('📜','ภารกิจประจำวัน',qd+'/4 สำเร็จ (Q)',()=>openQuests());T('🏆','ถ้วยประจำบ้าน',HTH[player.house]+' '+(V.hp[player.house]||0)+' แต้ม',()=>openCup());
+ const qd=V.quests&&V.quests.day===SIM.day?V.quests.list.filter(q=>q.done).length:0;T('📜','ภารกิจประจำวัน',qd+'/'+(V.quests?V.quests.list.length:4)+' สำเร็จ (Q)',()=>openQuests());T('🏆','ถ้วยประจำบ้าน',HTH[player.house]+' '+(V.hp[player.house]||0)+' แต้ม',()=>openCup());
  T('📅','ปฏิทินเทศกาล',(festToday()?festToday().ic+' '+festToday().th:'วันที่ '+(SIM.day+1))+' · '+SEASON[SIM.day%8],()=>openCalendar());
  T('🧹',player.fly?'ลงจอด':'ขี่ไม้กวาด','กลางแจ้งเท่านั้น (B)',()=>{closeV();toggleBroom();});T('📷','โหมดถ่ายภาพ','ฟิลเตอร์ ท่าทาง บันทึก PNG (P)',()=>{closeV();openPhoto();});
  const ev2=lunaEvAvail();T('💙','ลูน่า','ระดับความสนิท '+lunaLv()+'/10'+(ev2.length?' · ✨ มีเหตุการณ์พิเศษ!':''),()=>openLunaHub());
@@ -4736,7 +4747,7 @@ function navHops(id){const r=zonePath(zone.id,id);return r?r.length-1:999;}
 function navSpot(id,pref){const z=ZONES[id];const p=pref?findFree(z,pref.x,pref.y):findFree(z,z.w/2,z.h/2);return p;}
 function questTarget(q){const hum=n=>!n.c.creature&&!isGhost(n.c)&&!n.inMatch&&!n.trip&&!(n.c.id==='fatlady');
  switch(q.type){
-  case 'talk':case 'gift':case 'gob':{const n=navNearestNpc(hum);if(!n)return null;return{zone:n.zone,x:n.x,y:n.y,npc:n,label:n.c.th};}
+  case 'talk':case 'gift':case 'gob':{const n=q.arg?NPCS.find(n=>n.c.id===q.arg):navNearestNpc(hum);if(!n)return null;return{zone:n.zone,x:n.x,y:n.y,npc:n,label:n.c.th};}
   case 'class':{const c=CLASSES.filter(c=>c.k!=='fly'&&c.k!=='patronus'||c.k==='patronus'&&!V.patronus).sort((a,b)=>navHops(a.z)-navHops(b.z))[0];const p=navSpot(c.z);return{zone:c.z,x:p.x,y:p.y,label:'คาบ'+c.t+' ('+ZONES[c.z].th+')',onArrive:c.go};}
   case 'fish':{const z=navHops('black_lake')<=navHops('lake_shore')?'black_lake':'lake_shore';const p=navSpot(z);return{zone:z,x:p.x,y:p.y,label:'ตกปลา ('+ZONES[z].th+')',onArrive:gFish};}
   case 'ring':{const p=navSpot('quidditch');return{zone:'quidditch',x:p.x,y:p.y,label:'ห่วงทอง (สนามควิดดิช)',onArrive:()=>{if(!player.fly)toggleBroom();}};}
@@ -5112,6 +5123,7 @@ let MEMO22=null;
 function memo22Tick(dt){const z=zone;if(!z||z.id!=='ministry_atrium'){if(MEMO22){scene.remove(MEMO22);MEMO22=null;}return;}
  if(!MEMO22){MEMO22=new THREE.Group();const g=new THREE.ConeGeometry(0.18,0.5,3);g.rotateX(Math.PI/2);g.scale(1,0.25,1);const m=new THREE.MeshBasicMaterial({color:'#c8a8f0'});for(let i=0;i<14;i++){const p=new THREE.Mesh(g,m);p.userData={r:3+Math.random()*9,s:0.25+Math.random()*0.3,a:Math.random()*6.28,h:3+Math.random()*2.5,cx:z.w/2+(Math.random()-0.5)*8,cy:z.h/2+(Math.random()-0.5)*6};MEMO22.add(p);}scene.add(MEMO22);}
  for(const p of MEMO22.children){const u=p.userData;u.a+=dt*u.s;p.position.set(u.cx+Math.cos(u.a)*u.r,u.h+Math.sin(u.a*3)*0.3,u.cy+Math.sin(u.a)*u.r*0.6);p.rotation.y=-u.a;p.rotation.z=Math.sin(u.a*3)*0.3;}}
+for(const q of (window.Q22||[]))SCH[q[0]]=[{[q[2]]:1},{[q[2]]:1},{[q[2]]:1},{[q[2]]:1}];
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
