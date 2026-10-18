@@ -4743,7 +4743,7 @@ const DYNRES={base:0,scale:1,acc:0,n:0,on:!/[?&]nodr/.test(location.search)};
 function dynResTick(dt){if(!DYNRES.on||CZA.on)return;if(!DYNRES.base)DYNRES.base=renderer.getPixelRatio();DYNRES.acc+=dt;DYNRES.n++;if(DYNRES.acc<2)return;const avg=DYNRES.acc/DYNRES.n;DYNRES.acc=0;DYNRES.n=0;
  let s=DYNRES.scale;const _tn=performance.now();if(avg>0.030&&s>0.7){s=Math.max(0.7,s-0.15);DYNRES.hold=_tn+(DYNRES.ups>1?60000:20000);}else if(avg<0.015&&s<1&&_tn>(DYNRES.hold||0)){s=Math.min(1,s+0.15);DYNRES.ups=(DYNRES.ups||0)+1;}if(s!==DYNRES.scale){DYNRES.pend=s;}}
 function dynResApply(){const s=DYNRES.pend;DYNRES.pend=0;if(s&&s<DYNRES.scale){try{localStorage.setItem('hc_dr',String(s));}catch(e){}}return;if(s){DYNRES.scale=s;renderer.setPixelRatio(DYNRES.base*s);renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}}
-function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
+function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
 setTimeout(prewarmInit,1200);
 window.__v18={buildChibi:(L,h)=>buildChibi(L,h),NPCQ,PREWARM,CZA,DYNRES,get steps(){return BUN_STATS.steps;}};
 
@@ -5193,6 +5193,15 @@ function lpxTick(dt){if(!LPX.list.length){for(let i=0;i<LPX.N;i++){const l=new T
  A.sort((a,b)=>a.d-b.d);
  for(let i=0;i<LPX.N;i++){const l=LPX.list[i],e=A[i];if(e){const o=e.o;l.position.set(e.x,e.y,e.z);l.color.copy(o.color);l.intensity=o.intensity;l.distance=o.distance;l.decay=o.decay;}else l.intensity=0;}}
 
+/* v23: shader warm-up — cycle time/weather variants for a few frames each while the opening modal covers the screen */
+var WARM23={i:-1,f:0,seq:[[3,null],[0,null],[null,'rain'],[null,'snow'],[null,'aurora']],t0:null,w0:null,done:false};window.WARM23=WARM23;
+function warm23Tick(){const W=WARM23;if(W.done||!window.__game)return;const G=window.__game;
+ if(W.i<0){if(!G.zone)return;setTimeout(warm23End,6000);W.t0=timeIdx;W.w0=weather;W.i=0;W.f=0;const s=W.seq[0];if(s[0]!=null)G.setTime(s[0]);if(s[1])G.setWeather(s[1]);return;}
+  if(++W.f<4)return;try{renderer.compile(scene,camera);}catch(e){}
+ W.i++;W.f=0;if(W.i>=W.seq.length){G.setTime(W.t0);G.setWeather(W.w0);W.done=true;warm23End();return;}const s=W.seq[W.i];G.setTime(s[0]!=null?s[0]:W.t0);G.setWeather(s[1]||W.w0);}
+
+function warm23End(){const l=window.__ld23;if(l){window.__ld23=null;l.style.transition='opacity .4s';l.style.opacity='0';setTimeout(()=>l.remove(),450);}}
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
@@ -5213,7 +5222,7 @@ if(!save.name)openSetup();else setTimeout(()=>lunaBubble('ยินดีต้�
  try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');}catch(_){}
  setTimeout(onResize,300);});})();
 requestAnimationFrame(frame);
-const _ld=document.getElementById('loading');if(_ld)_ld.remove();
+const _ld=document.getElementById('loading');if(_ld)window.__ld23=_ld;
 </script>
 </body>
 </html>
