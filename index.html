@@ -4863,7 +4863,7 @@ function puddleTick(dt){const wet=(weather==='rain'||V17P.rainbowT>0)&&isOut()&&
   for(let i=0;i<N;i++){const p=findFree(zone,rnd(2,zone.w-2),rnd(2,zone.h-2));d.position.set(p.x,0.025,p.y);d.rotation.set(-Math.PI/2,0,rnd(0,6));d.scale.set(rnd(0.5,1.3),rnd(0.35,0.8),1);d.updateMatrix();pudG.setMatrixAt(i,d.matrix);}pudG.renderOrder=1;scene.add(pudG);}}
  if(pudG){const o=pudG.material;o.opacity+=((wet?0.55:0)-o.opacity)*Math.min(1,dt);if(weather==='rain'&&Math.random()<dt*10){spawnP('drop',player.x+rnd(-6,6),player.y+rnd(-5,5),0,0,0.4,2,'rgba(220,240,255,.7)');}}}
 let bloomK='';
-function bloomTick(){if(typeof bloomPass==='undefined'||!bloomPass)return;const t=TIMES[timeIdx],k=t+(isOut()?1:0)+(festToday()?1:0);if(k===bloomK)return;bloomK=k;bloomPass.strength=t==='night'?(festToday()?0.75:0.6):t==='sunset'?0.5:0.3;bloomPass.threshold=t==='night'?0.82:0.88;bloomPass.radius=0.6;}
+function bloomTick(){if(typeof bloomPass==='undefined'||!bloomPass)return;const t=TIMES[timeIdx],_vil=t==='night'&&isOut()&&(zone.village||zone.sub==='hogsmeade'||/hogsmeade/.test(zone.id)),k=t+(isOut()?1:0)+(festToday()?1:0)+(_vil?'v':'');if(k===bloomK)return;bloomK=k;bloomPass.strength=_vil?0.3:t==='night'?(festToday()?0.75:0.6):t==='sunset'?0.5:0.3;bloomPass.threshold=_vil?0.93:t==='night'?0.82:0.88;renderer.toneMappingExposure=_vil?0.9:1.1;bloomPass.radius=0.6;}
 function g18Tick(dt){try{puddleTick(dt);bloomTick();}catch(e){}}
 window.__g18={seasonGrade,get pud(){return pudG},get bloom(){return bloomPass&&bloomPass.strength},setWeather(w){weather=w},season(){return SEASON[SIM.day%8]}};
 
