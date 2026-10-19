@@ -3340,7 +3340,7 @@ var SHF=0;function render(){const dt=lastDt;ensurePlayer();if(Q===QUALS.low){ren
     patronusModels.m.opacity=Math.min(0.65,patronus.life*0.3);if(Math.random()<0.5)spawnP('spark',patronusModels.stag.position.x,patronusModels.stag.position.z,rnd(-.3,.3),rnd(-.3,.3),1,3,'#dff4ff');}
   else if(patronusModels){scene.remove(patronusModels.stag,patronusModels.hare);patronusModels=null;}
   trackPivot.visible=false;if(trackId){const n=NPCS.find(m=>m.c.id===trackId);let tx=null,ty=null;if(n.zone===zone.id){tx=n.x;ty=n.y;}else{const d=nextDoorTo(n.zone);if(d){const t=doorTrigger(zone,d);tx=t.x;ty=t.y;}}if(tx!=null){trackPivot.visible=true;trackPivot.position.set(player.x,1.95+Math.sin(now*5)*0.05,player.y);trackPivot.rotation.y=Math.atan2(tx-player.x,ty-player.y);}}
-  updateCam(false);if(composer)composer.render();else renderer.render(scene,camera);
+  updateCam(false);if(!(TRAV25.busy&&TRAV25.veil)){if(composer)composer.render();else renderer.render(scene,camera);}
   for(const k in labelPool)labelPool[k].dataset.used='';
   if(!uiOpen){const pp0=screenOf(player.x,player.y,0),pp1=screenOf(player.x,player.y,1.6);const PR={l:pp0.x-22,r:pp0.x+22,t:pp1.y-4,b:pp0.y+4};
     const cover=(el)=>{const r=el.getBoundingClientRect(),o=toLocal(r.left,r.top),o2=toLocal(r.right,r.bottom);const l=Math.min(o.x,o2.x),rr=Math.max(o.x,o2.x),t=Math.min(o.y,o2.y),b=Math.max(o.y,o2.y);return l<PR.r&&rr>PR.l&&t<PR.b&&b>PR.t;};
@@ -3842,7 +3842,7 @@ function bunTick(dt){if(!bunActive||!zone)return;bunCool-=dt;
   if(bunActive.key!==bunKey()){if(!TCA.on)buildCandles();return;}
   if(bunCool<=0&&(lastDt<0.045||(player.fly&&lastDt<0.12))&&!SIM.ff&&!BUN_IDLE.busy){const cand=bunCandidates();for(const id of cand){let b=BUN[id];if(b&&b.key!==bunKey()){bunDispose(b);b=null;}if(b&&b.ready)continue;if(!b)b=newBundle(id);if(window.requestIdleCallback&&!window.__noIdle){BUN_IDLE.busy=true;const bb=b;requestIdleCallback(()=>{BUN_IDLE.busy=false;if(BUN[bb.id]!==bb||bb.ready)return;bunStep(bb);if(bb.ready)bunLayout();BUN_IDLE.n++;},{timeout:400});}else{bunStep(b);if(b.ready)bunLayout();}bunCool=0.08;break;}
     // memory: keep at most 10 bundles (active + neighbours + preloaded doors), dispose least-recently-used
-    const ids=Object.keys(BUN);if(ids.length>10){const keep=new Set([zone.id,...cand]);ids.filter(i=>!keep.has(i)).sort((a,b)=>BUN[a].used-BUN[b].used).slice(0,ids.length-10).forEach(i=>bunDispose(BUN[i]));}}
+    const ids=Object.keys(BUN);if(ids.length>10){const keep=new Set([zone.id,...cand]);ids.filter(i=>!keep.has(i)&&!BUN[i].pin).sort((a,b)=>BUN[a].used-BUN[b].used).slice(0,ids.length-10).forEach(i=>bunDispose(BUN[i]));}}
   // streaming by distance: neighbour areas appear as you approach their edge; heavy layers (grass, crowds) only when close
   const lowQ=Q===QUALS.low;
   for(const {n,b} of BUN_NBV){const B=ZONES[n.id];const dx=Math.max(n.off.x-player.x,0,player.x-(n.off.x+B.w)),dy=Math.max(n.off.y-player.y,0,player.y-(n.off.y+B.h));const dd=Math.hypot(dx,dy);b.dist=dd;{const A=zone,c=n.pos+0.5;const px=n.side==='N'||n.side==='S'?c:(n.side==='W'?0:A.w),py=n.side==='W'||n.side==='E'?c:(n.side==='N'?0:A.h);b.ddoor=Math.hypot(player.x-px,player.y-py);}
@@ -4086,7 +4086,7 @@ const FLOO_REGIONS=[['hogwarts','🏰 ฮอกวอตส์',['great_hall','g
  ['ottery','🌾 ออตเทอรี เซนต์แคทช์โพล',['burrow_garden','burrow_house','lovegood_hill','lovegood_house']],['far','🗺️ สถานที่ไกล',['malfoy_manor','shell_cottage','privet_drive']],['godric','❄️ ก็อดริกส์ฮอลโลว์',['godrics_hollow']]];
 function flooTravel(id,kind){const z=ZONES[id];if(!z)return;closeModal();let fx=document.getElementById('flooFx');if(!fx){fx=document.createElement('div');fx.id='flooFx';document.body.appendChild(fx);}
  fx.className=kind==='pk'?'pk':'floo';void fx.offsetWidth;fx.classList.add('go');try{Audio.sfx('spell');}catch(e){}
- toast((kind==='pk'?'🥾 พอร์ตคีย์พาไป… ':'🔥 โยนผงฟลู! "')+z.th+(kind==='pk'?'':'"'));setTimeout(()=>changeZone(id,z.center),380);}
+ toast((kind==='pk'?'🥾 พอร์ตคีย์พาไป… ':'🔥 โยนผงฟลู! "')+z.th+(kind==='pk'?'':'"'));travel25(id,z.center,kind==='pk'?'พอร์ตคีย์พาไป':'ผงฟลูพาไป');}
 function flooPanel(){const d=document.createElement('div');d.className='flooPanel';d.innerHTML='<h4>🔥 เครือข่ายผงฟลู & พอร์ตคีย์</h4>';
  for(const [rg,name,ids] of FLOO_REGIONS){const row=document.createElement('div');row.className='flooRow';row.innerHTML='<b>'+name+'</b>';
   for(const id of ids){const z=ZONES[id];if(!z)continue;const b=document.createElement('button');b.className='flooBtn'+(id===zone.id?' here':'');b.textContent=z.th;b.title=z.en;
@@ -4129,12 +4129,12 @@ function openMap(){openModal('mapM');const grid=$('mapGrid');grid.innerHTML='';t
   for(const id of ZONE_IDS){const z=ZONES[id],p=MAPXY[id];if(!p)continue;const ppl=NPCS.filter(n=>n.zone===id).length;const b=document.createElement('button');
     b.className='mapNode'+(id===zone.id?' here':'')+(id===trackZone?' track':'')+(z.sub?' shop':'')+(z.x6?' new':'');b.style.left=p[0]+'%';b.style.top=(p[1]/72*100)+'%';
     b.innerHTML=(id===zone.id?'📍':id===trackZone?'🧭':'')+(z.num?'<i>'+z.num+'</i>':'')+'<span>'+z.th.replace(/ \(ฮอกส์มี้ด\)/,'')+'</span>'+(ppl?'<em>'+ppl+'</em>':'');b.title=z.th+' · '+z.en+(ppl?' · 👥 '+ppl:'');
-    b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});wrap.appendChild(b);}
+    b.addEventListener('click',()=>{closeModal();travel25(id,z.center);});wrap.appendChild(b);}
   grid.appendChild(flooPanel());
   grid.appendChild(wrap);
   const list=document.createElement('div');list.className='mapList';for(const id of ZONE_IDS){const z=ZONES[id];const ppl=NPCS.filter(n=>n.zone===id);const b=document.createElement('button');b.className='btn mapZ'+(id===zone.id?' on':'');
    b.innerHTML='<b>'+(id===zone.id?'📍 ':id===trackZone?'🧭 ':'')+(z.num?z.num+'. ':'↳ ')+z.th+'</b><small>'+z.en+(z.sub?' — ย่านฮอกส์มี้ด':'')+'</small>'+(ppl.length?'<small>👥 '+ppl.map(n=>n.c.th.split(' ')[0]).join(', ')+'</small>':'');
-   b.addEventListener('click',()=>{closeModal();changeZone(id,z.center);});list.appendChild(b);}grid.appendChild(list);}
+   b.addEventListener('click',()=>{closeModal();travel25(id,z.center);});list.appendChild(b);}grid.appendChild(list);}
 let dirBuilt=false;
 function openDirectory(){openModal('dirM');const list=$('dirList');if(!dirBuilt){list.innerHTML='';for(const n of NPCS){const c=n.c;const item=document.createElement('div');item.className='dirItem';const m=document.createElement('canvas');m.width=58;m.height=68;
     const Lk=c.look;m.style.imageRendering='pixelated';pixThumb(m,Lk,c.house!=='N'?c.house:null);
@@ -5224,7 +5224,7 @@ try{lpxTick(0);}catch(e){}
    and linked before the first teleport there; each toured area is dropped again right after (memory stays capped) */
 var TOUR24={q:null,cur:null,done:{},still:0,lx:0,ly:0,n:0,link:0};window.__tour=TOUR24;
 function tourTick(dt){const T=TOUR24;if(!bunActive||!zone||SIM.ff||uiOpen)return;
- if(!T.q){T.link=1;T.q=['black_lake','ministry_atrium','hogsmeade','great_hall','diagon_alley','kings_cross','forbidden_forest','quidditch_pitch','hagrid_hut','gringotts','burrow_garden','godrics_hollow','little_hangleton','durmstrang_dock','beauxbatons_lawn','glenfinnan_viaduct','triwizard_lake','owlery_hill','shell_cottage','astronomy','library','dungeon','greenhouse','room_of_requirement'].filter(id=>ZONES[id]);}
+ if(!T.q){T.link=1;T.q=['black_lake','ministry_atrium','hogsmeade','great_hall','diagon_alley','kings_cross','forbidden_forest','quidditch_pitch','hagrid_hut','gringotts','burrow_garden','godrics_hollow','little_hangleton','durmstrang_dock','beauxbatons_lawn','glenfinnan_viaduct','triwizard_lake','owlery_hill','shell_cottage','astronomy','library','dungeon','greenhouse','room_of_requirement'].filter(id=>ZONES[id]);for(const id of ZONE_IDS)if(!T.q.includes(id))T.q.push(id);}
  const mv=Math.hypot(player.x-T.lx,player.y-T.ly);T.lx=player.x;T.ly=player.y;T.still=mv<0.01?T.still+dt:0;if(T.still<0.8||lastDt>0.05)return;
  if(T.link){const t=performance.now();let all=true;for(const p of renderer.info.programs){if(p.__lk)continue;try{p.getUniforms();}catch(e){}p.__lk=1;if(performance.now()-t>30){all=false;break;}}if(all)T.link=0;return;}
  if(BUN_IDLE.busy)return;
@@ -5307,6 +5307,20 @@ function chr25Merge(J){const root=J.root;const bad=new Set();for(const e of J.L)
   let mg=null;try{mg=BGU.mergeGeometries(gs,false);}catch(e){}gs.forEach(g=>g.dispose());if(!mg)continue;const o0=L[0];const m=new THREE.Mesh(mg,o0.material);m.castShadow=o0.castShadow;m.receiveShadow=o0.receiveShadow;m.renderOrder=o0.renderOrder;m.frustumCulled=o0.frustumCulled;
   Object.assign(m.userData,{isOutline:o0.userData.isOutline,i24:1,own:1});A.add(m);for(const o of L)o.parent&&o.parent.remove(o);INST24.stats.cMerged++;INST24.stats.cMeshes+=L.length;}}
 
+/* v25: travel with a short magic fade — the destination is built (time-sliced) and its shaders linked while the screen is veiled,
+   so Floo/Portkey/map jumps no longer freeze on the first visit */
+var TRAV25={veil:false,busy:false,n:0,last:null};
+(function(){const st=document.createElement('style');st.textContent='#trav25{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .28s ease;background:radial-gradient(ellipse at 50% 50%,rgba(60,40,110,.92),rgba(10,8,22,.97));display:flex;align-items:center;justify-content:center;color:#f2d68a;font-size:18px;letter-spacing:1px;text-shadow:0 0 14px rgba(255,210,120,.7)}#trav25.on{opacity:1}#trav25 span{animation:t25 1.2s ease-in-out infinite}@keyframes t25{0%,100%{opacity:.55;transform:scale(.97)}50%{opacity:1;transform:scale(1.03)}}';document.head.appendChild(st);})();
+function travel25(id,pos,label){if(TRAV25.busy||!ZONES[id])return;if(id===zone.id){changeZone(id,pos);return;}TRAV25.busy=true;const t0=performance.now();let ov=document.getElementById('trav25');if(!ov){ov=document.createElement('div');ov.id='trav25';document.body.appendChild(ov);}
+ ov.innerHTML='<span>✨ '+(label||'กำลังเดินทางไป')+' '+ZONES[id].th+' …</span>';requestAnimationFrame(()=>ov.classList.add('on'));
+ let b=BUN[id];if(b&&b.key!==bunKey()){bunDispose(b);b=null;}if(!b)b=newBundle(id);b.pin=1;let phase=0;
+ const step=()=>{const fs=performance.now();try{if(phase===0){if(performance.now()-t0<260){requestAnimationFrame(step);return;}phase=1;TRAV25.veil=true;}
+   if(phase===1){while(!b.ready&&performance.now()-fs<45)bunStep(b);if(b.ready){phase=2;TRAV25.tb=Math.round(performance.now()-t0);}}
+   else if(phase===2){let all=true;for(const p of renderer.info.programs){if(p.__lk)continue;try{p.getUniforms();}catch(e){}p.__lk=1;if(performance.now()-fs>45){all=false;break;}}if(all){phase=3;TRAV25.tl=Math.round(performance.now()-t0);}}
+   if(phase<3&&performance.now()-t0<5000){requestAnimationFrame(step);return;}}catch(e){console.warn('trav25',e);}
+  b.pin=0;TRAV25.veil=false;try{changeZone(id,pos);}catch(e){console.warn(e);}TRAV25.n++;TRAV25.last=Math.round(performance.now()-t0);setTimeout(()=>{ov.classList.remove('on');TRAV25.busy=false;},120);};
+ requestAnimationFrame(step);}
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
@@ -5317,7 +5331,7 @@ let fpsAcc=0,fpsN=0,fps=60;
 function frame(ts){let dt=(ts-last)/1000;last=ts;if(!(dt>0))dt=1/60;dt=Math.min(dt,0.05);lastDt=dt;fpsAcc+=dt;fpsN++;if(fpsAcc>1){fps=fpsN/fpsAcc;fpsAcc=0;fpsN=0;}
   const _P=PROF.on;if(_P)PROF.frame(ts);let _t=_P?performance.now():0;const M=k=>{const n=performance.now();PROF.cur[k]=(PROF.cur[k]||0)+n-_t;_t=n;};
   try{update(dt);_P&&M('update');bunTick(dt);_P&&M('bunTick');npcGreetTick();npcEmoteTick(dt);lunaPairTick(dt);gatherTick(dt);nbWalkTick(dt);lodTick(dt);_P&&M('npcTicks');v17Tick(dt);_P&&M('v17Tick');v18Tick(dt);_P&&M('v18Tick');render();_P&&M('render');}catch(err){console.error(err);}requestAnimationFrame(frame);}
-window.__dh=drawHuman;window.__qi=qInfo;window.__dc2=drawCreature2;window.__game={checkDoors:()=>checkDoors(),get doorCD(){return doorCooldown;},set doorCD(v){doorCooldown=v;},LUNA_LOOK,THREE,renderer,scene,camera,get PXI(){return [PX,LW,LH]},MAIN_ZONE_IDS,ZONES,CHARACTERS,NPCS,player,luna,get zone(){return zone;},changeZone,unstuck,castSpell,openDirectory,openMap,openLuna,closeModal,get fps(){return fps;},get uiOpen(){return uiOpen;},solidAt,doorSpawn,findFree,setTime:i=>{timeIdx=i;buildCandles();updateHud();},setWeather:w=>{weather=w;updateHud();}};
+window.__dh=drawHuman;window.__qi=qInfo;window.__dc2=drawCreature2;window.__game={travel:(id,p)=>travel25(id,p),get trav(){return TRAV25;},checkDoors:()=>checkDoors(),get doorCD(){return doorCooldown;},set doorCD(v){doorCooldown=v;},LUNA_LOOK,THREE,renderer,scene,camera,get PXI(){return [PX,LW,LH]},MAIN_ZONE_IDS,ZONES,CHARACTERS,NPCS,player,luna,get zone(){return zone;},changeZone,unstuck,castSpell,openDirectory,openMap,openLuna,closeModal,get fps(){return fps;},get uiOpen(){return uiOpen;},solidAt,doorSpawn,findFree,setTime:i=>{timeIdx=i;buildCandles();updateHud();},setWeather:w=>{weather=w;updateHud();}};
 changeZone('entrance_hall',{x:10,y:9},true);updateHud();
 if(!save.name)openSetup();else setTimeout(()=>lunaBubble('ยินดีต้อนรับกลับมาจ้ะ '+player.name+'~'),800);
 
