@@ -5292,6 +5292,7 @@ function audio24Tick(){const A=Audio;if(!A||!A.ac||!A.master||A.ac.state!=='runn
  const R=A._rv;if(!R.wet||!zone)return;if(R.z===zone.id)return;R.z=zone.id;const big=/great_hall|grand_staircase|entrance_hall|library|ministry|gringotts|chamber|astronomy|kings_cross|room_of_requirement/.test(zone.id);
  const tgt=A.muted?0:(big?0.32:isOut()?0.1:0.2);try{R.wet.gain.setTargetAtTime(tgt,A.ac.currentTime,0.6);}catch(e){}}
 
+(function(){const z=ZONES.durmstrang_dock;if(z&&z.water){z.water[3]-=3;if(z.waterR)z.waterR.h-=3;}})();
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
