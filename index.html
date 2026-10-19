@@ -5239,7 +5239,7 @@ function tourTick(dt){const T=TOUR24;if(!bunActive||!zone||SIM.ff||uiOpen)return
    Only parts that stayed perfectly still during a 4 s watch window are touched, so anything animated is left alone. */
 var INST24={q:[],stats:{bInst:0,bMeshes:0,cMerged:0,cMeshes:0},on:!/noinst/.test(location.search)};window.__inst=INST24;
 function inst24Key(o){const e=o.matrix.elements;let s=o.visible?'v':'h';for(let i=0;i<16;i++)s+=','+Math.round(e[i]*1000);return s;}
-function inst24Watch(root,kind){if(!INST24.on||!root||root.userData.i24)return;root.userData.i24=1;const skip=new Set();
+function inst24Watch(root,kind){if(kind==='chr')return chr25Watch(root);if(!INST24.on||!root||root.userData.i24)return;root.userData.i24=1;const skip=new Set();
  if(kind==='bun'){const b=root.userData.bun;if(b&&b.s)for(const g of[b.s.MG,b.s.ambGrp,b.s.poolGrp])if(g)skip.add(g);}
  const L=[];root.traverse(o=>{if(skip.has(o))return;if(!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||o.morphTargetInfluences||!o.geometry||!o.material||Array.isArray(o.material))return;
   for(let x=o.parent;x&&x!==root;x=x.parent)if(skip.has(x))return;L.push({o,k:inst24Key(o),pk:o.parent?inst24Key(o.parent):'',bad:false});});
@@ -5247,7 +5247,7 @@ function inst24Watch(root,kind){if(!INST24.on||!root||root.userData.i24)return;r
  INST24.q.push({root,kind,L,t:performance.now(),f:0,dur:kind==='bun'?4000:9000});}
 function inst24Tick(){const Q=INST24.q;if(!Q.length)return;const now=performance.now();
  for(let qi=Q.length-1;qi>=0;qi--){const J=Q[qi];if(!J.root.parent&&J.kind==='bun'){Q.splice(qi,1);continue;}J.f++;if(J.f%8===0)for(const e of J.L){if(!e.bad&&(inst24Key(e.o)!==e.k||!e.o.parent))e.bad=true;if(J.kind==='bun'&&!e.bad&&e.o.parent&&inst24Key(e.o.parent)!==e.pk)e.bad=true;}
-  if(now-J.t>J.dur){Q.splice(qi,1);try{(J.kind==='bun'?inst24Bundle:inst24Char)(J);}catch(e){console.warn('inst24',e);}return;}}}
+  if(now-J.t>J.dur){Q.splice(qi,1);try{(J.kind==='bun'?inst24Bundle:J.kind==='c25'?chr25Merge:inst24Char)(J);}catch(e){console.warn('inst24',e);}return;}}}
 function inst24Bundle(J){const root=J.root;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();const G={};
  for(const e of J.L){if(e.bad)continue;const o=e.o;let vis=true;for(let x=o;x&&x!==root;x=x.parent)if(!x.visible){vis=false;break;}if(!vis)continue;const k=o.geometry.uuid+'|'+o.material.uuid+'|'+(o.renderOrder||0)+'|'+(o.userData.isOutline?1:0);(G[k]||(G[k]=[])).push(o);}
  const m4=new THREE.Matrix4();
@@ -5293,6 +5293,20 @@ function audio24Tick(){const A=Audio;if(!A||!A.ac||!A.master||A.ac.state!=='runn
  const tgt=A.muted?0:(big?0.32:isOut()?0.1:0.2);try{R.wet.gain.setTargetAtTime(tgt,A.ac.currentTime,0.6);}catch(e){}}
 
 (function(){const z=ZONES.durmstrang_dock;if(z&&z.water){z.water[3]-=3;if(z.waterR)z.waterR.h-=3;}})();
+/* v25: deeper character merge — static parts are merged into their nearest moving ancestor (head bone, arm, root...),
+   not only with siblings; hair strands, buttons, trims, outlines collapse into a few meshes per character */
+function chr25Watch(root){if(!INST24.on||!root||root.userData.c25)return;root.userData.c25=1;root.userData.i24=1;const N=[];
+ root.traverse(o=>{if(o===root)return;N.push({o,k:inst24Key(o),bad:false});});INST24.q.push({root,kind:'c25',L:N,t:performance.now(),f:0,dur:9000});}
+function chr25Merge(J){const root=J.root;const bad=new Set();for(const e of J.L)if(e.bad||!e.o.parent)bad.add(e.o);root.updateMatrixWorld(true);
+ const anchorOf=o=>{let a=o.parent;while(a&&a!==root&&!bad.has(a)&&!a.isBone)a=a.parent;return a||root;};const G={};
+ for(const e of J.L){const o=e.o;if(bad.has(o)||!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||o.morphTargetInfluences||!o.geometry||!o.material||Array.isArray(o.material))continue;
+  let vis=true;for(let x=o;x&&x!==root;x=x.parent)if(!x.visible){vis=false;break;}if(!vis)continue;const g=o.geometry;const ak=Object.keys(g.attributes).sort().join('+')+(g.index?'i':'n');const A=anchorOf(o);
+  const k=A.uuid+'|'+o.material.uuid+'|'+ak+'|'+(o.renderOrder||0)+'|'+(o.userData.isOutline?1:0)+'|'+o.castShadow+'|'+o.frustumCulled;(G[k]||(G[k]={A,L:[]})).L.push(o);}
+ const inv=new THREE.Matrix4(),m4=new THREE.Matrix4();
+ for(const k in G){const {A,L}=G[k];if(L.length<2)continue;inv.copy(A.matrixWorld).invert();const gs=[];for(const o of L){const g=o.geometry.clone();m4.multiplyMatrices(inv,o.matrixWorld);g.applyMatrix4(m4);gs.push(g);}
+  let mg=null;try{mg=BGU.mergeGeometries(gs,false);}catch(e){}gs.forEach(g=>g.dispose());if(!mg)continue;const o0=L[0];const m=new THREE.Mesh(mg,o0.material);m.castShadow=o0.castShadow;m.receiveShadow=o0.receiveShadow;m.renderOrder=o0.renderOrder;m.frustumCulled=o0.frustumCulled;
+  Object.assign(m.userData,{isOutline:o0.userData.isOutline,i24:1,own:1});A.add(m);for(const o of L)o.parent&&o.parent.remove(o);INST24.stats.cMerged++;INST24.stats.cMeshes+=L.length;}}
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
