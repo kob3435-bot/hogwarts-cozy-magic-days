@@ -910,7 +910,7 @@ function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const
 function openOutdoorSides(z){return{N:!!outdoorEdge(z,'N'),S:!!outdoorEdge(z,'S'),W:!!outdoorEdge(z,'W'),E:!!outdoorEdge(z,'E')};}
 
 // ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
-const NONSOLID_K=['mfloor25','mrunner24','gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
+const NONSOLID_K=['sbelow25','mfloor25','mrunner24','gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
 (function dress(){const R=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
  const conn=CONNS;for(const id in ZONES){const z=ZONES[id];const doors=[];for(const c of conn){if(c[0]===id)doors.push([c[1],c[2]]);if(c[3]===id)doors.push([c[4],c[5]]);}
   const occ=z.furn.map(f=>({x:f[0]-0.6,y:f[1]-0.6,w:f[2]+1.2,h:f[3]+1.2}));for(const s of(z.sits||[]))occ.push({x:s[0]-1.6,y:s[1]-1.6,w:3.2,h:3.2});
@@ -3193,6 +3193,15 @@ case'mfloor25':{const tx=geo('mfl25tex',()=>{const c=document.createElement('can
   g.strokeStyle='rgba(232,192,80,0.55)';g.lineWidth=1.5;g.beginPath();g.moveTo(128,96);g.lineTo(160,128);g.lineTo(128,160);g.lineTo(96,128);g.closePath();g.stroke();
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t;});
  const t2=tx.clone();t2.needsUpdate=true;t2.repeat.set(w/8,d/8);const m=new THREE.Mesh(PLANE,toonify(new THREE.MeshStandardMaterial({map:t2,roughness:0.35})));m.rotation.x=-Math.PI/2;m.scale.set(w,d,1);m.position.y=0.012;m.receiveShadow=true;A(m);break;}
+case'srail25':{const st='#9a8a78',gd='#d8b048';B(w,0.25,0.5,'#7a6c5e',0,0,0);for(let x=-w/2+0.2;x<=w/2-0.15;x+=0.75){B(0.16,0.85,0.16,st,x,0.25,0);}B(w,0.12,0.36,'#b8a690',0,1.1,0);A(mesh(BOX,toon(gd,{emissive:'#7a5810',ei:0.35}),0,1.2,0,w,0.06,0.2,false));
+ const P=['#3a5a8a','#7a3a3a','#3a6a4a','#6a4a7a','#8a6a3a'];for(let x=-w/2+0.9,i=0;x<w/2-0.6;x+=1.8,i++){const c=P[(i+f.x)%5];A(mesh(BOX,toon(gd,{emissive:'#8a6010',ei:0.35}),x,0.62,0.3,0.62,0.5,0.05,false));A(mesh(BOX,toon(c,{emissive:c,ei:0.55}),x,0.62,0.335,0.48,0.38,0.02,false));A(mesh(SPH,toon('#f0d0b0',{emissive:'#a08060',ei:0.4}),x,0.66,0.35,0.08,0.09,0.02,false));}
+ A(mesh(BOX,toon('#6a5a4c'),0,-0.9,3.6,w+0.2,0.2,6,false));A(mesh(BOX,toon('#8a3030'),0,-0.77,3.2,w*0.6,0.04,2.4,false));const cm=new THREE.MeshBasicMaterial({color:'#ffb040'});for(let x=-w/2+0.8;x<w/2;x+=2.4){A(mesh(SPH,cm,x,-0.55,1.0,0.09,0.14,0.09,false));}const cw=new THREE.MeshBasicMaterial({color:'#fff4dc'});for(let i=0;i<Math.round(w*0.8);i++)A(mesh(CYL,cw,-w/2+hash(i,f.x)*w,-0.6+hash(i,5)*1.4,1.2+hash(i,7)*4.5,0.04,0.22,0.04,false));break;}
+case'sarch25':{const st='#a49480',gd='#d8b048';for(const s of[-1,1]){B(0.45,3.2,0.45,st,s*0.9,0,0);A(mesh(BOX,toon(gd,{emissive:'#7a5810',ei:0.3}),s*0.9,3.25,0,0.55,0.1,0.55,false));A(mesh(SPH,new THREE.MeshBasicMaterial({color:'#ffc060'}),s*0.9,2.4,0.3,0.1,0.15,0.1,false));}
+ const a=mesh(new THREE.TorusGeometry(0.9,0.18,6,12,Math.PI),toon(st),0,3.2,0,1,1,1);A(a);A(mesh(BOX,toon(gd,{emissive:'#8a6010',ei:0.4}),0,4.25,0.12,0.5,0.4,0.06,false));break;}
+case'sbelow25':{const fl=mesh(BOX,toon('#6a5a4c'),0,-2.6,0,w,0.2,d);A(fl);A(mesh(BOX,toon('#5a4c40'),0,-1.3,-d/2+0.1,w,2.6,0.2));
+ for(let x=-w/2+1;x<w/2;x+=3){A(mesh(CYL,toon('#3a2a1a'),x,-1.1,-d/2+0.25,0.05,0.25,0.05,false));A(mesh(SPH,new THREE.MeshBasicMaterial({color:'#ffb040'}),x,-0.9,-d/2+0.25,0.1,0.16,0.1,false));}
+ const cm=new THREE.MeshBasicMaterial({color:'#fff4dc'});for(let i=0;i<14;i++){A(mesh(CYL,cm,-w/2+hash(i,3)*w,-1.2+hash(i,5)*1.2,-d/2+1+hash(i,7)*(d-1.5),0.04,0.22,0.04,false));}
+ A(mesh(BOX,toon('#8a3030'),0,-2.48,0.2,w*0.5,0.04,d*0.5,false));break;}
 case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
    case'treeline':{for(let i=0;i<d;i++){const s=1.1+hash(i,f.x)*0.5;A(mesh(CYL,T('#4a3020'),0,0.8*s,-d/2+i+0.5,0.13*s,1.6*s,0.13*s));A(mesh(ICO,T(i%2?'#1f4a2a':'#2a5a32'),0,2*s,-d/2+i+0.5,0.8*s));}break;}
@@ -5328,6 +5337,9 @@ function travel25(id,pos,label){if(TRAV25.busy||!ZONES[id])return;if(id===zone.i
    if(phase<3&&performance.now()-t0<5000){requestAnimationFrame(step);return;}}catch(e){console.warn('trav25',e);}
   b.pin=0;TRAV25.veil=false;try{changeZone(id,pos);}catch(e){console.warn(e);}TRAV25.n++;TRAV25.last=Math.round(performance.now()-t0);setTimeout(()=>{ov.classList.remove('on');TRAV25.busy=false;},120);};
  requestAnimationFrame(step);}
+
+(function(){const S=ZONES.grand_staircase;if(!S)return;const H=S.h,W=S.w;const gp=(S.doors||[]).filter(d=>d.side==='S').map(d=>d.pos).sort((a,b)=>a-b);let x=1;const segs=[];for(const p of gp){if(p-2>x)segs.push([x,p-2]);x=p+3;}if(x<W-1)segs.push([x,W-1]);
+ for(const [a,b] of segs)S.furn.push({x:a,y:H-1,w:b-a,h:1,k:'srail25',n:''});for(const p of gp){S.furn.push({x:p-3,y:H-1,w:1,h:1,k:'sarch25',n:''},{x:p+3,y:H-1,w:1,h:1,k:'sarch25',n:''});}window.__s25=segs;})();
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
