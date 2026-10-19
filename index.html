@@ -885,6 +885,8 @@ window.Q22=T;})();
  for(const [tx,ty] of[[1,4],[24,4],[1,10],[24,10],[1,16],[24,16],[7,1],[18,1]])S.furn.push([tx,ty,1,1,'torch']);for(const [cx,cy] of[[6,5],[18,5],[12,4],[6,14],[19,14]])S.furn.push([cx,cy,2,2,'fcandle23']);}})();
 (function(){const D=ZONES.diagon_alley;if(D)D.furn=D.furn.filter(f=>{const k=f.k||f[4],y=f.y??f[1];return !((k==='tree'||k==='bigtree'||k==='oak'||k==='bush')&&y>D.h*0.78);});})();
 
+(function(){const M=ZONES.ministry_atrium;if(M){M.floor='marble';for(const x of[6,11,28,33])for(const y of[5,16])M.furn.push([x,y,1,1,'mpillar24']);M.furn.push([19,13,2,5,'mrunner24']);M.furn.push([14,6,1,1,'lamp'],[25,6,1,1,'lamp'],[14,16,1,1,'lamp'],[25,16,1,1,'lamp']);}})();
+
 /* ===== v14: enlarge every zone again (outdoor x1.5, interiors x1.3) ===== */
 const XW20={courtyard:1.2,hagrid_hut:1.2,stone_circle:1.2,whomping_willow:1.2,lake_shore:1.2,boats_arrival:1.2,hogsmeade:1.2,diagon_alley:1.25,knockturn_alley:1.2};
 (function enlarge14(){const KEEP=['wooden_bridge','viaduct','stands_tower','quidditch','express_carriage','bell_tower'];const SF={};
@@ -908,7 +910,7 @@ function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const
 function openOutdoorSides(z){return{N:!!outdoorEdge(z,'N'),S:!!outdoorEdge(z,'S'),W:!!outdoorEdge(z,'W'),E:!!outdoorEdge(z,'E')};}
 
 // ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
-const NONSOLID_K=['gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
+const NONSOLID_K=['mrunner24','gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
 (function dress(){const R=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
  const conn=CONNS;for(const id in ZONES){const z=ZONES[id];const doors=[];for(const c of conn){if(c[0]===id)doors.push([c[1],c[2]]);if(c[3]===id)doors.push([c[4],c[5]]);}
   const occ=z.furn.map(f=>({x:f[0]-0.6,y:f[1]-0.6,w:f[2]+1.2,h:f[3]+1.2}));for(const s of(z.sits||[]))occ.push({x:s[0]-1.6,y:s[1]-1.6,w:3.2,h:3.2});
@@ -3181,6 +3183,8 @@ case'gwall23':{const L=Math.max(w,d),q=new THREE.Group();if(d>w)q.rotation.y=Mat
   q.add(mesh(SPH,toon('#f0d0b0',{emissive:'#a08060',ei:0.45}),cx,cy+ph*0.12,0.32,pw*0.16,pw*0.18,0.02,false));x+=pw+0.25+hash(i,9)*0.3;i++;}}
  for(const s of[-1,1]){q.add(mesh(CYL,toon('#3a2a1a'),s*(L/2-0.2),H*0.62,0.4,0.06,0.3,0.06,false));q.add(mesh(SPH,new THREE.MeshBasicMaterial({color:'#ffb040'}),s*(L/2-0.2),H*0.62+0.25,0.4,0.12,0.2,0.12,false));}
  break}
+case'mpillar24':{const H=6.2;A(mesh(CYL,toon('#1d5a48'),0,H/2,0,0.36,H,0.36));for(const y of[0.25,H*0.55,H-0.2])A(mesh(CYL,toon('#e8c050',{emissive:'#a07010',ei:0.35}),0,y,0,0.46,0.18,0.46,false));A(mesh(BOX,toon('#e8c050',{emissive:'#a07010',ei:0.35}),0,H+0.12,0,0.95,0.24,0.95,false));A(mesh(SPH,new THREE.MeshBasicMaterial({color:'#9affc8',transparent:true,opacity:0.25,depthWrite:false}),0,H*0.78,0,0.55,0.55,0.55,false));break;}
+case'mrunner24':{A(mesh(BOX,toon('#2a3c8a'),0,0.02,0,w,0.04,d,false));A(mesh(BOX,toon('#e8c050',{emissive:'#806010',ei:0.3}),-w/2+0.08,0.045,0,0.1,0.02,d,false));A(mesh(BOX,toon('#e8c050',{emissive:'#806010',ei:0.3}),w/2-0.08,0.045,0,0.1,0.02,d,false));break;}
 case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
    case'treeline':{for(let i=0;i<d;i++){const s=1.1+hash(i,f.x)*0.5;A(mesh(CYL,T('#4a3020'),0,0.8*s,-d/2+i+0.5,0.13*s,1.6*s,0.13*s));A(mesh(ICO,T(i%2?'#1f4a2a':'#2a5a32'),0,2*s,-d/2+i+0.5,0.8*s));}break;}
@@ -5276,7 +5280,8 @@ function life24Motes(b){if(!b||LIFE24.motes.has(b.root.uuid))return;const z=ZONE
 function life24Discover(){try{const L=LIFE24;if(!zone)return;if(!L.seen){try{L.seen=JSON.parse(localStorage.getItem('hc_seen24')||'{}');}catch(e){L.seen={};}}
  if(L.seen[zone.id])return;const first=Object.keys(L.seen).length===0;L.seen[zone.id]=1;try{localStorage.setItem('hc_seen24',JSON.stringify(L.seen));}catch(e){}if(first)return;
  const tot=ZONE_IDS.length,got=Object.keys(L.seen).length;let c=document.getElementById('disc24');if(!c){c=document.createElement('div');c.id='disc24';document.body.appendChild(c);}
- c.innerHTML='<div class="d24s">✦ ค้นพบสถานที่ใหม่ ✦</div><div class="d24t">'+zone.th+'</div><div class="d24e">'+zone.en+'</div><div class="d24c">🗺️ '+got+' / '+tot+'</div>';c.classList.remove('show');void c.offsetWidth;c.classList.add('show');try{Audio.sfx('chime');}catch(e){}}catch(e){}}
+ c.innerHTML='<div class="d24s">✦ ค้นพบสถานที่ใหม่ ✦</div><div class="d24t">'+zone.th+'</div><div class="d24e">'+zone.en+'</div><div class="d24c">🗺️ '+got+' / '+tot+'</div>';c.classList.remove('show');void c.offsetWidth;c.classList.add('show');try{Audio.sfx('chime');}catch(e){}
+ const MS=[5,10,20,35,50,75,ZONE_IDS.length];if(MS.includes(got)){const rew=got>=ZONE_IDS.length?100:Math.round(got*1.5);setTimeout(()=>{try{V.gal+=rew;saveV();hudV();toast('🗺️ นักสำรวจตัวน้อย! ค้นพบครบ '+got+' แห่ง · รางวัล 🪙'+rew);Audio.sfx('gift');}catch(e){}},1600);}}catch(e){}}
 (function(){const st=document.createElement('style');st.textContent='#disc24{position:fixed;left:50%;top:18%;transform:translate(-50%,-10px) scale(.96);z-index:45;pointer-events:none;text-align:center;opacity:0;padding:14px 34px 12px;border-radius:22px;background:radial-gradient(ellipse at 50% 0%,rgba(80,52,120,.92),rgba(16,12,30,.9));border:2px solid rgba(242,214,138,.85);box-shadow:0 0 0 4px rgba(242,214,138,.18),0 10px 40px rgba(0,0,0,.55),0 0 40px rgba(255,210,120,.25);color:#fff4dc;font-family:inherit;min-width:220px}#disc24.show{animation:d24 3.4s ease forwards}#disc24 .d24s{font-size:12px;letter-spacing:2px;color:#f2d68a}#disc24 .d24t{font-size:24px;font-weight:700;margin:4px 0 0;text-shadow:0 0 12px rgba(255,210,120,.6)}#disc24 .d24e{font-size:12px;opacity:.8}#disc24 .d24c{font-size:12px;margin-top:6px;color:#f2d68a}@keyframes d24{0%{opacity:0;transform:translate(-50%,-10px) scale(.96)}12%{opacity:1;transform:translate(-50%,0) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px) scale(1)}}@media (max-width:700px),(max-height:500px){#disc24{top:14%;padding:10px 22px 9px}#disc24 .d24t{font-size:19px}}';document.head.appendChild(st);})();
 
 /* v24 audio: soft synthetic hall reverb on the whole mix (bigger in grand halls, light outdoors) */
