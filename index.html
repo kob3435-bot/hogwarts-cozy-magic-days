@@ -3389,14 +3389,14 @@ function buildScatter(){if(scatterGrp){scene.remove(scatterGrp);scatterGrp.trave
 
 /* ===================== v8 ENVIRONMENT: detailed props, living grounds, magic FX ===================== */
 const WIND={value:0};const ANIM8=[];
-function windify(m,amp,off){m.onBeforeCompile=sh=>{sh.uniforms.uWind=WIND;sh.vertexShader='uniform float uWind;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+function windify(m,amp,off){const _wa={value:amp},_wo={value:off||0};m.onBeforeCompile=sh=>{sh.uniforms.uWind=WIND;sh.uniforms.uWAmp=_wa;sh.uniforms.uWOff=_wo;sh.vertexShader='uniform float uWind;uniform float uWAmp;uniform float uWOff;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
 #ifdef USE_INSTANCING
 vec3 wO=instanceMatrix[3].xyz;
 #else
 vec3 wO=modelMatrix[3].xyz;
 #endif
-float wH=max(0.0,position.y+${(off||0).toFixed(2)});wH*=wH;
-transformed.x+=sin(uWind*1.7+wO.x*0.55+wO.z*0.35)*${amp.toFixed(3)}*wH;transformed.z+=cos(uWind*1.25+wO.z*0.6+wO.x*0.2)*${(amp*0.7).toFixed(3)}*wH;`);};m.customProgramCacheKey=()=>'wind'+amp+'_'+off;return m;}
+float wH=max(0.0,position.y+uWOff);wH*=wH;
+transformed.x+=sin(uWind*1.7+wO.x*0.55+wO.z*0.35)*uWAmp*wH;transformed.z+=cos(uWind*1.25+wO.z*0.6+wO.x*0.2)*(uWAmp*0.7)*wH;`);};m.customProgramCacheKey=()=>'windU';return m;}
 const _v8=new THREE.Vector3();
 function lumpGeo(key,seed,det,amt,flat){return geo('lump'+key,()=>{let g=new THREE.IcosahedronGeometry(1,det);g.deleteAttribute('normal');g.deleteAttribute('uv');g=BGU.mergeVertices(g);const p=g.attributes.position;const col=[];
   for(let i=0;i<p.count;i++){_v8.fromBufferAttribute(p,i);const n=1+amt*(Math.sin(_v8.x*4.1+seed)*Math.sin(_v8.y*3.7+seed*1.7)*Math.sin(_v8.z*4.3+seed*2.3))+amt*0.45*Math.sin(_v8.x*9.3+_v8.y*7.1+seed)*Math.cos(_v8.z*8.7);_v8.multiplyScalar(n);if(flat)_v8.y*=flat;p.setXYZ(i,_v8.x,_v8.y,_v8.z);
@@ -4744,7 +4744,7 @@ const DYNRES={base:0,scale:1,acc:0,n:0,on:!/[?&]nodr/.test(location.search)};
 function dynResTick(dt){if(!DYNRES.on||CZA.on)return;if(!DYNRES.base)DYNRES.base=renderer.getPixelRatio();DYNRES.acc+=dt;DYNRES.n++;if(DYNRES.acc<2)return;const avg=DYNRES.acc/DYNRES.n;DYNRES.acc=0;DYNRES.n=0;
  let s=DYNRES.scale;const _tn=performance.now();if(avg>0.030&&s>0.7){s=Math.max(0.7,s-0.15);DYNRES.hold=_tn+(DYNRES.ups>1?60000:20000);}else if(avg<0.015&&s<1&&_tn>(DYNRES.hold||0)){s=Math.min(1,s+0.15);DYNRES.ups=(DYNRES.ups||0)+1;}if(s!==DYNRES.scale){DYNRES.pend=s;}}
 function dynResApply(){const s=DYNRES.pend;DYNRES.pend=0;if(s&&s<DYNRES.scale){try{localStorage.setItem('hc_dr',String(s));}catch(e){}}return;if(s){DYNRES.scale=s;renderer.setPixelRatio(DYNRES.base*s);renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}}
-function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
+function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{tourTick(dt);}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
 setTimeout(prewarmInit,1200);
 window.__v18={buildChibi:(L,h)=>buildChibi(L,h),NPCQ,PREWARM,CZA,DYNRES,get steps(){return BUN_STATS.steps;}};
 
@@ -5214,6 +5214,20 @@ function warmPts23(){const grp=new THREE.Group(),geo=new THREE.BufferGeometry();
  for(const mp of[null,tx])for(const sa of[true,false])for(const fg of[true,false])for(const vc of[false,true])for(const bl of[THREE.NormalBlending,THREE.AdditiveBlending]){const o={size:1,sizeAttenuation:sa,fog:fg,vertexColors:vc,transparent:true,blending:bl};if(mp)o.map=mp;const P=new THREE.Points(geo,new THREE.PointsMaterial(o));P.frustumCulled=false;grp.add(P);}
  scene.add(grp);try{renderer.compile(grp,camera,scene);}catch(e){}scene.remove(grp);}
 var WPZ23={};function warmPtsZone23(){const z=window.__game&&__game.zone;if(!z)return;const k=z.id;if(WPZ23[k])return;WPZ23[k]=1;try{warmPts23();}catch(e){}}
+
+try{lpxTick(0);}catch(e){}
+/* v24: idle "shader tour" — while the player stands still, quietly pre-build far areas in the background so their shaders are compiled
+   and linked before the first teleport there; each toured area is dropped again right after (memory stays capped) */
+var TOUR24={q:null,cur:null,done:{},still:0,lx:0,ly:0,n:0,link:0};window.__tour=TOUR24;
+function tourTick(dt){const T=TOUR24;if(!bunActive||!zone||SIM.ff||uiOpen)return;
+ if(!T.q){T.link=1;T.q=['black_lake','ministry_atrium','hogsmeade','great_hall','diagon_alley','kings_cross','forbidden_forest','quidditch_pitch','hagrid_hut','gringotts','burrow_garden','godrics_hollow','little_hangleton','durmstrang_dock','beauxbatons_lawn','glenfinnan_viaduct','triwizard_lake','owlery_hill','shell_cottage','astronomy','library','dungeon','greenhouse','room_of_requirement'].filter(id=>ZONES[id]);}
+ const mv=Math.hypot(player.x-T.lx,player.y-T.ly);T.lx=player.x;T.ly=player.y;T.still=mv<0.01?T.still+dt:0;if(T.still<0.8||lastDt>0.05)return;
+ if(T.link){const t=performance.now();let all=true;for(const p of renderer.info.programs){if(p.__lk)continue;try{p.getUniforms();}catch(e){}p.__lk=1;if(performance.now()-t>30){all=false;break;}}if(all)T.link=0;return;}
+ if(BUN_IDLE.busy)return;
+ if(T.cur){const b=BUN[T.cur];if(!b){T.cur=null;return;}if(!b.ready){BUN_IDLE.busy=true;requestIdleCallback(()=>{BUN_IDLE.busy=false;if(BUN[b.id]===b&&!b.ready)bunStep(b);},{timeout:400});return;}
+   T.done[T.cur]=1;T.n++;T.link=1;const keep=b===bunActive||(NB_OF[zone.id]||[]).some(n=>n.id===b.id)||bunCandidates().includes(b.id);if(!keep&&!b._wasRes)bunDispose(b);T.cur=null;return;}
+ for(const id of bunCandidates()){const b=BUN[id];if(!b||!b.ready)return;}
+ while(T.q.length){const id=T.q.shift();if(T.done[id]||id===zone.id)continue;if(BUN[id]){T.done[id]=1;continue;}T.cur=id;newBundle(id);return;}}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
