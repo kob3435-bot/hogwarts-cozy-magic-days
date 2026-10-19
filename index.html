@@ -1152,7 +1152,7 @@ function nbWalkTick(dt){for(const n of NPCS){if(!n.nbT)continue;if(n.zone===zone
   if(!VZ[n.zone]||!npcModels[n.c.id]){n.x=n.nbT.x;n.y=n.nbT.y;n.nbT=null;despawnNpc(n);continue;}const dx=n.nbT.x-n.x,dy=n.nbT.y-n.y,d=Math.hypot(dx,dy);if(d<0.15){n.nbT=null;if(!n.trip)despawnNpc(n);continue;}const st=Math.min(d,1.6*dt);n.x+=dx/d*st;n.y+=dy/d*st;n.dir={x:dx,y:dy};n.walk=(n.walk||0)+st*3;}}
 function npcModelFor(n){const c=n.c;if(!NPC_CACHE[c.id]){const m=buildChibi(c.look,c.house!=='N'?c.house:null);addHitbox(m,m.userData.h||1.6).userData.npc=n;NPC_CACHE[c.id]=m;}return NPC_CACHE[c.id];}
 const NPC_CACHE={};
-function spawnNpc(n){if(BUN_BG||npcModels[n.c.id])return;if(!NPC_CACHE[n.c.id]&&!NPCQ_SYNC){NPCQ.add(n);return;}const m=npcModelFor(n);m.position.set(n.x,0,n.y);scene.add(m);npcModels[n.c.id]=m;}
+function spawnNpc(n){if(BUN_BG||npcModels[n.c.id])return;if(!NPC_CACHE[n.c.id]&&!NPCQ_SYNC){NPCQ.add(n);return;}const m=npcModelFor(n);m.position.set(n.x,0,n.y);scene.add(m);npcModels[n.c.id]=m;try{inst24Watch(m,'chr');}catch(e){}}
 function despawnNpc(n){const m=npcModels[n.c.id];if(m){scene.remove(m);delete npcModels[n.c.id];}}
 function simTick(dt){if(SIM.phase===3&&timeIdx===0){SIM.day++;}SIM.sv=(SIM.sv||0)+dt;if(SIM.sv>20&&!SIM.ff){SIM.sv=0;persist();}const p=timeIdx;if(p!==SIM.phase){const first=SIM.phase<0;SIM.phase=p;for(const n of NPCS){if(FIXED[n.c.id])continue;n.dwell=first?rnd(5,60):(LEADER[n.c.id]?rnd(6,30):rnd(0,25));}}
   for(const n of NPCS){if(FIXED[n.c.id]||n.inMatch||n.inConv&&!n.trip)continue;
@@ -3824,7 +3824,7 @@ function shadowBudget(b,active){if(!b||!b.root)return;const hi=Q===QUALS.high;if
    if(o.userData.isOutline&&o.userData.small&&!hi&&!o.isInstancedMesh){o.visible=false;PERF16.olOff++;}if(o.userData.small&&o.castShadow&&!hi)PERF16.smallOff++;});}
  if(b._sbA===active)return;b._sbA=active;PERF16.sbRuns++;b.root.traverse(o=>{if(!o.isMesh||o.userData.cs0===undefined)return;o.castShadow=o.userData.cs0&&active&&(hi||!o.userData.small);});}
 function bunActivate(b){if(bunActive&&bunActive!==b){bunActive.s=bunSaveG();bunActive.s.zone=ZONES[bunActive.id];bunSetSky(bunActive,false);}
-  b.s.zone=ZONES[b.id];bunLoadG(b.s);bunActive=b;if(b.glow)b.glow.visible=false;shadowBudget(b,true);b.used=performance.now();b.root.position.set(0,0,0);b.root.visible=true;bunSetSky(b,true);bunApplyLights(b);b.s.lightsDyn=b.s.lightsDyn;applyEnv(zone);bunLayout();}
+  b.s.zone=ZONES[b.id];bunLoadG(b.s);bunActive=b;try{b.root.userData.bun=b;inst24Watch(b.root,'bun');}catch(e){}if(b.glow)b.glow.visible=false;shadowBudget(b,true);b.used=performance.now();b.root.position.set(0,0,0);b.root.visible=true;bunSetSky(b,true);bunApplyLights(b);b.s.lightsDyn=b.s.lightsDyn;applyEnv(zone);bunLayout();}
 function bunSetSky(b,on){b.root.traverse(o=>{if(o.userData.skyDome||o.userData.skyish)o.visible=on;});}
 function bunLayout(){VZ={};VZ[zone.id]=Z0;BUN_NBV=[];const keep=new Set([zone.id]);
   for(const n of NB_OF[zone.id]||[]){keep.add(n.id);const b=BUN[n.id];if(b&&b.ready&&b.key===bunKey()){b.root.position.set(n.off.x,0,n.off.y);b.root.visible=true;bunSetSky(b,false);if(b.glow)b.glow.visible=true;shadowBudget(b,false);VZ[n.id]=n.off;BUN_NBV.push({n,b});}}
@@ -4744,7 +4744,7 @@ const DYNRES={base:0,scale:1,acc:0,n:0,on:!/[?&]nodr/.test(location.search)};
 function dynResTick(dt){if(!DYNRES.on||CZA.on)return;if(!DYNRES.base)DYNRES.base=renderer.getPixelRatio();DYNRES.acc+=dt;DYNRES.n++;if(DYNRES.acc<2)return;const avg=DYNRES.acc/DYNRES.n;DYNRES.acc=0;DYNRES.n=0;
  let s=DYNRES.scale;const _tn=performance.now();if(avg>0.030&&s>0.7){s=Math.max(0.7,s-0.15);DYNRES.hold=_tn+(DYNRES.ups>1?60000:20000);}else if(avg<0.015&&s<1&&_tn>(DYNRES.hold||0)){s=Math.min(1,s+0.15);DYNRES.ups=(DYNRES.ups||0)+1;}if(s!==DYNRES.scale){DYNRES.pend=s;}}
 function dynResApply(){const s=DYNRES.pend;DYNRES.pend=0;if(s&&s<DYNRES.scale){try{localStorage.setItem('hc_dr',String(s));}catch(e){}}return;if(s){DYNRES.scale=s;renderer.setPixelRatio(DYNRES.base*s);renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}}
-function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{tourTick(dt);}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
+function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{tourTick(dt);}catch(e){}try{inst24Tick();inst24Scan(dt);}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
 setTimeout(prewarmInit,1200);
 window.__v18={buildChibi:(L,h)=>buildChibi(L,h),NPCQ,PREWARM,CZA,DYNRES,get steps(){return BUN_STATS.steps;}};
 
@@ -5228,6 +5228,33 @@ function tourTick(dt){const T=TOUR24;if(!bunActive||!zone||SIM.ff||uiOpen)return
    T.done[T.cur]=1;T.n++;T.link=1;const keep=b===bunActive||(NB_OF[zone.id]||[]).some(n=>n.id===b.id)||bunCandidates().includes(b.id);if(!keep&&!b._wasRes)bunDispose(b);T.cur=null;return;}
  for(const id of bunCandidates()){const b=BUN[id];if(!b||!b.ready)return;}
  while(T.q.length){const id=T.q.shift();if(T.done[id]||id===zone.id)continue;if(BUN[id]){T.done[id]=1;continue;}T.cur=id;newBundle(id);return;}}
+
+/* v24: real instancing / merging to cut draw calls.
+   - areas: identical static props (candles, lamps, flowers, memos, rocks...) become one InstancedMesh per geometry+material
+   - characters: static sibling parts with the same material are merged per bone/group (animation is kept, it moves the parent)
+   Only parts that stayed perfectly still during a 4 s watch window are touched, so anything animated is left alone. */
+var INST24={q:[],stats:{bInst:0,bMeshes:0,cMerged:0,cMeshes:0},on:!/noinst/.test(location.search)};window.__inst=INST24;
+function inst24Key(o){const e=o.matrix.elements;let s=o.visible?'v':'h';for(let i=0;i<16;i++)s+=','+Math.round(e[i]*1000);return s;}
+function inst24Watch(root,kind){if(!INST24.on||!root||root.userData.i24)return;root.userData.i24=1;const skip=new Set();
+ if(kind==='bun'){const b=root.userData.bun;if(b&&b.s)for(const g of[b.s.MG,b.s.ambGrp,b.s.poolGrp])if(g)skip.add(g);}
+ const L=[];root.traverse(o=>{if(skip.has(o))return;if(!o.isMesh||o.isSkinnedMesh||o.isInstancedMesh||o.morphTargetInfluences||!o.geometry||!o.material||Array.isArray(o.material))return;
+  for(let x=o.parent;x&&x!==root;x=x.parent)if(skip.has(x))return;L.push({o,k:inst24Key(o),pk:o.parent?inst24Key(o.parent):'',bad:false});});
+ if(kind==='bun'){const b=root.userData.bun;if(b&&b.s&&b.s.ambGrp)for(const c of b.s.ambGrp.children)inst24Watch(c,'chr');}
+ INST24.q.push({root,kind,L,t:performance.now(),f:0,dur:kind==='bun'?4000:9000});}
+function inst24Tick(){const Q=INST24.q;if(!Q.length)return;const now=performance.now();
+ for(let qi=Q.length-1;qi>=0;qi--){const J=Q[qi];if(!J.root.parent&&J.kind==='bun'){Q.splice(qi,1);continue;}J.f++;if(J.f%8===0)for(const e of J.L){if(!e.bad&&(inst24Key(e.o)!==e.k||!e.o.parent))e.bad=true;if(J.kind==='bun'&&!e.bad&&e.o.parent&&inst24Key(e.o.parent)!==e.pk)e.bad=true;}
+  if(now-J.t>J.dur){Q.splice(qi,1);try{(J.kind==='bun'?inst24Bundle:inst24Char)(J);}catch(e){console.warn('inst24',e);}return;}}}
+function inst24Bundle(J){const root=J.root;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert();const G={};
+ for(const e of J.L){if(e.bad)continue;const o=e.o;let vis=true;for(let x=o;x&&x!==root;x=x.parent)if(!x.visible){vis=false;break;}if(!vis)continue;const k=o.geometry.uuid+'|'+o.material.uuid+'|'+(o.renderOrder||0)+'|'+(o.userData.isOutline?1:0);(G[k]||(G[k]=[])).push(o);}
+ const m4=new THREE.Matrix4();
+ for(const k in G){const A=G[k];if(A.length<6)continue;const o0=A[0];const im=new THREE.InstancedMesh(o0.geometry,o0.material,A.length);A.forEach((o,i)=>{m4.multiplyMatrices(inv,o.matrixWorld);im.setMatrixAt(i,m4);});
+  im.castShadow=o0.castShadow;im.receiveShadow=o0.receiveShadow;im.renderOrder=o0.renderOrder;Object.assign(im.userData,{isOutline:o0.userData.isOutline,i24:1});im.computeBoundingSphere();root.add(im);
+  for(const o of A)o.parent.remove(o);INST24.stats.bInst++;INST24.stats.bMeshes+=A.length;}}
+function inst24Char(J){const G={};for(const e of J.L){if(e.bad||!e.o.parent)continue;const o=e.o;if(!o.visible)continue;const g=o.geometry;const ak=Object.keys(g.attributes).sort().join('+')+(g.index?'i':'n');
+  const k=o.parent.uuid+'|'+o.material.uuid+'|'+ak+'|'+(o.renderOrder||0)+'|'+(o.userData.isOutline?1:0)+'|'+o.castShadow;(G[k]||(G[k]=[])).push(o);}
+ for(const k in G){const A=G[k];if(A.length<2)continue;const gs=[];for(const o of A){const g=o.geometry.clone();o.updateMatrix();g.applyMatrix4(o.matrix);gs.push(g);}let mg=null;try{mg=BGU.mergeGeometries(gs,false);}catch(e){}gs.forEach(g=>g.dispose());if(!mg)continue;
+  const o0=A[0],par=o0.parent;const m=new THREE.Mesh(mg,o0.material);m.castShadow=o0.castShadow;m.receiveShadow=o0.receiveShadow;m.renderOrder=o0.renderOrder;Object.assign(m.userData,{isOutline:o0.userData.isOutline,i24:1,own:1});par.add(m);for(const o of A)par.remove(o);INST24.stats.cMerged++;INST24.stats.cMeshes+=A.length;}}
+var INST24S=0;function inst24Scan(dt){INST24S-=dt;if(INST24S>0)return;INST24S=2;for(const c of scene.children){if(c.userData.i24||c.isLight||c.isMesh||/bundle/.test(c.name||''))continue;let n=0;c.traverse(o=>{if(o.isMesh)n++;});if(n>=12)inst24Watch(c,'chr');}}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
