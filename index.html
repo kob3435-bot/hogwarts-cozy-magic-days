@@ -4699,6 +4699,8 @@ function openHub(){if(uiOpen&&uiOpen!=='v17M')return;openV('🎒 เมนูก
  T('📅','ปฏิทินเทศกาล',(festToday()?festToday().ic+' '+festToday().th:'วันที่ '+(SIM.day+1))+' · '+SEASON[SIM.day%8],()=>openCalendar());
  T('🧹',player.fly?'ลงจอด':'ขี่ไม้กวาด','กลางแจ้งเท่านั้น (B)',()=>{closeV();toggleBroom();});T('📷','โหมดถ่ายภาพ','ฟิลเตอร์ ท่าทาง บันทึก PNG (P)',()=>{closeV();openPhoto();});
  const ev2=lunaEvAvail();T('💙','ลูน่า','ระดับความสนิท '+lunaLv()+'/10'+(ev2.length?' · ✨ มีเหตุการณ์พิเศษ!':''),()=>openLunaHub());
+ T('⚔️','ชมรมดวลเวท','ดวลแบบเป็นมิตรกับคนใกล้ตัว · ชนะแล้ว '+((V.f26&&V.f26.duelW)||0),()=>F26.gDuel());T('🐾','สอนท่าสัตว์เลี้ยง',V.pet?'หมุน กระโดด อ้อน เต้น':'ยังไม่มีสัตว์เลี้ยง',()=>F26.openTricks());
+ T('🎁','ของขวัญรายวัน','ต่อเนื่อง '+((V.f26&&V.f26.streak)||0)+'/7 วัน',()=>F26.openGift());T('🏅','ความสำเร็จ',F26.achList().filter(a=>a.ok).length+'/'+F26.achList().length+' ปลดล็อก',()=>F26.openAch());
  T('😴','นอนพักถึงวันใหม่','ข้ามไปเช้าวันถัดไป',()=>{closeV();nextDay();});T('⚙️','ตั้งค่า','เสียง กราฟิก ป้ายชื่อ บันทึก',()=>openSettings());
  if(!V.sorted)T('🎩','พิธีคัดสรร','ให้หมวกเลือกบ้าน',()=>openSorting());
  B.append(g,h17('h2',{style:'margin-top:12px;font-size:17px'},'🏫 คาบเรียน (มินิเกม)'));const g2=h17('div',{className:'grid'});
@@ -4785,7 +4787,7 @@ const DYNRES={base:0,scale:1,acc:0,n:0,on:!/[?&]nodr/.test(location.search)};
 function dynResTick(dt){if(!DYNRES.on||CZA.on)return;if(!DYNRES.base)DYNRES.base=renderer.getPixelRatio();DYNRES.acc+=dt;DYNRES.n++;if(DYNRES.acc<2)return;const avg=DYNRES.acc/DYNRES.n;DYNRES.acc=0;DYNRES.n=0;
  let s=DYNRES.scale;const _tn=performance.now();if(avg>0.030&&s>0.7){s=Math.max(0.7,s-0.15);DYNRES.hold=_tn+(DYNRES.ups>1?60000:20000);}else if(avg<0.015&&s<1&&_tn>(DYNRES.hold||0)){s=Math.min(1,s+0.15);DYNRES.ups=(DYNRES.ups||0)+1;}if(s!==DYNRES.scale){DYNRES.pend=s;}}
 function dynResApply(){const s=DYNRES.pend;DYNRES.pend=0;if(s&&s<DYNRES.scale){try{localStorage.setItem('hc_dr',String(s));}catch(e){}}return;if(s){DYNRES.scale=s;renderer.setPixelRatio(DYNRES.base*s);renderer.setSize(VW,VH);if(window.__composer){__composer.setPixelRatio(renderer.getPixelRatio());__composer.setSize(VW,VH);}}}
-function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{tourTick(dt);}catch(e){}try{inst24Tick();inst24Scan(dt);}catch(e){}try{life24Tick(dt);}catch(e){window.__lifeErr=String(e);}try{audio24Tick();}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
+function v18Tick(dt){czaTick();g18Tick(dt);g19Tick(dt);try{amb20(dt);vis20Tick(dt);}catch(e){}try{warm23Tick();}catch(e){}try{tourTick(dt);}catch(e){}try{inst24Tick();inst24Scan(dt);}catch(e){}try{life24Tick(dt);}catch(e){window.__lifeErr=String(e);}try{audio24Tick();}catch(e){}try{F26.tick(dt);}catch(e){}try{if(window.SPIN23){for(const g of SPIN23)if(g.parent)g.rotation.y+=dt*0.12;}lpxTick(dt);vis21Tick(dt);vis22Tick(dt);sky22Tick(dt);a22Tick(dt);train22Tick(dt);memo22Tick(dt);whomp22Tick(dt);walk22Tick(dt);}catch(e){if(!window.__v21e){window.__v21e=1;console.warn(e);}}npcQTick();const _d0=performance.now();dynResTick(dt);PROF.mark("dynres",performance.now()-_d0);try{if(typeof v18NavTick==='function')v18NavTick(dt);}catch(e){console.error(e);}}
 setTimeout(prewarmInit,1200);
 window.__v18={buildChibi:(L,h)=>buildChibi(L,h),NPCQ,PREWARM,CZA,DYNRES,get steps(){return BUN_STATS.steps;}};
 
@@ -5371,6 +5373,107 @@ function travel25(id,pos,label){if(TRAV25.busy||!ZONES[id])return;if(id===zone.i
 /* v26 A1: build every sky environment map while the loading screen is up, so changing time/area never compiles PMREM mid-play */
 try{const _t0=performance.now();for(const t of TIMES)envFor(true,t,TIME_LIGHT[t]);envFor(false,TIMES[0],TIME_LIGHT[TIMES[0]]);window.__envBoot=Math.round(performance.now()-_t0);}catch(e){console.warn('env26',e);}
 try{window.__aud=Audio;}catch(e){}
+
+/* ===================== v26 FUN: duel club, snitch chase, lost & found, pet tricks, daily gift, achievements ===================== */
+var F26=(function(){if(!V.f26)V.f26={duelW:0,duelP:0,snitch:0,found:0,tricks:0,love:0,trickDay:-1,trickN:0,streak:0,lastGift:'',best:0,ach:{}};const F=V.f26;
+ const st=document.createElement('style');st.textContent=`
+#chip26{position:fixed;left:10px;top:86px;flex-direction:column;align-items:flex-start;z-index:30;display:none;gap:8px}
+#chip26 button{border:2px solid #e0b23a;background:linear-gradient(160deg,#6a3a8a,#2a1a4a);color:#ffe9b0;border-radius:18px;padding:6px 12px;font-size:15px;animation:p26 1.4s ease-in-out infinite;cursor:pointer;box-shadow:0 0 16px rgba(224,178,58,.6)}
+@keyframes p26{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.d26{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0}.d26 .who{text-align:center;flex:1}.d26 .who b{font-size:40px;display:block}
+.d26 .hp{font-size:20px;letter-spacing:2px}.d26bar{height:12px;border-radius:6px;background:#3a2614;overflow:hidden;margin:8px 0}.d26bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd84a,#ff7a3a);width:100%}
+.d26cast{font-size:34px;text-align:center;min-height:52px;animation:pop .4s}.d26btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.d26btns button{font-size:18px;padding:12px 14px;min-width:96px}
+.a26{display:flex;align-items:center;gap:10px;margin:6px 0;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.35)}.a26 b{font-size:26px}.a26.done{background:rgba(255,216,74,.45)}
+.tr26{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.tr26 button{font-size:18px;padding:14px}`;document.head.appendChild(st);
+ const chip=document.createElement('div');chip.id='chip26';document.body.appendChild(chip);
+ const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+ const yest=()=>{const d=new Date(Date.now()-864e5);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+ const save=()=>{try{saveV();}catch(e){}};
+ /* ---------- chips (daily gift / letters) ---------- */
+ function chips(){chip.innerHTML='';let n=0;if(F.lastGift!==today()){n++;chip.append(btn('🎁 ของขวัญรายวัน',()=>openGift()));}
+  const a=achList().filter(x=>x.ok&&!F.ach[x.k]).length;if(a){n++;chip.append(btn('🏅 ความสำเร็จใหม่ '+a,()=>openAch()));}chip.style.display=n?'flex':'none';}
+ /* ---------- daily gift streak ---------- */
+ const GIFTS=[['🪙',10,'10 เกลเลียน'],['🐸',1,'ช็อกโกแลตกบ 1 ชิ้น'],['🪙',20,'20 เกลเลียน'],['🍭',1,'กล่องขนมหนีเรียน'],['🪙',30,'30 เกลเลียน'],['🎆',1,'ดอกไม้ไฟมังกร'],['🌟',60,'60 เกลเลียน + 🐸×2']];
+ function openGift(){if(uiOpen&&uiOpen!=='v17M')closeModal();const can=F.lastGift!==today();const nx=can?(F.lastGift===yest()?(F.streak%7)+1:1):F.streak;
+  openV('🎁 ของขวัญรายวัน',B=>{B.append(h17('p',{},'เข้ามาเล่นทุกวันเพื่อรับของขวัญต่อเนื่อง 7 วัน (นับตามวันจริง) · ต่อเนื่องสูงสุด '+(F.best||0)+' วัน'));const g=h17('div',{className:'grid'});
+   GIFTS.forEach((G,i)=>{const d=i+1,got=can?d<nx:d<=nx;g.append(h17('div',{className:'tile',style:(d===nx&&can?'outline:3px solid #e0b23a;':'')+(got?'opacity:.55':'')},'<b>'+G[0]+'</b>วันที่ '+d+'<br><small>'+G[2]+(got?' ✅':'')+'</small>'));});B.append(g);
+   if(can)B.append(h17('div',{className:'row',style:'justify-content:center;margin-top:10px'},null),btn('🎁 รับของขวัญวันที่ '+nx,()=>{claimGift(nx);closeV();},'gold'));else B.append(h17('p',{style:'text-align:center'},'รับของวันนี้แล้ว — พรุ่งนี้มาใหม่นะ 💛'));});}
+ function claimGift(d){if(F.lastGift===today())return;F.streak=d;F.best=Math.max(F.best||0,d);F.lastGift=today();const G=GIFTS[d-1];
+  if(G[0]==='🪙')addGal(G[1],'ของขวัญรายวัน');else if(G[0]==='🐸')addInv('frog',1);else if(G[0]==='🍭')addInv('snack',1);else if(G[0]==='🎆')addInv('firework',1);else{addGal(G[1],'ของขวัญวันที่ 7');addInv('frog',2);}
+  toast('🎁 ได้รับ: '+G[2]);Audio.sfx('gift');burst('#ffd84a',30);save();chips();}
+ /* ---------- spell duel club ---------- */
+ const SP=[['🛡️','โพรเทโก','กันสตูเปไฟ'],['⚡','สตูเปไฟ','ชนะเอ็กซ์เปลลิอาร์มัส'],['🪄','เอ็กซ์เปลลิอาร์มัส','ปลดโล่โพรเทโก']];const BEATS={0:1,1:2,2:0};
+ function gDuel(op,skill){op=op||(()=>{const n=NPCS.find(n=>n.zone===zone.id&&!n.c.creature&&!(typeof isGhost==='function'&&isGhost(n.c)));return n?n.c.th:'ประธานชมรมดวลเวท';})();skill=skill==null?0.5:skill;
+  const S={me:3,op:3,round:0,busy:false,t:null,timer:null};
+  openV('⚔️ ชมรมดวลเวทมนตร์ (เป็นมิตร)',B=>{B.innerHTML='';const top=h17('div',{className:'d26'});const me=h17('div',{className:'who'});const yo=h17('div',{className:'who'});top.append(me,h17('div',{style:'font-size:26px'},'VS'),yo);
+   const cast=h17('div',{className:'d26cast'},'โค้งคำนับ… 🙇');const bar=h17('div',{className:'d26bar'},'<i></i>');const msg=h17('p',{style:'text-align:center;min-height:22px;margin:4px 0'},'อ่านคาถาที่คู่ดวลร่าย แล้วเลือกคาถาที่ชนะทันเวลา!');
+   const bs=h17('div',{className:'d26btns'});const BT=SP.map((s,i)=>{const b=btn(s[0]+' '+s[1],()=>pickS(i));bs.append(b);return b;});
+   const leg=h17('p',{style:'font-size:12px;opacity:.85;text-align:center'},'🛡️ โพรเทโก กัน ⚡ · ⚡ สตูเปไฟ ชนะ 🪄 · 🪄 เอ็กซ์เปลลิอาร์มัส ปลด 🛡️');
+   B.append(top,cast,bar,msg,bs,leg);const draw=()=>{me.innerHTML='<b>🧙</b>'+(player.name||'เธอ')+'<div class="hp">'+'💛'.repeat(S.me)+'🤍'.repeat(3-S.me)+'</div>';yo.innerHTML='<b>🧑‍🎓</b>'+op+'<div class="hp">'+'💜'.repeat(S.op)+'🤍'.repeat(3-S.op)+'</div>';};draw();
+   const win=Math.max(1.2,2.4-skill*1.1);
+   function next(){if(S.me<=0||S.op<=0)return end();S.round++;S.busy=false;S.cur=Math.floor(Math.random()*3);const fake=Math.random()<skill*0.35;S.show=fake?'❔':SP[S.cur][0];
+    cast.innerHTML='<span style="opacity:.6;font-size:18px">'+op+' ร่าย…</span> '+S.show+(fake?' <small style="font-size:14px">(เดาจากท่าทาง: '+SP[S.cur][1].slice(0,3)+'…)</small>':' <small style="font-size:16px">'+SP[S.cur][1]+'</small>');
+    const t0=performance.now();clearInterval(S.timer);S.timer=setInterval(()=>{if(!document.body.contains(bar)){clearInterval(S.timer);return;}const f=1-(performance.now()-t0)/(win*1000);bar.firstChild.style.width=Math.max(0,f*100)+'%';if(f<=0){clearInterval(S.timer);res(-1);}},40);}
+   function pickS(i){if(S.busy||S.cur==null)return;clearInterval(S.timer);res(i);}
+   function res(i){if(S.busy)return;S.busy=true;let r;if(i<0){r='lose';msg.textContent='⌛ ช้าไปนิด! โดนคาถาเข้าเต็มๆ';}else if(i===S.cur){r='tie';msg.textContent='💥 คาถาชนกันกลางอากาศ! ประกายไฟกระจาย';}else if(BEATS[i]===S.cur){r='win';msg.textContent='✨ '+SP[i][1]+' ได้ผล! '+op+' เซไปหนึ่งก้าว';}else{r='lose';msg.textContent='😵 '+SP[S.cur][1]+' ของ '+op+' ชนะคาถาเธอ';}
+    if(r==='win')S.op--;if(r==='lose')S.me--;draw();Audio.sfx(r==='win'?'chime':'spell');try{burst(r==='win'?'#ffd84a':r==='tie'?'#ffffff':'#b48aff',r==='tie'?18:12);}catch(e){}
+    cast.innerHTML=(i>=0?SP[i][0]:'⌛')+' ⟷ '+SP[S.cur][0];setTimeout(next,1100);}
+   function end(){clearInterval(S.timer);const won=S.op<=0;F.duelP++;if(won)F.duelW++;save();BT.forEach(b=>b.disabled=true);
+    cast.innerHTML=won?'🏆 ชนะการดวล!':'🤝 แพ้แบบสวยงาม';msg.textContent=won?op+' ยิ้มแล้วจับมือ: “ฝีมือดีมาก! มาดวลกันใหม่นะ”':op+' ช่วยดึงเธอลุก: “เกือบแล้ว! ลองอ่านท่าทางให้ไวขึ้น”';
+    if(won){addGal(12+Math.round(skill*8),'ชนะการดวล');addHP(10,'ชมรมดวลเวท');burst('#ffd84a',40);}else addGal(3,'น้ำใจนักดวล');try{ev('duel');}catch(e){}chips();
+    const r=h17('div',{className:'row',style:'justify-content:center;margin-top:8px'});r.append(btn('🔁 ดวลอีกครั้ง',()=>gDuel(op,Math.min(0.95,skill+(won?0.1:-0.05))),'gold'),btn('ปิด',()=>closeV()));B.append(r);}
+   setTimeout(next,900);},()=>{clearInterval(S.timer);});}
+ /* ---------- golden snitch chase (while flying outdoors) ---------- */
+ const SN={m:null,next:performance.now()+25000,t0:0,x:0,y:0,h:2,vx:0,vy:0,last:0};
+ function snMesh(){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(0.2,16,12),new THREE.MeshStandardMaterial({color:'#ffd23a',emissive:'#b07a10',emissiveIntensity:0.8,metalness:0.6,roughness:0.3}));g.add(b);
+  const wm=new THREE.MeshBasicMaterial({color:'#fffaf0',transparent:true,opacity:0.92,side:THREE.DoubleSide});const wg=new THREE.PlaneGeometry(0.62,0.22);for(const s of[-1,1]){const w=new THREE.Mesh(wg,wm);w.position.x=s*0.36;w.userData.s=s;g.add(w);}
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(0.55,12,8),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.38,blending:THREE.AdditiveBlending,depthWrite:false}));g.add(halo);g.userData.halo=halo;g.scale.setScalar(2.2);return g;}
+ function spawnSnitch(){if(SN.m)return;const a=Math.random()*Math.PI*2,r=5+Math.random()*2;SN.x=clamp(player.x+Math.cos(a)*r,1,zone.w-1);SN.y=clamp(player.y+Math.sin(a)*r,1,zone.h-1);SN.h=2;SN.m=snMesh();SN.zone=zone.id;scene.add(SN.m);SN.t0=performance.now();SN.vx=0;SN.vy=0;toast('✨ ลูกสนิชทองคำโผล่มา! บินไล่จับให้ได้ภายใน 25 วินาที');Audio.sfx('chirp');}
+ function snGone(msg){if(SN.m){scene.remove(SN.m);SN.m.traverse(o=>{if(o.geometry)o.geometry.dispose();});SN.m=null;}SN.next=performance.now()+45000+Math.random()*40000;if(msg)toast(msg);}
+ function snTick(dt){const T=performance.now();if(!SN.m){if(player.fly&&isOut()&&!(typeof QM!=='undefined'&&QM.on)&&!uiOpen&&T>SN.next)spawnSnitch();return;}
+  if(!player.fly||zone.id!==SN.zone){snGone(null);return;}if(T-SN.t0>25000){snGone('💨 ลูกสนิชบินหนีไปแล้ว… คราวหน้าต้องจับให้ได้!');return;}
+  const dx=SN.x-player.x,dy=SN.y-player.y,d=Math.hypot(dx,dy)||0.01;const tt=T/1000;let ax=Math.sin(tt*1.7+SN.t0)*3,ay=Math.cos(tt*1.3+SN.t0*0.7)*3;if(d<4.5){ax+=dx/d*(5.2-d)*2.2;ay+=dy/d*(5.2-d)*2.2;}
+  SN.vx=(SN.vx+ax*dt)*0.96;SN.vy=(SN.vy+ay*dt)*0.96;const sp=Math.hypot(SN.vx,SN.vy),mx=3.4+Math.min(1.2,(T-SN.t0)/20000);if(sp>mx){SN.vx*=mx/sp;SN.vy*=mx/sp;}
+  SN.x=clamp(SN.x+SN.vx*dt,1,zone.w-1);SN.y=clamp(SN.y+SN.vy*dt,1,zone.h-1);if(SN.x<=1.01||SN.x>=zone.w-1.01)SN.vx*=-1;if(SN.y<=1.01||SN.y>=zone.h-1.01)SN.vy*=-1;
+  const hy=1.5+(V17P.alt||0)*0.8+Math.sin(tt*2.3)*0.4;SN.m.position.set(SN.x,hy,SN.y);SN.m.rotation.y=Math.atan2(SN.vx,SN.vy);for(const c of SN.m.children)if(c.userData.s)c.rotation.y=c.userData.s*(0.3+Math.sin(tt*40)*0.9);SN.m.userData.halo.scale.setScalar(1+Math.sin(tt*6)*0.15);
+  if(Math.random()<0.5)spawnP('spark',SN.x,SN.y,-SN.vx*0.2,-SN.vy*0.2,0.5,2,'#ffe08a');
+  if(d<1.25){F.snitch++;save();snGone(null);toast('🏆 จับลูกสนิชได้! (รวม '+F.snitch+' ลูก)');addGal(15,'จับสนิช');addHP(10,'จับสนิช');Audio.sfx('chime');burst('#ffd84a',50);try{ev('snitch');}catch(e){}chips();}}
+ /* ---------- lost & found (collectible hunt on foot) ---------- */
+ const LOST=[['🔴','ลูกแก้วรีเมมบรอลของเนวิลล์ (ฉบับแต่งใหม่)','เนวิลล์ยิ้มแป้น ส่งขนมมาขอบคุณ'],['🪶','ขนนกเขียนหนังสือสีทอง','เจ้าของฝากเหรียญขอบคุณมากับนกฮูก'],['🧣','ผ้าพันคอลายบ้านที่ปลิวหาย','อุ่นขึ้นทันทีที่หยิบ — ส่งคืนเจ้าของแล้ว'],['📗','หนังสือห้องสมุดที่เลยกำหนดคืน','บรรณารักษ์ไม่ปรับ แถมยังให้แต้มบ้าน'],['🍬','ถุงลูกอมรสแปลกตกอยู่','แบ่งกินกับลูน่าคนละเม็ด… รสขี้หู!'],['🌟','ประกายดาวตกที่ร่วงลงมา','อธิษฐานเงียบๆ หนึ่งข้อ ✨'],['🔑','กุญแจมีปีกที่หลงฝูง','ปล่อยมันบินกลับไปหาพวกพ้อง'],['🧦','ถุงเท้าข้างเดียว','เอลฟ์ประจำบ้านดีใจใหญ่!']];
+ const LF={m:null,next:performance.now()+40000,it:null,zone:null,x:0,y:0};
+ function lfTex(e){const c=document.createElement('canvas');c.width=c.height=96;const g=c.getContext('2d');const gr=g.createRadialGradient(48,48,6,48,48,46);gr.addColorStop(0,'rgba(255,240,180,.95)');gr.addColorStop(1,'rgba(255,220,120,0)');g.fillStyle=gr;g.fillRect(0,0,96,96);g.font='54px serif';g.textAlign='center';g.textBaseline='middle';g.fillText(e,48,52);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
+ function spawnLost(){if(LF.m||!zone)return false;const it=LOST[Math.floor(Math.random()*LOST.length)];for(let k=0;k<20;k++){const a=Math.random()*Math.PI*2,r=4+Math.random()*4.5;const x=clamp(player.x+Math.cos(a)*r,1.5,zone.w-1.5),y=clamp(player.y+Math.sin(a)*r,1.5,zone.h-1.5);
+   if(solidAt(zone,x,y,0.35))continue;const p=findFree(zone,x,y);if(Math.hypot(p.x-player.x,p.y-player.y)<3)continue;LF.x=p.x;LF.y=p.y;LF.it=it;LF.zone=zone.id;LF.m=new THREE.Sprite(new THREE.SpriteMaterial({map:lfTex(it[0]),transparent:true,depthWrite:false}));LF.m.scale.setScalar(1.6);LF.m.renderOrder=5;scene.add(LF.m);LF.beam=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.4,4,12,1,true),new THREE.MeshBasicMaterial({color:'#ffe08a',transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));LF.beam.position.set(LF.x,2,LF.y);scene.add(LF.beam);
+   toast('✨ มีบางอย่างเป็นประกายอยู่แถวนี้… ลองเดินไปหาดู');return true;}LF.next=performance.now()+20000;return false;}
+ function lfGone(){if(LF.beam){scene.remove(LF.beam);LF.beam.geometry.dispose();LF.beam.material.dispose();LF.beam=null;}if(LF.m){scene.remove(LF.m);LF.m.material.map.dispose();LF.m.material.dispose();LF.m=null;}LF.next=performance.now()+90000+Math.random()*70000;}
+ function lfTick(dt){const T=performance.now();if(!LF.m){if(!player.fly&&!uiOpen&&zone&&zone.w>=12&&T>LF.next)spawnLost();return;}if(zone.id!==LF.zone){lfGone();LF.next=T+30000;return;}
+  LF.m.position.set(LF.x,0.75+Math.sin(T/400)*0.12,LF.y);if(Math.random()<0.25)spawnP('spark',LF.x+rnd(-.3,.3),LF.y+rnd(-.3,.3),0,0,0.8,2.5,'#ffe08a');
+  if(!player.fly&&Math.hypot(LF.x-player.x,LF.y-player.y)<1.1){const it=LF.it;F.found++;save();lfGone();toast(it[0]+' เจอแล้ว: '+it[1]);setTimeout(()=>toast('💛 '+it[2]),900);addGal(6,'ของหาย');if(F.found%3===0)addInv('frog',1);if(it[0]==='📗')addHP(5,'คืนหนังสือ');Audio.sfx('chime');burst('#ffe08a',24);try{ev('found');}catch(e){}chips();}}
+ /* ---------- pet tricks ---------- */
+ const TR=[['🌀','หมุนตัว','spin'],['⬆️','กระโดด','jump'],['💖','อ้อนขอกอด','love'],['🎵','เต้นระบำ','dance']];const PT={k:null,t:0};
+ function openTricks(){if(!V.pet)return toast('ยังไม่มีสัตว์เลี้ยง — ลองซื้อแคระฟูที่ร้านวีสลีย์ หรือรับนกฮูก/แมว/คางคก');openV('🐾 สอนท่าสัตว์เลี้ยง',B=>{B.append(h17('p',{},'ความผูกพัน: '+'💗'.repeat(Math.min(10,Math.floor(F.love/5)))+' ('+F.love+') · วันนี้เล่นแล้ว '+(F.trickDay===SIM.day?F.trickN:0)+'/6 ครั้งที่ได้รางวัล'));const g=h17('div',{className:'tr26'});
+   for(const t of TR)g.append(btn(t[0]+' '+t[1],()=>{doTrick(t[2]);closeV();}));B.append(g);});}
+ function doTrick(k){if(!V.pet||!petM)return;PT.k=k;PT.t=0;F.tricks++;if(F.trickDay!==SIM.day){F.trickDay=SIM.day;F.trickN=0;}if(F.trickN<6){F.trickN++;F.love++;if(F.love%10===0){addGal(10,'สัตว์เลี้ยงรักเธอ');toast('💗 ความผูกพันเพิ่มขึ้นอีกระดับ!');}}save();Audio.sfx(V.pet==='owl'?'hoot':'chirp');try{ev('trick');}catch(e){}chips();}
+ function trickTick(dt){if(!PT.k||!petM)return;PT.t+=dt;const t=PT.t,D=1.6;if(t>D){PT.k=null;petM.rotation.z=0;return;}
+  if(PT.k==='spin')petM.rotation.y+=dt*14;else if(PT.k==='jump')petM.position.y+=Math.abs(Math.sin(t/D*Math.PI*2))*1.0;else if(PT.k==='love'){petM.position.y+=Math.abs(Math.sin(t*8))*0.15;if(Math.random()<0.35)spawnP('heart',pet.x,pet.y,rnd(-.5,.5),rnd(-.5,.5),1.4,4,'#ff8ad8');}else if(PT.k==='dance'){petM.rotation.z=Math.sin(t*10)*0.35;petM.rotation.y+=dt*4;petM.position.y+=Math.abs(Math.sin(t*10))*0.2;if(Math.random()<0.2)spawnP('spark',pet.x,pet.y,rnd(-.6,.6),rnd(-.6,.6),0.8,3,pick(['#ffd84a','#8ad8ff','#ff8ad8']));}}
+ try{const _pt=petTick;petTick=function(dt){_pt(dt);try{trickTick(dt);}catch(e){}};}catch(e){console.warn('pet26',e);}
+ /* ---------- achievements ---------- */
+ function achList(){const cls=Object.values(V.cls||{}).reduce((a,b)=>a+b,0);return [
+  ['🐸','นักสะสมการ์ด','สะสมการ์ด 10 ใบ',(V.cards||[]).length,10,20],['🃏','อัลบั้มครบเล่ม','สะสมการ์ดครบทุกใบ',(V.cards||[]).length,CARDS.length,80],
+  ['⚔️','ดวลครั้งแรก','ชนะการดวลเวท 1 ครั้ง',F.duelW,1,10],['🏅','แชมป์ชมรมดวล','ชนะการดวล 5 ครั้ง',F.duelW,5,40],
+  ['✨','มือไวเหมือนซีกเกอร์','จับลูกสนิช 1 ลูก',F.snitch,1,15],['🏆','ซีกเกอร์ตัวจริง','จับลูกสนิช 5 ลูก',F.snitch,5,50],
+  ['🔍','นักสืบใจดี','คืนของหาย 3 ชิ้น',F.found,3,15],['🧭','ฮีโร่ของหาย','คืนของหาย 10 ชิ้น',F.found,10,40],
+  ['🐾','เพื่อนซี้สี่ขา','ให้สัตว์เลี้ยงเล่นท่า 10 ครั้ง',F.tricks,10,15],['🎁','มาทุกวัน','รับของขวัญต่อเนื่อง 3 วัน',F.best||0,3,20],['🌟','ครบสัปดาห์','รับของขวัญต่อเนื่อง 7 วัน',F.best||0,7,60],
+  ['📚','นักเรียนขยัน','เรียนคาบมินิเกม 5 ครั้ง',cls,5,20],['🗺️','นักสำรวจ','ค้นพบ 30 สถานที่',(V.places||[]).length,30,30],['🦌','ผู้พิทักษ์','ร่ายคาถาผู้พิทักษ์สำเร็จ',V.patronus?1:0,1,20]
+ ].map(a=>({k:a[1],ic:a[0],t:a[1],d:a[2],v:Math.min(a[3],a[4]),n:a[4],rew:a[5],ok:a[3]>=a[4]}));}
+ function openAch(){openV('🏅 ความสำเร็จ',B=>{const L=achList();B.append(h17('p',{},'ปลดล็อกแล้ว '+L.filter(a=>a.ok).length+'/'+L.length+' · แตะเพื่อรับรางวัล'));
+   for(const a of L){const got=F.ach[a.k];const row=h17('div',{className:'a26'+(a.ok?' done':'')},'<b>'+(a.ok?a.ic:'🔒')+'</b><div style="flex:1"><b style="font-size:15px">'+a.t+'</b><br><small>'+a.d+' · '+a.v+'/'+a.n+'</small><div class="bar"><i style="width:'+(a.v/a.n*100)+'%"></i></div></div>');
+    if(a.ok&&!got)row.append(btn('รับ 🪙'+a.rew,()=>{F.ach[a.k]=1;save();addGal(a.rew,'ความสำเร็จ');burst('#ffd84a',30);Audio.sfx('gift');openAch();chips();},'gold'));else if(got)row.append(h17('span',{},'✅'));B.append(row);}});}
+ /* ---------- per-frame + boot ---------- */
+ let ct=0;function tick(dt){try{snTick(dt);}catch(e){if(!window.__f26e)console.warn('sn26',e);window.__f26e=String(e);}try{lfTick(dt);}catch(e){window.__f26e=String(e);}ct-=dt;if(ct<=0){ct=5;try{chips();}catch(e){}}}
+ setTimeout(()=>{try{chips();}catch(e){}},4000);
+ return {tick,gDuel,openGift,claimGift,openAch,achList,openTricks,doTrick,spawnSnitch,spawnLost,SN,LF,PT,F,chips};})();
+window.__f26=F26;
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
