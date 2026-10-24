@@ -4701,6 +4701,7 @@ function openHub(){if(uiOpen&&uiOpen!=='v17M')return;openV('🎒 เมนูก
  const ev2=lunaEvAvail();T('💙','ลูน่า','ระดับความสนิท '+lunaLv()+'/10'+(ev2.length?' · ✨ มีเหตุการณ์พิเศษ!':''),()=>openLunaHub());
  T('⚔️','ชมรมดวลเวท','ดวลแบบเป็นมิตรกับคนใกล้ตัว · ชนะแล้ว '+((V.f26&&V.f26.duelW)||0),()=>F26.gDuel());T('🐾','สอนท่าสัตว์เลี้ยง',V.pet?'หมุน กระโดด อ้อน เต้น':'ยังไม่มีสัตว์เลี้ยง',()=>F26.openTricks());
  T('🎁','ของขวัญรายวัน','ต่อเนื่อง '+((V.f26&&V.f26.streak)||0)+'/7 วัน',()=>F26.openGift());T('🏅','ความสำเร็จ',F26.achList().filter(a=>a.ok).length+'/'+F26.achList().length+' ปลดล็อก',()=>F26.openAch());
+ T('🧭','หาเพื่อน (เดินอัตโนมัติ)','เลือกใครก็ได้ แล้วเดินไปหา (F)',()=>PICK27.open());
  T('😴','นอนพักถึงวันใหม่','ข้ามไปเช้าวันถัดไป',()=>{closeV();nextDay();});T('⚙️','ตั้งค่า','เสียง กราฟิก ป้ายชื่อ บันทึก',()=>openSettings());
  if(!V.sorted)T('🎩','พิธีคัดสรร','ให้หมวกเลือกบ้าน',()=>openSorting());
  B.append(g,h17('h2',{style:'margin-top:12px;font-size:17px'},'🏫 คาบเรียน (มินิเกม)'));const g2=h17('div',{className:'grid'});
@@ -5474,6 +5475,34 @@ var F26=(function(){if(!V.f26)V.f26={duelW:0,duelP:0,snitch:0,found:0,tricks:0,l
  setTimeout(()=>{try{chips();}catch(e){}},4000);
  return {tick,gDuel,openGift,claimGift,openAch,achList,openTricks,doTrick,spawnSnitch,spawnLost,SN,LF,PT,F,chips};})();
 window.__f26=F26;
+
+/* v27 P1: "find a friend" picker — search any character, auto-walk to them across zones (Floo/Portkey handled by nav) */
+var PICK27=(function(){const st=document.createElement('style');st.textContent=`
+.pk27top{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}.pk27top input{flex:1;min-width:160px;font-size:17px;padding:9px 12px;border-radius:12px;border:2px solid #8a6a2a;background:#fff8e6;color:#3a2614}
+.pk27chips button{font-size:13px;padding:6px 10px;margin:2px}.pk27chips button.on{background:#e0b23a;color:#3a2614}
+.pk27list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;max-height:min(58vh,560px);overflow:auto;padding-right:4px}
+.pk27it{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.4);border-radius:12px;padding:6px 8px;border:1px solid rgba(138,106,42,.35)}
+.pk27it canvas{width:46px;height:54px;border-radius:10px;background:radial-gradient(circle,#fff6dc,#e8cf98);flex:none}.pk27it .i{flex:1;min-width:0;font-size:13px;line-height:1.3}.pk27it b{font-size:15px}
+.pk27it .bb{display:flex;flex-direction:column;gap:4px}.pk27it .bb button{font-size:13px;padding:7px 8px;white-space:nowrap}`;document.head.appendChild(st);
+ const CAT=[['all','ทั้งหมด'],['G','🦁 กริฟฟินดอร์'],['S','🐍 สลิธีริน'],['R','🦅 เรเวนคลอ'],['H','🦡 ฮัฟเฟิลพัฟ'],['staff','🎓 อาจารย์/ผู้ใหญ่'],['ghost','👻 ผี'],['beast','🐾 สัตว์'],['here','📍 ใกล้ตัว']];
+ let cat='all',q='';const TH={};
+ const catOf=n=>{const c=n.c;if(c.creature)return 'beast';if(typeof isGhost==='function'&&isGhost(c))return 'ghost';if(c.house==='N'||c.staff||c.adult)return 'staff';return c.house;};
+ function hopsTo(z){try{return navHops(z);}catch(e){return 99;}}
+ function go(n){closeV();const t=questTarget({type:'talk',arg:n.c.id});if(!t)return toast('หาตัวไม่เจอ ลองใหม่อีกที');if(t.zone===zone.id&&Math.hypot(t.x-player.x,t.y-player.y)<1.3){NAV={on:true,t,t0:performance.now()};navArrive();return;}navTo(t);SIM.pick27=(SIM.pick27||0)+1;}
+ function open(){openV('🧭 อยากไปหาใคร? (เดินอัตโนมัติ)',B=>{const top=h17('div',{className:'pk27top'});const inp=h17('input',{placeholder:'🔍 พิมพ์ชื่อ เช่น แฮร์รี่, Hermione, ฮากริด…',value:q});top.append(inp);
+   const chips=h17('div',{className:'pk27chips'});const list=h17('div',{className:'pk27list'});B.append(top,chips,list);
+   const draw=()=>{chips.innerHTML='';for(const [k,t] of CAT){const b=btn(t,()=>{cat=k;draw();});if(k===cat)b.classList.add('on');chips.append(b);}
+    list.innerHTML='';const s=q.trim().toLowerCase();let L=NPCS.filter(n=>{if(cat==='here')return n.zone===zone.id||hopsTo(n.zone)<=1;if(cat!=='all'&&catOf(n)!==cat)return false;return !s||(n.c.th+' '+n.c.en+' '+n.c.id).toLowerCase().includes(s);});
+    L=L.map(n=>({n,h:n.zone===zone.id?0:hopsTo(n.zone)})).sort((a,b)=>a.h-b.h||a.n.c.th.localeCompare(b.n.c.th,'th'));
+    if(!L.length)list.append(h17('p',{},'ไม่พบชื่อนี้ ลองพิมพ์ใหม่นะ'));
+    for(const {n,h} of L.slice(0,80)){const c=n.c;const it=h17('div',{className:'pk27it'});const cv=document.createElement('canvas');cv.width=58;cv.height=68;cv.style.imageRendering='pixelated';try{pixThumb(cv,c.look,c.house!=='N'?c.house:null);}catch(e){}
+     const where=ZONES[n.zone]?ZONES[n.zone].th:'?';const i=h17('div',{className:'i'},'<b>'+c.th+'</b><br><span style="opacity:.75">'+c.en+'</span><br>📍 '+where+(h===0?' · อยู่ที่นี่!':h<99?' · '+h+' ทางผ่าน':''));
+     const bb=h17('div',{className:'bb'});bb.append(btn('🚶 เดินไปหา',()=>go(n),'gold'),btn('✨ วาร์ป',()=>{closeV();travel25(n.zone,{x:n.x+1.1,y:n.y+0.3});}));it.append(cv,i,bb);list.append(it);}};
+   inp.addEventListener('input',()=>{q=inp.value;draw();});draw();setTimeout(()=>{if(!('ontouchstart' in window))inp.focus();},50);});}
+ try{const bar=document.getElementById('rightBtns');const b=document.createElement('button');b.className='btn';b.id='bPick';b.title='หาเพื่อน (F)';b.textContent='🧭 หาเพื่อน';b.onclick=()=>{if(uiOpen&&uiOpen!=='v17M')return;open();};bar.insertBefore(b,document.getElementById('bDir'));
+  const mb=document.getElementById('mBtns');if(mb){const m=document.createElement('button');m.className='btn';m.id='mPick';m.textContent='🧭 หา';m.onclick=()=>open();mb.append(m);}
+  window.addEventListener('keydown',e=>{if(e.code==='KeyF'&&!uiOpen&&!(e.target&&e.target.tagName==='INPUT')){open();}});}catch(e){console.warn('pick27',e);}
+ return {open,go};})();window.__pick=PICK27;
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
