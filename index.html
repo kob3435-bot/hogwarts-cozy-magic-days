@@ -5667,6 +5667,13 @@ window.__g28={cam:()=>cam,line(ids,dx){for(const m of (this._m||[]))scene.remove
 (function(){const _r=renderer.render.bind(renderer);const HZ=(z,x,y)=>{if(!z||!z.h28)return 0;let H=0;for(const d of z.h28){const r=Math.hypot(x-d.x,y-d.y);const v=r<=d.r?d.h:r<d.r+d.rr?d.h*(1-(r-d.r)/d.rr):0;if(v>H)H=v;}return H;};window.__h28=HZ;
  renderer.render=function(s,c){try{if(zone&&zone.h28){for(const o of scene.children){const u=o.userData;if(!u||!u.parts||!u.parts.human&&!u.parts.q)continue;const p=o.position;const base=(u.h28l!=null&&Math.abs(p.y-u.h28l)<1e-6)?p.y-u.h28a:p.y;if(base>0.3){u.h28l=null;continue;}const H=HZ(zone,p.x,p.z);p.y=base+H;u.h28a=H;u.h28l=p.y;}}}catch(e){}return _r(s,c);};})();
 
+/* v28 P2: auto-walk follows moving / zone-changing targets: target waits for you, re-targets each frame (navGoal), catches up via travel veil if it keeps changing zones, gives up gracefully */
+(function(){const _nt=navTo,_ng=navGoal;
+ navTo=function(t){if(t&&t.npc){try{t.npc.dwell=Math.max(t.npc.dwell||0,300);t.npc.hold28=performance.now()+120000;}catch(e){}}const r=_nt(t);if(r&&t&&t.npc){NAV.zc28=0;NAV.lz28=t.npc.zone;}return r;};
+ navGoal=function(){try{const t=NAV.t;if(t&&t.npc){const n=t.npc,now=performance.now();n.dwell=Math.max(n.dwell||0,60);if(n.zone!==NAV.lz28){NAV.zc28=(NAV.zc28||0)+1;NAV.lz28=n.zone;}
+   const el=now-(NAV.t0||now);if(el>200000){navCancel('ตามไม่ทันแล้ว ลองวาร์ปดูนะ ✨');return null;}
+   if(zone.id!==n.zone&&!NAV.w28&&(el>50000||NAV.zc28>=2)&&typeof travel25==='function'){NAV.w28=1;travel25(n.zone,{x:n.x+1.1,y:n.y+0.3});}}}catch(e){}return _ng();};})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
