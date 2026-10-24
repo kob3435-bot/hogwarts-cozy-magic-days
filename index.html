@@ -890,7 +890,7 @@ window.Q22=T;})();
 /* ===== v14: enlarge every zone again (outdoor x1.5, interiors x1.3) ===== */
 const XW20={courtyard:1.2,hagrid_hut:1.2,stone_circle:1.2,whomping_willow:1.2,lake_shore:1.2,boats_arrival:1.2,hogsmeade:1.2,diagon_alley:1.25,knockturn_alley:1.2};
 (function enlarge14(){const KEEP=['wooden_bridge','viaduct','stands_tower','quidditch','express_carriage','bell_tower'];const SF={};
-  for(const id in ZONES){const z=ZONES[id];if(KEEP.includes(id))continue;const out=!!(z.out||z.outdoorSky);const k=(out?1.5:1.3)*(XW20[id]||1);SF[id]=k;
+  for(const id in ZONES){const z=ZONES[id];if(KEEP.includes(id))continue;const out=!!(z.out||z.outdoorSky);const k=(out?1.5:1.3)*(XW20[id]||1)*(out?1.2:1.12);SF[id]=k;
     const big=f=>/^(house|shack|boathouse|train|platform|longtable|counter|fountain|rug|pumpkins|stands|hut|greenhouse|castlewall)$/.test(f[4]);
     z.furn=z.furn.map(f=>{const x=Math.round(f[0]*k),y=Math.round(f[1]*k);let w=f[2]||1,h=f[3]||1;
       // wall-hugging strips (shelves along walls) stretch with the room; big structures grow a bit
@@ -2990,7 +2990,7 @@ function buildZone3D(){clearWorld();const z=zone,t=TIMES[timeIdx],TL=TIME_LIGHT[
   const OS=openOutdoorSides(z);const sides={N:[],S:[],W:[],E:[]};
   for(let x=0;x<z.w;x++){if(!OS.N&&!isDoorTile(z,x,0))sides.N.push([x,0]);if(!OS.S&&!isDoorTile(z,x,z.h-1))sides.S.push([x,z.h-1]);}
   for(let y=1;y<z.h-1;y++){if(!OS.W&&!isDoorTile(z,0,y))sides.W.push([0,y]);if(!OS.E&&!isDoorTile(z,z.w-1,y))sides.E.push([z.w-1,y]);}
-  wallSides={};const wallH=outside?1.0:2.6;const m4=new THREE.Matrix4(),q0=new THREE.Quaternion();
+  wallSides={};const wallH=outside?(window.__edge27&&window.__edge27[z.id]?0.18:1.0):2.6;const m4=new THREE.Matrix4(),q0=new THREE.Quaternion();
   for(const s in sides){const grp=new THREE.Group();const list=sides[s];const im=new THREE.InstancedMesh(outside?ICO:BOX,(outside?toon(shade(z.wall,15)):wallMat(z.wall)),list.length);
     list.forEach((p,i)=>{if(outside)m4.compose(new THREE.Vector3(p[0]+0.5,0.5,p[1]+0.5),q0,new THREE.Vector3(0.62,0.6+hash(p[0],p[1])*0.3,0.62));else m4.compose(new THREE.Vector3(p[0]+0.5,0.5,p[1]+0.5),q0,new THREE.Vector3(1,1,1));im.setMatrixAt(i,m4);});
     im.castShadow=true;im.receiveShadow=true;grp.add(im);
@@ -5370,6 +5370,22 @@ function travel25(id,pos,label){if(TRAV25.busy||!ZONES[id])return;if(id===zone.i
  const H=ZONES.hogsmeade;if(H){H.furn.push({x:Math.round(H.w*0.5)-3,y:Math.round(H.h*0.5)+2,w:1,h:1,k:'hsign25',n:'ป้ายหมู่บ้านฮอกส์มี้ด'});for(const fy of[-4,5])H.furn.push({x:Math.round(H.w*0.5)-6,y:Math.round(H.h*0.5)+fy,w:12,h:1,k:'festoon25',n:''});}})();
 
 (function(){const S=ZONES.grand_staircase;if(S)S.furn.push({x:0,y:S.h-1,w:S.w,h:1,k:'swell26',n:''});})();
+
+/* v27 W1: organic outdoor edges — closed sides become irregular belts of trees, bushes and rocks (varying depth, gaps, clusters),
+   plus wooded hills beyond the edge, so no outdoor area reads as a rectangle */
+(function(){const SKIP=['wooden_bridge','viaduct','stands_tower','bell_tower','hogsmeade_station','quidditch','express_carriage'];const h=(a,b)=>{let x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x);};
+ const sm=(i,s)=>{const a=Math.floor(i/5),f=i/5-a,u=f*f*(3-2*f);return h(a,s)*(1-u)+h(a+1,s)*u;};let n=0;window.__edge27={};
+ for(const id in ZONES){const z=ZONES[id];if(!(z.out||z.outdoorSky)||SKIP.includes(id)||z.w<18||z.h<14||z.underwater)continue;const OS=openOutdoorSides(z);const ds=(z.doors||[]);
+  const nearDoor=(side,p)=>ds.some(d=>d.side===side&&Math.abs(d.pos-p)<5);const occ=new Set();for(const f of z.furn){const fx=f.x!=null?f.x:f[0],fy=f.x!=null?f.y:f[1],fw=f.x!=null?f.w:f[2]||1,fh=f.x!=null?f.h:f[3]||1;for(let a=0;a<fw;a++)for(let b=0;b<fh;b++)occ.add((fx+a)+','+(fy+b));}
+  const W=(z.water||null);const inWater=(x,y)=>W&&x>=W[0]-1&&x<W[0]+W[2]+1&&y>=W[1]-1&&y<W[1]+W[3]+1;
+  const put=(x,y,k)=>{x=Math.round(x);y=Math.round(y);if(x<1||y<1||x>z.w-2||y>z.h-2||occ.has(x+','+y)||inWater(x,y))return;occ.add(x+','+y);z.furn.push({x,y,w:1,h:1,k,n:''});n++;};
+  const kinds=s=>{const r=h(s,9);return r<0.34?'pine':r<0.58?'oak':r<0.72?'birch':'bush';};const cx=z.w/2,cy=z.h/2,maxD=Math.max(2,Math.min(5,Math.floor(Math.min(z.w,z.h)*0.12)));
+  for(const side of ['N','S','W','E']){if(OS[side])continue;const L=side==='N'||side==='S'?z.w:z.h;const seed=id.length*7+side.charCodeAt(0);
+   for(let p=1;p<L-1;p++){if(nearDoor(side,p))continue;const d=1+Math.floor(sm(p,seed)*maxD);if(h(p,seed+3)<0.16)continue;
+    for(let k=0;k<d;k++){if(h(p*3+k,seed)<0.42)continue;const inw=1+k+(h(p,k+seed)<0.5?0:0.4);const x=side==='W'?inw:side==='E'?z.w-1-inw:p,y=side==='N'?inw:side==='S'?z.h-1-inw:p;
+     if(Math.hypot(x-cx,y-cy)<Math.min(z.w,z.h)*0.25)continue;put(x,y,k===d-1&&h(p,k)<0.5?'bush':kinds(p*5+k+seed));}}}
+  window.__edge27[id]=1;}
+ window.__edge27n=n;})();
 
 /* v26 A1: build every sky environment map while the loading screen is up, so changing time/area never compiles PMREM mid-play */
 try{const _t0=performance.now();for(const t of TIMES)envFor(true,t,TIME_LIGHT[t]);envFor(false,TIMES[0],TIME_LIGHT[TIMES[0]]);window.__envBoot=Math.round(performance.now()-_t0);}catch(e){console.warn('env26',e);}
