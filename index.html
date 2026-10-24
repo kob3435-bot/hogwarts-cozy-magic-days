@@ -910,7 +910,7 @@ function outdoorEdge(z,side){if(!z||!(z.out||z.outdoorSky))return null;for(const
 function openOutdoorSides(z){return{N:!!outdoorEdge(z,'N'),S:!!outdoorEdge(z,'S'),W:!!outdoorEdge(z,'W'),E:!!outdoorEdge(z,'E')};}
 
 // ---- procedural dressing: wall decor indoors, scatter + paths outdoors ----
-const NONSOLID_K=['swell26','festoon25','sbelow25','mfloor25','mrunner24','gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
+const NONSOLID_K=['plaza27','path27','swell26','festoon25','sbelow25','mfloor25','mrunner24','gportrait23','lshaft23','hbanner23','fcandle23','rail','stonestep','brickarch','steam','darktile','rug','stairs','torch','window','banner','portrait','sign','skeleton','clock','tapestry','flowers','tuft','path','platform','fruitpaint','mirror'];
 (function dress(){const R=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
  const conn=CONNS;for(const id in ZONES){const z=ZONES[id];const doors=[];for(const c of conn){if(c[0]===id)doors.push([c[1],c[2]]);if(c[3]===id)doors.push([c[4],c[5]]);}
   const occ=z.furn.map(f=>({x:f[0]-0.6,y:f[1]-0.6,w:f[2]+1.2,h:f[3]+1.2}));for(const s of(z.sits||[]))occ.push({x:s[0]-1.6,y:s[1]-1.6,w:3.2,h:3.2});
@@ -3220,6 +3220,13 @@ case'swell26':{const T26=(c,o)=>{const m=toon(c,o).clone();m.fog=false;return m;
  const P=['#3a5a8a','#7a3a3a','#3a6a4a','#6a4a7a','#8a6a3a'];for(const yy of[-2.2,-4.8])for(let x=-w/2+1.2,i=0;x<w/2;x+=2.4,i++){const c=P[(i+(yy<-3?2:0))%5];A(mesh(BOX,em,x,yy,D+0.8,1.1,1.3,0.06,false));A(mesh(BOX,T26(c,{emissive:c,ei:0.5}),x,yy,D+0.75,0.9,1.1,0.03,false));A(mesh(SPH,T26('#f0d0b0',{emissive:'#a08060',ei:0.4}),x,yy+0.1,D+0.73,0.16,0.2,0.03,false));}
  const cm=new THREE.MeshBasicMaterial({color:'#ffc870',fog:false});for(let i=0;i<Math.round(w*0.7);i++)A(mesh(CYL,cm,-w/2+hash(i,f.x+3)*w,-1.2-hash(i,11)*5.2,2+hash(i,13)*9,0.05,0.24,0.05,false));
  for(let x=-w/2+2;x<w/2;x+=5)A(mesh(SPH,new THREE.MeshBasicMaterial({color:'#ffb040',fog:false}),x,Y+2.2,D+0.5,0.16,0.24,0.16,false));break;}
+case'plaza27':{const r=w/2;const st=toon('#b9ab94'),st2=toon('#9c8e78'),gr=toon('#d8cbb2');A(mesh(CYL,st2,0,0.022,0,r,0.02,r,false));A(mesh(CYL,st,0,0.03,0,r-0.45,0.02,r-0.45,false));A(mesh(CYL,gr,0,0.038,0,r*0.35,0.02,r*0.35,false));
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;A(mesh(CYL,st2,Math.cos(a)*r*0.68,0.036,Math.sin(a)*r*0.68,0.5,0.02,0.5,false));}
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2+0.2;A(mesh(SPHL,toon(['#ff8ab0','#ffd36a','#9ad0ff','#c8a0f0'][i%4]),Math.cos(a)*(r-0.25),0.12,Math.sin(a)*(r-0.25),0.18));}break;}
+case'path27':{const P=f.pts||[];if(P.length){const im=new THREE.InstancedMesh(CYL,toon('#cdbf9f'),P.length);const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
+  P.forEach((p,i)=>{V.set(p[0]-0.5,0.03,p[1]-0.5);S.set(p[2],0.02,p[2]*(0.8+((i*37)%10)/25));Q.setFromAxisAngle(new THREE.Vector3(0,1,0),i*1.7);M4.compose(V,Q,S);im.setMatrixAt(i,M4);});im.receiveShadow=true;im.castShadow=false;A(im);}break;}
+case'mound27':{const s=1.4+((f.x*7+f.y*13)%10)/8,hh=0.45+((f.x*3+f.y*5)%10)/16;const c=weather==='snow'?'#e8f0f4':['#5f9a4a','#6aa852','#58904a'][(f.x+f.y)%3];A(mesh(SPH,toon(c),0,0,0,s,hh,s*0.85));A(mesh(SPHL,toon(weather==='snow'?'#f4f8fa':'#7cbc5c'),s*0.3,hh*0.7,0,s*0.45,hh*0.45,s*0.4));break;}
+case'corner27':{const r=1.5;const m=mesh(CYL,toon(f.wc),f.cx*0.5,1.3,f.cy*0.5,r,2.6,r);A(m);A(mesh(CYL,toon('#e8d8b0'),f.cx*0.5,2.62,f.cy*0.5,r+0.06,0.06,r+0.06,false));break;}
 case'tree':case'bigtree':{const s=f.k==='bigtree'?1.6:1.15;A(mesh(CYL,T('#5a3a24'),0,0.9*s,0,0.15*s,1.8*s,0.15*s));const col=weather==='snow'?['#e8f0f4','#d0dde4']:f.k==='bigtree'?['#1f4a2a','#2a5a32']:['#3f8a3a','#4f9a44'];
      A(outlined(mesh(ICO,T(col[0]),0,2.1*s,0,0.9*s),1.04));A(mesh(ICO,T(col[1]),0.4*s,2.6*s,0.2*s,0.6*s));A(mesh(ICO,T(col[1]),-0.45*s,2.3*s,-0.1*s,0.55*s));break;}
    case'treeline':{for(let i=0;i<d;i++){const s=1.1+hash(i,f.x)*0.5;A(mesh(CYL,T('#4a3020'),0,0.8*s,-d/2+i+0.5,0.13*s,1.6*s,0.13*s));A(mesh(ICO,T(i%2?'#1f4a2a':'#2a5a32'),0,2*s,-d/2+i+0.5,0.8*s));}break;}
@@ -5386,6 +5393,25 @@ function travel25(id,pos,label){if(TRAV25.busy||!ZONES[id])return;if(id===zone.i
      if(Math.hypot(x-cx,y-cy)<Math.min(z.w,z.h)*0.25)continue;put(x,y,k===d-1&&h(p,k)<0.5?'bush':kinds(p*5+k+seed));}}}
   window.__edge27[id]=1;}
  window.__edge27n=n;})();
+
+/* v27 W2: break the grid — round cobbled town plazas, curved stone paths from every gate to the centre,
+   rolling grassy mounds along wooded edges, and rounded corners in larger interiors */
+(function(){const h=(a,b)=>{let x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x);};let n=0;
+ const TOWN=['hogsmeade','diagon_alley','godrics_hollow','courtyard','little_hangleton','knockturn_alley','beauxbatons_lawn','burrow_garden','shell_cottage'];
+ for(const id in ZONES){const z=ZONES[id];if(!z||!z.furn||z.underwater)continue;const out=!!(z.out||z.outdoorSky);
+  const occ=new Set();for(const f of z.furn){const fx=f.x!=null?f.x:f[0],fy=f.x!=null?f.y:f[1],fw=f.x!=null?f.w:f[2]||1,fh=f.x!=null?f.h:f[3]||1;for(let a=0;a<fw;a++)for(let b=0;b<fh;b++)occ.add((fx+a)+','+(fy+b));}
+  const ds=z.doors||[];const W=z.water||null;const inWater=(x,y)=>W&&x>=W[0]-1&&x<W[0]+W[2]+1&&y>=W[1]-1&&y<W[1]+W[3]+1;
+  if(out&&window.__edge27&&window.__edge27[id]){const cx=z.w/2,cy=z.h/2;
+   if(TOWN.includes(id)){const r=Math.min(7,Math.max(3.5,Math.min(z.w,z.h)*0.11));z.furn.push({x:Math.round(cx-r),y:Math.round(cy-r),w:Math.round(r*2),h:Math.round(r*2),k:'plaza27',n:''});n++;}
+   const pts=[];for(const d of ds){const sx=d.side==='W'?1:d.side==='E'?z.w-2:d.pos,sy=d.side==='N'?1:d.side==='S'?z.h-2:d.pos;const L=Math.hypot(cx-sx,cy-sy);if(L<6)continue;
+    const nx=-(cy-sy)/L,ny=(cx-sx)/L,bend=(h(d.pos,id.length)-0.5)*L*0.5;const mx=(sx+cx)/2+nx*bend,my=(sy+cy)/2+ny*bend;const steps=Math.floor(L/1.1);
+    for(let i=0;i<=steps*0.85;i++){const t=i/steps,u=1-t;const x=u*u*sx+2*u*t*mx+t*t*cx,y=u*u*sy+2*u*t*my+t*t*cy;if(inWater(x,y))continue;pts.push([x+(h(i,1)-0.5)*0.35,y+(h(i,2)-0.5)*0.35,0.32+h(i,3)*0.18]);}}
+   if(pts.length){z.furn.push({x:0,y:0,w:1,h:1,k:'path27',pts,n:''});n++;}
+   const nearDoor=(x,y)=>ds.some(d=>{const dx=d.side==='W'?0:d.side==='E'?z.w-1:d.pos,dy=d.side==='N'?0:d.side==='S'?z.h-1:d.pos;return Math.hypot(dx-x,dy-y)<7;});
+   for(let p=3;p<z.w+z.h;p+=5){for(const side of['N','S','W','E']){const L=side==='N'||side==='S'?z.w:z.h;const q=Math.round(p*(L/(z.w+z.h))*1.0);if(q<3||q>L-4||h(q,side.charCodeAt(0))<0.45)continue;
+     const inw=2+Math.floor(h(q,7)*4);const x=side==='W'?inw:side==='E'?z.w-1-inw:q,y=side==='N'?inw:side==='S'?z.h-1-inw:q;if(occ.has(x+','+y)||inWater(x,y)||nearDoor(x,y))continue;occ.add(x+','+y);z.furn.push({x,y,w:1,h:1,k:'mound27',n:''});n++;}}}
+  if(!out&&z.w>=26&&z.h>=17){for(const [x,y] of[[1,1],[z.w-2,1],[1,z.h-2],[z.w-2,z.h-2]]){if(occ.has(x+','+y))continue;if(ds.some(d=>{const dx=d.side==='W'?0:d.side==='E'?z.w-1:d.pos,dy=d.side==='N'?0:d.side==='S'?z.h-1:d.pos;return Math.hypot(dx-x,dy-y)<5;}))continue;z.furn.push({x,y,w:1,h:1,k:'corner27',cx:x<z.w/2?-1:1,cy:y<z.h/2?-1:1,wc:z.wall||'#8a7a6a',n:''});n++;}}}
+ window.__w2n=n;})();
 
 /* v26 A1: build every sky environment map while the loading screen is up, so changing time/area never compiles PMREM mid-play */
 try{const _t0=performance.now();for(const t of TIMES)envFor(true,t,TIME_LIGHT[t]);envFor(false,TIMES[0],TIME_LIGHT[TIMES[0]]);window.__envBoot=Math.round(performance.now()-_t0);}catch(e){console.warn('env26',e);}
