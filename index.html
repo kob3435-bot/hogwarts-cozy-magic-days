@@ -5707,6 +5707,24 @@ window.__g28={cam:()=>cam,line(ids,dx){for(const m of (this._m||[]))scene.remove
    const tm=c.M('#'+br.getHexString(),{r:0.6,e:H.c1,ei:0.25});for(const s of[-1,1]){const b=hm(G_BOX,tm,s*0.062,-0.16,0.08,0.05,0.46,0.014);b.rotation.z=s*0.06;chest.add(b);}
    const cr=hm(G_BOX,c.M(H.c1,{r:0.5,e:H.c1,ei:0.3}),-0.1,-0.02,0.075,0.07,0.08,0.01);cr.rotation.y=0.3;chest.add(cr);chest.addR(hm(G_BOX,c.M(H.c2,{m:0.4,r:0.3,e:H.c2,ei:0.2}),-0.1,-0.02,0.08,0.035,0.04,0.006)).rotation.y=0.3;}catch(e){}};})();
 
+/* v29 M1: richer base materials (same meshes, same draw calls) — stone walls with per-block colour/bevel/cracks/moss,
+   wood floors with plank seams + grain + knots, stone floors with bevelled tiles, outdoor ground with grass tufts and warm/cool mottling */
+(function(){const R=(a,b)=>{let x=Math.sin(a*127.1+b*311.7)*43758.5453;return x-Math.floor(x);};
+ const _wm=wallMat;wallMat=function(col){const fresh=!WALLM[col];const m=_wm(col);try{if(fresh&&m&&m.map&&m.map.image&&m.map.image.getContext){const g=m.map.image.getContext('2d');let r=0;
+   for(let y=0;y<256;y+=32,r++)for(let x=-(r%2)*32;x<256;x+=64){const v=R(x+7,y+3);g.fillStyle=v<0.33?'rgba(255,220,170,.10)':v<0.66?'rgba(120,140,190,.10)':'rgba(0,0,0,.10)';g.fillRect(x+3,y+3,58,26);
+    g.fillStyle='rgba(255,250,235,.22)';g.fillRect(x+3,y+3,58,3);g.fillRect(x+3,y+3,3,26);g.fillStyle='rgba(0,0,0,.22)';g.fillRect(x+3,y+26,58,3);
+    if(R(x,y+11)<0.12){g.strokeStyle='rgba(0,0,0,.35)';g.lineWidth=1.2;g.beginPath();g.moveTo(x+10+R(x,1)*30,y+4);g.lineTo(x+20+R(x,2)*20,y+14);g.lineTo(x+14+R(x,3)*30,y+26);g.stroke();}
+    if(y>=192&&R(x,y+5)<0.35){for(let i=0;i<14;i++){g.fillStyle=`rgba(${70+R(i,x)*30},${110+R(i,y)*40},60,.35)`;g.beginPath();g.arc(x+4+R(i,x+y)*56,y+20+R(i,7)*10,2+R(i,9)*3,0,7);g.fill();}}}
+   m.map.needsUpdate=true;}}catch(e){}return m;};
+ const _ft=floorTex;floorTex=function(z){const fresh=!FLOOR_TEX[z.id];const t=_ft(z);try{if(fresh&&t&&t.image&&t.image.getContext){const c=t.image,g=c.getContext('2d'),W=c.width,H=c.height,P=W/z.w,out=!!(z.out||z.outdoorSky),k=z.floor;
+   if(k==='wood'){for(let y=0;y<z.h;y++){const off=(y%2)*P*1.5;g.fillStyle='rgba(40,20,8,.45)';g.fillRect(0,y*P+P-2,W,2);g.fillStyle='rgba(255,230,190,.12)';g.fillRect(0,y*P,W,1.5);for(let x=-off;x<W;x+=P*3){g.fillStyle='rgba(40,20,8,.4)';g.fillRect(x,y*P,2,P);const tint=R(x,y);g.fillStyle=tint<0.5?`rgba(255,200,140,${0.06+tint*0.1})`:`rgba(60,30,10,${0.04+(tint-0.5)*0.14})`;g.fillRect(x+2,y*P,P*3-2,P-2);}
+     for(let i=0;i<z.w*1.6;i++){g.strokeStyle=`rgba(${R(i,y)<0.5?'50,25,8':'255,225,180'},${0.07+R(i,y+3)*0.08})`;g.lineWidth=1;const x0=R(i,y+9)*W,yy=y*P+3+R(i,y+1)*(P-6);g.beginPath();g.moveTo(x0,yy);g.bezierCurveTo(x0+P,yy-2,x0+P*2,yy+2,x0+P*3,yy);g.stroke();}
+     if(R(y,5)<0.5){g.fillStyle='rgba(60,30,10,.35)';g.beginPath();g.ellipse(R(y,8)*W,y*P+P/2,3,2,0,0,7);g.fill();}}}
+   else if(!out){for(let y=0;y<z.h;y++)for(let x=0;x<z.w;x++){const v=R(x,y);g.fillStyle=v<0.5?`rgba(255,245,225,${v*0.16})`:`rgba(30,20,30,${(v-0.5)*0.16})`;g.fillRect(x*P+1,y*P+1,P-2,P-2);g.fillStyle='rgba(255,255,255,.14)';g.fillRect(x*P+1,y*P+1,P-2,1.5);g.fillStyle='rgba(0,0,0,.22)';g.fillRect(x*P,y*P+P-1.5,P,1.5);g.fillRect(x*P+P-1.5,y*P,1.5,P);}}
+   else if(/grass|forest/.test(k)){const n=Math.min(14000,z.w*z.h*1.2);for(let i=0;i<n;i++){const x=Math.random()*W,y=Math.random()*H,l=P*(0.18+Math.random()*0.22);g.strokeStyle=Math.random()<0.5?'rgba(190,230,110,.55)':'rgba(25,70,30,.5)';g.lineWidth=Math.max(1.5,P*0.08);g.beginPath();g.moveTo(x-l*0.3,y-l);g.lineTo(x,y);g.lineTo(x+l*0.3,y-l);g.stroke();}
+     for(let i=0;i<z.w*z.h/14;i++){const x=Math.random()*W,y=Math.random()*H,r=P*(1.5+Math.random()*3);const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,Math.random()<0.5?'rgba(255,230,120,.2)':'rgba(20,60,50,.22)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,2*r,2*r);}}
+   t.needsUpdate=true;}}catch(e){}return t;};})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
