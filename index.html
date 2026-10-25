@@ -1905,6 +1905,9 @@ function gradeTick(){const z=zone,t=TIMES[timeIdx];const key=z.id+t+weather+(SIM
  if(/forest|aragog|maze/.test(z.id)){tint=[tint[0]*0.95,tint[1]*1.04,tint[2]*0.96];vig+=0.06;}
  if(/chamber|slytherin|merpeople|underwater/.test(z.id)||z.underwater){tint=[tint[0]*0.9,tint[1]*1.04,tint[2]*1.04];}
  if(/knockturn|borgin|malfoy|forbidden_corridor/.test(z.id)){sat=0.92;tint=[tint[0]*0.95,tint[1]*0.95,tint[2]*1.03];vig+=0.08;}
+ if(/great_hall|three_broomsticks|leaky|burrow_house|gryffindor_common|hufflepuff|kitchens|hogsmeade|godrics|yule/.test(z.id)){tint=[tint[0]*1.03,tint[1]*1.0,tint[2]*0.96];sat*=1.03;}
+ if(/library|divination|headmaster|ollivanders|flourish/.test(z.id)){tint=[tint[0]*1.04,tint[1]*1.0,tint[2]*0.93];vig+=0.04;}
+ if(/lake|shore|boat|triwizard_lake|shell_cottage|durmstrang/.test(z.id)){tint=[tint[0]*0.97,tint[1]*1.01,tint[2]*1.04];sat*=1.04;}
  if(weather==='rain'||weather==='fog'){sat-=0.1;con-=0.03;}if(weather==='aurora'&&out){tint=[tint[0]*0.95,tint[1]*1.05,tint[2]*1.05];}
  sat*=1.05;con+=0.02;if(out&&TIMES[timeIdx]==='sunset'){tint=[tint[0]*1.04,tint[1]*1.0,tint[2]*0.95];vig+=0.02;}
  RIMC.value.set(rim);if(!GRADE)return;const U=GRADE.uniforms;U.uTint.value.setRGB(...tint);U.uLift.value.setRGB(...lift);U.uSat.value=sat;U.uCon.value=con;U.uVig.value=vig;
@@ -5681,6 +5684,7 @@ window.__g28={cam:()=>cam,line(ids,dx){for(const m of (this._m||[]))scene.remove
  const _qa=qAccessories;qAccessories=function(c){_qa(c);try{const {stu,lite,ghost,chest,H}=c;if(!stu||ghost)return;const tm=c.M(H.c1,{r:0.7});const t2=c.M(H.c2,{r:0.5,m:0.3});
    for(const s of[-1,1]){const b=hm(G_BOX,tm,s*0.07,-0.16,0.075,0.04,0.44,0.012);b.rotation.z=s*0.06;chest.add(b);if(!lite){const e=hm(G_BOX,t2,s*0.088,-0.16,0.078,0.006,0.42,0.012);e.rotation.z=s*0.06;chest.add(e);}}}catch(e){}};})();
 
+(function(){if(composer)return;const d=document.createElement('div');d.id='vig29';d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 52%,rgba(0,0,0,0) 58%,rgba(20,10,30,.28) 100%)';document.body.appendChild(d);})();
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
