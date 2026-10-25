@@ -3014,7 +3014,7 @@ function buildZone3D(){clearWorld();const z=zone,t=TIMES[timeIdx],TL=TIME_LIGHT[
   waterMat=null;boatMesh=null;
   if(z.waterR){const w=z.waterR;waterMat=waterShader(w,t);
     const wm=new THREE.Mesh(new THREE.PlaneGeometry(w.w,w.h,40,24),waterMat);wm.userData.own=1;wm.rotation.x=-Math.PI/2;wm.position.set(w.x+w.w/2,0.03,w.y+w.h/2);world.add(wm);
-    const d=z.dock;box(world,d[2],0.12,d[3]+0.4,'#7a5a3a',d[0]+d[2]/2,0.02,d[1]+d[3]/2+0.2);
+    const d=z.dock;{const pw=Math.min(d[2],2.4),cx=d[0]+1,L=d[3]+1.6,z0=d[1]-0.2;const pm=toon('#9a6a3e'),pm2=toon('#835a34'),po=toon('#5a3a22');for(let i=0,y=z0;y<z0+L;i++,y+=0.42)world.add(mesh(BOX,i%2?pm:pm2,cx,0.14,y+0.19,pw,0.08,0.36));for(const sx of[-1,1])for(let y=z0+0.3;y<z0+L;y+=1.4)world.add(mesh(CYL,po,cx+sx*(pw/2-0.08),0.05,y,0.09,0.5,0.09));for(const sx of[-1,1])world.add(mesh(BOX,po,cx+sx*(pw/2-0.04),0.2,z0+L/2,0.07,0.06,L));}
     boatMesh=new THREE.Group();boatMesh.add(outlined(mesh(geo('hull',()=>new THREE.SphereGeometry(1,16,8,0,Math.PI*2,Math.PI/2,Math.PI/2)),toon('#6a4426'),0,0.22,0,0.45,0.25,0.85),1.04));boatMesh.add(mesh(BOX,toon('#8a5a32'),0,0.2,0,0.8,0.04,0.2));boatMesh.add(mesh(SPHL,basic('#ffd77a'),0,0.75,0.7,0.06));boatMesh.add(mesh(CYL,toon('#5a3a20'),0,0.5,0.7,0.015,0.5,0.015));world.add(boatMesh);}
   candleInst=flameInst=null;const showC=z.candles||(!outside&&t==='night');
   if(showC){const n=z.candles?70:22;candleInst=new THREE.InstancedMesh(CYL,toon('#f6efe0',{emissive:'#6a5030',ei:0.4}),n);flameInst=new THREE.InstancedMesh(SPHL,basic('#ffcf5a'),n);candleInst.userData.ph=[];for(let i=0;i<n;i++)candleInst.userData.ph.push([1.5+hash(i,3)*(z.w-3),1.5+hash(i,7)*(z.h-3),hash(i,11)*6]);world.add(candleInst,flameInst);
