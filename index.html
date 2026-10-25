@@ -2626,7 +2626,7 @@ function qHolder(bone,ptModel,rotZ,scale,wq){const h=new THREE.Group();bone.add(
   bone.updateWorldMatrix(true,false);h.position.copy(bone.worldToLocal(ptModel.clone()));if(scale)h.scale.setScalar(scale);return h;}
 /* ===================== v9 ANIME STYLE: toon ramp, rim light, inverted-hull outlines, anime heads/hair ===================== */
 const TOON_RAMP=(()=>{const d=new Uint8Array([164,152,192,255, 176,166,204,255, 232,226,240,255, 252,248,248,255, 255,255,255,255, 255,255,255,255]);const t=new THREE.DataTexture(d,6,1,THREE.RGBAFormat);t.minFilter=t.magFilter=THREE.LinearFilter;t.generateMipmaps=false;t.needsUpdate=true;return t;})();
-const RIMU={value:0.55};const RIMC={value:new THREE.Color('#fff2e0')};
+const RIMU={value:0.72};const RIMC={value:new THREE.Color('#fff2e0')};
 function rimify(m){const ob=m.onBeforeCompile;m.onBeforeCompile=function(sh,r){if(ob)ob.call(this,sh,r);sh.uniforms.uRim=RIMU;sh.uniforms.uRimC=RIMC;sh.fragmentShader='uniform float uRim;uniform vec3 uRimC;\n'+sh.fragmentShader.replace('#include <opaque_fragment>','{vec3 vd=isOrthographic?vec3(0.0,0.0,1.0):normalize(vViewPosition);float rr=1.0-clamp(dot(normal,vd),0.0,1.0);outgoingLight+=mix(diffuseColor.rgb,uRimC,0.55)*uRim*smoothstep(0.6,0.92,rr);}\n#include <opaque_fragment>');};
   const ck=m.customProgramCacheKey?m.customProgramCacheKey.bind(m):()=>'';m.customProgramCacheKey=()=>ck()+'|rim';return m;}
 const TOONC=new Map();
@@ -2774,7 +2774,7 @@ function buildElfAnime(L,house,opt){opt=opt||{};const lite=!!opt.lite;const id=L
 const MAIN28=/^(harry|ron|hermione|ginny|draco|neville|fred|george|hagrid|dumbledore|mcgonagall|snape|luna|cho|cedric)$/;
 function buildHuman(L,house,opt){opt=opt||{};if(L.elf)return buildElfAnime(L,house,opt);if(!QOK)return buildHumanV7(L,house,opt);const lite=!!opt.lite;const id=L.id||'';const H=HOUSES[house||'N']||HOUSES.N;const stu=!!(house&&house!=='N'&&!L.robe);
   const fem=isFem(L);const base=(fem?'f':'m')+((lite||Q===QUALS.low)&&!opt.hi?'_lo':'');const I=qInfo(base);const ghost=!!L.ghost;
-  const M=(c,o)=>pbr(c,Object.assign({ghost},o||{}));const skinC=L.skin||SK.l,hairC=L.hair||'#3a2a1a',robeC=L.robe||(stu?'#'+new THREE.Color(H.c1).lerp(new THREE.Color('#15141c'),0.5).getHexString():'#4c4470');
+  const M=(c,o)=>pbr(c,Object.assign({ghost},o||{}));const skinC=L.skin||SK.l,hairC=L.hair||'#3a2a1a',robeC=L.robe||(stu?'#1e1c24':'#4c4470');
   const root=new THREE.Group(),rig=new THREE.Group();root.add(rig);const sc=SkeletonUtils.clone(QB[base].scene);rig.add(sc);sc.updateMatrixWorld(true);
   const bones={};sc.traverse(o=>{if(o.isBone)bones[o.name]=o;});const body=qBody(sc);
   const ghostify=m=>{m.transparent=true;m.opacity=0.5;m.depthWrite=false;m.emissive=new THREE.Color('#8fa8ff');m.emissiveIntensity=0.45;return m;};
@@ -5673,6 +5673,13 @@ window.__g28={cam:()=>cam,line(ids,dx){for(const m of (this._m||[]))scene.remove
  navGoal=function(){try{const t=NAV.t;if(t&&t.npc){const n=t.npc,now=performance.now();n.dwell=Math.max(n.dwell||0,60);if(n.zone!==NAV.lz28){NAV.zc28=(NAV.zc28||0)+1;NAV.lz28=n.zone;}
    const el=now-(NAV.t0||now);if(el>200000){navCancel('ตามไม่ทันแล้ว ลองวาร์ปดูนะ ✨');return null;}
    if(zone.id!==n.zone&&!NAV.w28&&(el>50000||NAV.zc28>=2)&&typeof travel25==='function'){NAV.w28=1;travel25(n.zone,{x:n.x+1.1,y:n.y+0.3});}}}catch(e){}return _ng();};})();
+
+/* v29 C2: film-style black robes with house-coloured trim; bigger iconic hair silhouettes for main characters */
+(function(){const _ah=animeHair;
+ const HK={hermione:1.28,harry:1.14,luna:1.12,ginny:1.1,ron:1.06,draco:1.04,neville:1.06,fred:1.08,george:1.08};
+ animeHair=function(hd,L,hairC,fem,M){const n0=hd.children.length;const r=_ah(hd,L,hairC,fem,M);try{const k=L.hs==='luna'?1.12:(HK[L.id]||(L.hs==='bushy'?1.2:1));if(k!==1){const C=new THREE.Vector3(0,0.11,-0.01);for(let i=n0;i<hd.children.length;i++){const o=hd.children[i];o.position.sub(C).multiplyScalar(k).add(C);o.scale.multiplyScalar(k);}}}catch(e){}return r;};
+ const _qa=qAccessories;qAccessories=function(c){_qa(c);try{const {stu,lite,ghost,chest,H}=c;if(!stu||ghost)return;const tm=c.M(H.c1,{r:0.7});const t2=c.M(H.c2,{r:0.5,m:0.3});
+   for(const s of[-1,1]){const b=hm(G_BOX,tm,s*0.07,-0.16,0.075,0.04,0.44,0.012);b.rotation.z=s*0.06;chest.add(b);if(!lite){const e=hm(G_BOX,t2,s*0.088,-0.16,0.078,0.006,0.42,0.012);e.rotation.z=s*0.06;chest.add(e);}}}catch(e){}};})();
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
