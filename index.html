@@ -4098,7 +4098,7 @@ function openDialogue(n){const c=n.c;openModal('dlg');n.dir={x:player.x-n.x,y:pl
   friend[c.id]=(friend[c.id]||0)+1;persist();
   const head=()=>{$('dlgName').textContent=c.th+'  ·  '+c.en+(c.creature?'  (สัตว์วิเศษ/สัตว์เลี้ยง)':'  ('+HOUSES[c.house].th+')');$('dlgHearts').textContent=heartStr(c.id)+'  ความสนิท';};
   const hearts3=()=>{for(let i=0;i<10;i++)spawnP('heart',n.x+rnd(-.4,.4),n.y-0.9,rnd(-.4,.4),-rnd(.4,1),1.4,4,'#ff8ab8');};
-  head();drawPortrait(c.look,c.house,'smile');typeText(Math.random()<0.35?ctxLine(n):pickLine(n));
+  head();drawPortrait(c.look,c.house,'smile');{const r30=Math.random()<0.4?react30(n):null;typeText(r30||(Math.random()<0.35?ctxLine(n):pickLine(n)));}
   const opts=[['💬 คุยต่อ',()=>{li++;drawPortrait(c.look,c.house,li%2?'happy':'smile');typeText(pickLine(n));}],
     ['🌙 คุยสามคนกับลูน่า',()=>{drawPortrait(c.look,c.house,'happy');typeText(c.th+': "'+c.luna3[0]+'"\nลูน่า: "'+c.luna3[1]+'"');}]];
   for(const ex of c.extra)opts.push([ex[0],()=>{drawPortrait(ex[2]||c.look,c.house,'happy');typeText(ex[1]);friend[c.id]=(friend[c.id]||0)+1;persist();head();if(ex[0].includes('📸'))for(let i=0;i<20;i++)spawnP('spark',player.x+rnd(-1.5,1.5),player.y-0.8+rnd(-1,1),0,0,0.5,5,'#ffffff');}]);
@@ -4777,7 +4777,7 @@ function v17DlgOpts(n){const c=n.c;ev('talk',c.id);V.talked=V.talked||[];if(!V.t
 hudV();applyVol();
 setTimeout(()=>{if(Audio.master)applyVol();},3000);
 window.__v17={V,openHub,openJournal,openSorting,openShop,openOllivander,openMalkin,openQuests,openCup,openCalendar,openPhoto,closePhoto,savePhoto,toggleBroom,land,gPotions,gCharms,gHerb,gCreatures,gAstro,gFish,gGob,gPatronus,playLunaEvent,LUNA_EV,nextDay,giftMenu,openLunaHub,openSettings,P:V17P,NARG,saveV,closeV,useItem,openInv,cupAward,deliverPost,queueLetter,get rings(){return V17P.rings;},castleG:()=>castleG,festG:()=>festG,setDay(d){SIM.day=d;},wmOverlaps,reachSeat,get zone(){return zone.id;}};
-function v17LunaOpts(){ev('luna');if(V.lunaTalkDay!==SIM.day){V.lunaTalkDay=SIM.day;V.lunaH=(V.lunaH||0)+1;saveV();}const o=[['🎁 ให้ของขวัญ',()=>{closeModal();giftMenu('luna','ลูน่า',()=>{lunaBubble('โอ้ ขอบใจนะ! นี่จะช่วยไล่ร็อกสเปิร์ตได้แน่ๆ');checkLunaEv();});}],['💙 ความสนิท & เหตุการณ์',()=>{closeModal();openLunaHub();}]];return o;}
+function v17LunaOpts(){ev('luna');if(V.lunaTalkDay!==SIM.day){V.lunaTalkDay=SIM.day;V.lunaH=(V.lunaH||0)+1;saveV();try{luna30();}catch(e){}}const o=[['🎁 ให้ของขวัญ',()=>{closeModal();giftMenu('luna','ลูน่า',()=>{lunaBubble('โอ้ ขอบใจนะ! นี่จะช่วยไล่ร็อกสเปิร์ตได้แน่ๆ');checkLunaEv();});}],['💙 ความสนิท & เหตุการณ์',()=>{closeModal();openLunaHub();}]];return o;}
 
 
 /* ===================== v18: smoothness ===================== */
@@ -5863,6 +5863,18 @@ function story30Target(s){const g=s&&s[3];if(!g)return null;if(g.luna){return nu
  /* A8 flicker */
  const FL={L:[],z:null,t:0};setInterval(()=>{if(zone!==FL.z||timeIdx!==FL.ti){FL.z=zone;FL.ti=timeIdx;for(const o of FL.L)if(o.userData.b30!=null)o.intensity=o.userData.b30;FL.L=[];setTimeout(()=>{scene.traverse(o=>{if(o.isPointLight&&o.color.r>o.color.b*1.15){o.userData.b30=o.intensity;o.userData.p30=Math.random()*10;FL.L.push(o);}});},2500);}},1000);
  const ft=()=>{requestAnimationFrame(ft);if(V.rm||!FL.L.length)return;FL.t+=0.016;for(const o of FL.L){if(o.userData.b30==null)continue;const p=o.userData.p30,t=FL.t;o.intensity=o.userData.b30*(0.88+0.07*Math.sin(t*7.3+p)+0.05*Math.sin(t*13.1+p*2));}};requestAnimationFrame(ft);})();
+
+/* v30 A7: NPC lines react to player progress; Luna friendship milestones */
+function react30(n){const c=n.c;if(c.creature)return null;const L=[];const hn=HTH[player.house];
+ if(c.house===player.house)L.push('เพื่อนร่วมบ้าน'+hn+'! วันนี้เราต้องเก็บแต้มให้บ้านเยอะๆ นะ','ดีใจที่เจอคนบ้านเดียวกัน '+player.name+' 💛');
+ else if(c.house&&c.house!=='N'&&HTH[c.house])L.push('บ้าน'+hn+'เหรอ? ปีนี้ถ้วยบ้านเป็นของ'+HTH[c.house]+'แน่!','ถึงจะต่างบ้าน แต่เราเป็นเพื่อนกันได้นะ');
+ const h=(V.hid30||[]).length;if(h>=3)L.push('ได้ยินว่าเธอเจอเหรียญลับไปแล้ว '+h+' เหรียญ! ตาไวจริงๆ');
+ if((V.ch30||0)>=1)L.push('เรื่องที่เธอสำรวจปราสาทมันเลื่องลือไปทั่วแล้วนะ');if((V.ch30||0)>=3)L.push('ห้องต้องประสงค์... เธอรู้จริงๆ เหรอว่ามันอยู่ไหน? 😮');
+ if((V.cards||[]).length>=5)L.push('การ์ดกบของเธอเยอะมาก! มีใบที่ซ้ำไหม แลกกันได้นะ');
+ if(TIMES[timeIdx]==='night')L.push('ดึกแล้ว ระวังฟิลช์จับได้นะ 🤫');if(weather==='rain')L.push('ฝนตกแบบนี้ น่านั่งจิบโกโก้ข้างเตาผิงจัง ☔');if(weather==='snow')L.push('หิมะแรก! ไปปาหิมะกันไหม ⛄');
+ if((friend[c.id]||0)>=10)L.push('เธอแวะมาคุยกับฉันบ่อยมาก ดีใจจริงๆ ที่มีเพื่อนแบบเธอ 💕');
+ return L.length?L[Math.floor(Math.random()*L.length)]:null;}
+function luna30(){const h=V.lunaH||0;const M={3:['🌙 ลูน่าให้สร้อยจุกขวดบัตเตอร์เบียร์',15],7:['🦋 ลูน่าให้แว่นสเปกเทรสเปกส์',25],14:['💙 ลูน่า: "เธอคือเพื่อนสนิทที่สุดของฉัน"',40],30:['✨ ลูน่าวาดภาพเธอไว้บนเพดานห้อง',80]};V.lunaM=V.lunaM||[];if(M[h]&&!V.lunaM.includes(h)){V.lunaM.push(h);saveV();setTimeout(()=>{toast(M[h][0]);addGal(M[h][1],'มิตรภาพกับลูน่า '+h+' วัน');try{burst('#9ad0ff',30);}catch(e){}},600);}}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
