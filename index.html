@@ -5878,7 +5878,7 @@ function luna30(){const h=V.lunaH||0;const M={3:['🌙 ลูน่าให้�
 
 /* v30 A8: wind sway for scatter foliage (one cloned material per kind, vertex-shader only) */
 const SWAY30={u:{value:0},c:new Map()};(function t(){requestAnimationFrame(t);if(!(typeof V!=='undefined'&&V.rm))SWAY30.u.value=performance.now()/1000;})();
-function sway30(k,m){if(!/^(canopy|pine|bleaf|bush|bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return m;let c=SWAY30.c.get(m);if(c)return c;c=m.clone();const amp=/^(tuft|bloom)/.test(k)?0.06:/^wdrop/.test(k)?0.08:0.035;
+function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return m;let c=SWAY30.c.get(m);if(c)return c;c=m.clone();const amp=/^(tuft|bloom)/.test(k)?0.06:/^wdrop/.test(k)?0.08:0.035;
  const ua={value:amp};c.onBeforeCompile=sh=>{sh.uniforms.uWind30=SWAY30.u;sh.uniforms.uAmp30=ua;sh.vertexShader='uniform float uWind30;uniform float uAmp30;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n#ifdef USE_INSTANCING\n{float ph=instanceMatrix[3].x*0.7+instanceMatrix[3].z*0.53;float w=sin(uWind30*1.7+ph)*0.7+sin(uWind30*3.1+ph*1.7)*0.3;float hgt=clamp(position.y+0.6,0.0,2.0);transformed.x+=w*uAmp30*hgt;transformed.z+=w*uAmp30*0.6*hgt;}\n#endif');};
  c.customProgramCacheKey=()=>'sway30';SWAY30.c.set(m,c);return c;}
 
