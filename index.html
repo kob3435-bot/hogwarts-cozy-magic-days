@@ -5827,6 +5827,18 @@ function story30Target(s){const g=s&&s[3];if(!g)return null;if(g.luna){return nu
   g.fillStyle='#ff4a6a';g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.arc(ox+player.x*sc,oy+player.y*sc,4,0,7);g.fill();g.stroke();
   g.fillStyle='#ffe9b0';g.font='bold 11px sans-serif';g.fillText((zone.th||'').slice(0,18),8,163);}catch(e){}},300);})();
 
+/* v30 A5: house-colour floor rings under students + player (1 instanced draw call); colour-blind mode adds house symbol sprites */
+(function(){const MAX=64;const geo=new THREE.RingGeometry(0.34,0.46,28);geo.rotateX(-Math.PI/2);const mat=new THREE.MeshBasicMaterial({transparent:true,opacity:0.72,depthWrite:false});
+ const im=new THREE.InstancedMesh(geo,mat,MAX);im.frustumCulled=false;im.renderOrder=2;im.count=0;scene.add(im);const M=new THREE.Matrix4(),C=new THREE.Color();const HC={G:'#e0303a',S:'#2fbf5a',R:'#3a7aff',H:'#ffd23a'};
+ const SYM={G:'🦁',S:'🐍',R:'🦅',H:'🦡'},sp={};const symTex=h=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.fillStyle=HC[h];g.beginPath();g.arc(32,32,30,0,7);g.fill();g.font='38px serif';g.textAlign='center';g.textBaseline='middle';g.fillText(SYM[h],32,35);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.SpriteMaterial({map:t,depthWrite:false});};const SM={};
+ const used=new Set();
+ const tick=()=>{requestAnimationFrame(tick);try{let n=0;used.clear();const add=(m,h,id)=>{if(!m||!m.parent||!m.visible||!HC[h]||n>=MAX)return;M.makeTranslation(m.position.x,m.position.y+0.07,m.position.z);im.setMatrixAt(n,M);C.set(HC[h]);im.setColorAt(n,C);n++;
+   if(V.cb){used.add(id);let s=sp[id];if(!s){s=new THREE.Sprite(SM[h]||(SM[h]=symTex(h)));s.scale.set(0.32,0.32,1);sp[id]=s;}if(s.parent!==scene)scene.add(s);s.position.set(m.position.x,(m.userData.h||1.6)+0.55,m.position.z);}};
+  if(typeof playerModel!=='undefined')add(playerModel,player.house,'__p');
+  for(const id in npcModels){const m=npcModels[id];const nn=m.userData.npc||NPCS.find(q=>q.c.id===id);const c=nn&&nn.c;if(c&&!c.creature&&!(m.userData.parts&&m.userData.parts.adult)&&c.house&&c.house!=='N'&&!(typeof isGhost==='function'&&isGhost(c)))add(m,c.house,id);}
+  for(const id in sp)if(!used.has(id)&&sp[id].parent)sp[id].parent.remove(sp[id]);
+  im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;}catch(e){}};requestAnimationFrame(tick);})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
