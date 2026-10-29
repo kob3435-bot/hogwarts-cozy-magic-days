@@ -4443,7 +4443,7 @@ var openShopInv=openInv;
 /* ---------- Shops ---------- */
 const SHOPS={honeydukes:{ic:'🍭',th:'ร้านขนมฮันนี่ดุกส์',greet:'ขนมหวานทุกรสชาติ รวมถึงรสที่เธอไม่อยากรู้!'},weasleys_wheezes:{ic:'🎆',th:'ร้านเกมกลวิเศษวีสลีย์',greet:'ของเล่นสุดป่วนจากฝาแฝด! (ไม่รับคืนเงิน)'},hogsmeade:{ic:'💐',th:'แผงของฝากฮอกส์มี้ด',greet:'ดอกไม้กับของจุกจิกน่ารัก'},flourish_blotts:{ic:'📚',th:'ร้านหนังสือฟลอริชแอนด์บล็อตส์',greet:'หนังสือดีๆ ทุกชั้นวาง'},eeylops:{ic:'🦉',th:'ร้านนกฮูกและสัตว์เลี้ยงอีล็อปส์',greet:'อาหารสัตว์ และเพื่อนสี่ขาสองปีก'}};
 function price(k){const f=festToday();return Math.max(1,Math.round(ITEMS[k].p*(f&&f.id==='hogsmeade'?0.7:1)));}
-function openShop(sid){const S=SHOPS[sid];openV(S.ic+' '+S.th,B=>{B.append(h17('p',{},'<i>"'+S.greet+'"</i> · 🪙 '+V.gal+(festToday()&&festToday().id==='hogsmeade'?' · <b>ลด 30% วันหยุดฮอกส์มี้ด!</b>':'')));const g=h17('div',{className:'grid'});
+function openShop(sid){const S=SHOPS[sid]||SHOPS[Object.keys(SHOPS)[0]];openV(S.ic+' '+S.th,B=>{B.append(h17('p',{},'<i>"'+S.greet+'"</i> · 🪙 '+V.gal+(festToday()&&festToday().id==='hogsmeade'?' · <b>ลด 30% วันหยุดฮอกส์มี้ด!</b>':'')));const g=h17('div',{className:'grid'});
  for(const k in ITEMS){const it=ITEMS[k];if(it.shop!==sid)continue;const p=price(k);g.append(h17('div',{className:'tile',on:{click:()=>{if(V.gal<p){toast('เกลเลียนไม่พอ 😢');return;}addGal(-p);addInv(k,1);Audio.sfx('chime');toast('ซื้อ '+it.ic+' '+it.th+' แล้ว!');ev('buy',k);openShop(sid);}}},'<b>'+it.ic+'</b>'+it.th+'<br>🪙 '+p+'<br><small>'+it.d+'</small>'+(V.inv[k]?'<br>มีแล้ว ×'+V.inv[k]:'')));}
  if(sid==='eeylops'){for(const [pk,ic,th,pp] of PETS)g.append(h17('div',{className:'tile',on:{click:()=>{if(V.pet===pk){V.pet=null;saveV();toast('ให้'+th+'พักที่ร้าน');openShop(sid);return;}if(!(V.ownPets||[]).includes(pk)){if(V.gal<pp)return toast('เกลเลียนไม่พอ 😢');addGal(-pp);V.ownPets=(V.ownPets||[]).concat(pk);}V.pet=pk;saveV();toast(ic+' '+th+' จะเดินตามเธอแล้ว!');Audio.sfx('hoot');openShop(sid);}}},'<b>'+ic+'</b>สัตว์เลี้ยง: '+th+'<br>'+((V.ownPets||[]).includes(pk)?(V.pet===pk?'✅ กำลังตาม (แตะเพื่อพัก)':'แตะเพื่อพาไปด้วย'):'🪙 '+pp)));}
  B.append(g);});}
@@ -5465,7 +5465,7 @@ var F26=(function(){if(!V.f26)V.f26={duelW:0,duelP:0,snitch:0,found:0,tricks:0,l
  const save=()=>{try{saveV();}catch(e){}};
  /* ---------- chips (daily gift / letters) ---------- */
  function chips(){chip.innerHTML='';let n=0;if(F.lastGift!==today()){n++;chip.append(btn('🎁 ของขวัญรายวัน',()=>openGift()));}
-  const a=achList().filter(x=>x.ok&&!F.ach[x.k]).length;if(a){n++;chip.append(btn('🏅 ความสำเร็จใหม่ '+a,()=>openAch()));}chip.style.display=n?'flex':'none';}
+  const a=achList().filter(x=>x.ok&&!F.ach[x.k]).length;if(a){n++;chip.append(btn('🏅 ความสำเร็จใหม่ '+a,()=>openAch()));}if(window.__ev30&&__ev30.btn){chip.append(__ev30.btn);n++;}chip.style.display=n?'flex':'none';}
  /* ---------- daily gift streak ---------- */
  const GIFTS=[['🪙',10,'10 เกลเลียน'],['🐸',1,'ช็อกโกแลตกบ 1 ชิ้น'],['🪙',20,'20 เกลเลียน'],['🍭',1,'กล่องขนมหนีเรียน'],['🪙',30,'30 เกลเลียน'],['🎆',1,'ดอกไม้ไฟมังกร'],['🌟',60,'60 เกลเลียน + 🐸×2']];
  function openGift(){if(uiOpen&&uiOpen!=='v17M')closeModal();const can=F.lastGift!==today();const nx=can?(F.lastGift===yest()?(F.streak%7)+1:1):F.streak;
@@ -5838,6 +5838,31 @@ function story30Target(s){const g=s&&s[3];if(!g)return null;if(g.luna){return nu
   for(const id in npcModels){const m=npcModels[id];const nn=m.userData.npc||NPCS.find(q=>q.c.id===id);const c=nn&&nn.c;if(c&&!c.creature&&!(m.userData.parts&&m.userData.parts.adult)&&c.house&&c.house!=='N'&&!(typeof isGhost==='function'&&isGhost(c)))add(m,c.house,id);}
   for(const id in sp)if(!used.has(id)&&sp[id].parent)sp[id].parent.remove(sp[id]);
   im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;}catch(e){}};requestAnimationFrame(tick);})();
+
+/* v30 A6 onboarding tips, A7 random encounters, A8 candle/torch flicker */
+(function(){const st=document.createElement('style');st.textContent='#tip30{position:fixed;left:50%;top:calc(92px + env(safe-area-inset-top));transform:translateX(-50%);z-index:8;max-width:min(88vw,460px);background:linear-gradient(180deg,#fff6dc,#f2dfb0);color:#3a2410;border:2px solid #c8962a;border-radius:16px;padding:10px 14px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.35);display:none}#tip30 .r{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}#tip30 button{border:0;border-radius:10px;padding:5px 12px;background:#6a3a8a;color:#ffe9b0;font-size:13px;min-height:34px}#tip30 button.s{background:#a89070}body.menu29 #tip30{display:none!important}body.rotated #tip30{top:auto;bottom:40%}';document.head.appendChild(st);
+ const el=document.createElement('div');el.id='tip30';document.body.appendChild(el);
+ const T=()=>{const tch=document.body.classList.contains('touch');return [
+  '👋 ยินดีต้อนรับสู่ฮอกวอตส์! '+(tch?'ใช้จอยสติ๊กซ้ายล่างเพื่อเดิน':'เดินด้วย WASD / ลูกศร หรือคลิกที่พื้น')+' · Welcome! '+(tch?'Use the joystick to walk.':'Move with WASD or click the floor.'),
+  '💬 แตะ/คลิกที่ตัวละครเพื่อคุย ให้ของขวัญ หรือท้าดวลเวทแบบเป็นมิตร · Tap a character to talk.',
+  '📖 ป้ายเป้าหมายด้านล่างบอกเนื้อเรื่องตอนนี้ — แตะแล้วเดินไปให้อัตโนมัติ · Tap the objective to auto-walk.',
+  '✨ ทุกสถานที่มีเหรียญลับซ่อนอยู่ 1 เหรียญ และปุ่ม 🎒 เมนูมีกิจกรรมอีกเพียบ · Every place hides a coin; the 🎒 menu has more.'];};
+ let i=0;const show=()=>{const L=T();if(i>=L.length){el.style.display='none';V.tut30=1;saveV();return;}el.innerHTML='<div>'+L[i]+'</div><div class="r"><button class="s">ข้าม / Skip</button><button>ถัดไป ('+(i+1)+'/'+L.length+')</button></div>';el.style.display='block';const b=el.querySelectorAll('button');b[0].onclick=()=>{i=99;show();};b[1].onclick=()=>{i++;show();};};
+ const start=()=>{try{if(V.tut30)return;if(uiOpen||document.getElementById('startScr')&&getComputedStyle(document.getElementById('startScr')).display!=='none'){setTimeout(start,2000);return;}show();}catch(e){setTimeout(start,2000);}};setTimeout(start,4000);window.__tip30={reset(){V.tut30=0;i=0;show();}};
+ /* A7 random encounters */
+ const EV=[
+  ['🦉','นกฮูกหลงทางเกาะอยู่ใกล้ๆ ถือจดหมายมาด้วย','A lost owl lands nearby with a letter',[['ส่งจดหมายให้ถึงมือ / Deliver it',()=>{addGal(12,'นกฮูกหลงทาง');addHP(3,'ช่วยนกฮูก');}],['ให้ขนมนกฮูก / Feed it',()=>{addGal(4);toast('🦉 ฮู้ฮู! นกฮูกดูมีความสุข');}]]],
+  ['👻','พีฟส์โยนลูกโป่งน้ำมาจากเพดาน!','Peeves drops a water balloon!',[['หลบ! / Dodge!',()=>{if(Math.random()<0.6){addGal(8,'หลบพีฟส์ทัน');}else toast('💦 เปียกโชก... แต่หัวเราะได้นะ');}],['ร่ายคาถาป้องกัน / Shield',()=>{addHP(4,'คาถาป้องกันสวย');}]]],
+  ['📚','หนังสือเล่มหนึ่งตกจากชั้นแล้วเปิดค้างไว้','A book falls open at your feet',[['อ่านดู / Read it',()=>{addGal(6,'ความรู้ใหม่');toast('📖 คุณเรียนรู้เกร็ดเวทมนตร์ใหม่!');}],['เก็บคืนชั้น / Shelve it',()=>{addHP(5,'มีน้ำใจ');}]]],
+  ['🐈','แมวตัวน้อยคาบกระดาษปริศนามาวางให้','A small cat brings you a riddle note',[['ไขปริศนา / Solve',()=>{addGal(10,'ไขปริศนาได้');}],['ลูบหัวแมว / Pet the cat',()=>{toast('🐈 เหมียว~ (ความสุข +1)');addGal(3);}]]],
+  ['🍬','เจอถุงลูกอมรสแปลกตกอยู่','You find a bag of odd-flavour sweets',[['ลองชิม / Taste one',()=>{const r=Math.random();if(r<0.5){addGal(6,'รสสตรอว์เบอร์รี!');}else toast('🤢 รสถุงเท้าเก่า! ฮ่าๆ');}],['แบ่งให้เพื่อน / Share',()=>{addHP(4,'แบ่งปัน');}]]]];
+ const E={t:0,next:120+Math.random()*120,pend:null};window.__ev30=E;
+ const open1=e=>{openV(e[0]+' เหตุการณ์ระหว่างทาง',B=>{B.append(h17('p',{style:'font-size:16px'},'<b>'+e[1]+'</b><br><small>'+e[2]+'</small>'));const r=h17('div',{className:'row'});for(const [t,f] of e[3])r.append(btn(t,()=>{closeV();try{f();Audio.sfx('chime');}catch(x){}ev('found');},'gold'));B.append(r);});};
+ setInterval(()=>{try{if(document.hidden||uiOpen||(typeof CZA!=='undefined'&&CZA.on))return;if(player.moving)E.t+=1;if(E.t<E.next||E.pend)return;E.t=0;E.next=150+Math.random()*150;const e=EV[Math.floor(Math.random()*EV.length)];E.pend=e;toast(e[0]+' มีบางอย่างเกิดขึ้น! ดูปุ่ม ❗ / Something happened!');
+  const b=btn('❗ '+e[0]+' เหตุการณ์',()=>{E.pend=null;E.btn=null;b.remove();open1(e);},'gold');E.btn=b;const ch=document.getElementById('chip26');if(ch){ch.append(b);ch.style.display='flex';}setTimeout(()=>{if(E.pend===e){E.pend=null;E.btn=null;b.remove();}},90000);}catch(x){}},1000);
+ /* A8 flicker */
+ const FL={L:[],z:null,t:0};setInterval(()=>{if(zone!==FL.z||timeIdx!==FL.ti){FL.z=zone;FL.ti=timeIdx;for(const o of FL.L)if(o.userData.b30!=null)o.intensity=o.userData.b30;FL.L=[];setTimeout(()=>{scene.traverse(o=>{if(o.isPointLight&&o.color.r>o.color.b*1.15){o.userData.b30=o.intensity;o.userData.p30=Math.random()*10;FL.L.push(o);}});},2500);}},1000);
+ const ft=()=>{requestAnimationFrame(ft);if(V.rm||!FL.L.length)return;FL.t+=0.016;for(const o of FL.L){if(o.userData.b30==null)continue;const p=o.userData.p30,t=FL.t;o.intensity=o.userData.b30*(0.88+0.07*Math.sin(t*7.3+p)+0.05*Math.sin(t*13.1+p*2));}};requestAnimationFrame(ft);})();
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
