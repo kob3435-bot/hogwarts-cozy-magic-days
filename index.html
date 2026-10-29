@@ -5799,6 +5799,20 @@ function story30Target(s){const g=s&&s[3];if(!g)return null;if(g.luna){return nu
  el.onclick=()=>{const c=story30Cur();if(!c)return;if(!c.s){addGal(c.C.rew[0],c.C.en);addHP(c.C.rew[1],'เนื้อเรื่อง');try{burst('#ffd84a',40);Audio.sfx('gift');}catch(e){}toast('🎉 จบ'+c.C.t+'!');V.ch30++;saveV();upd();const n=story30Cur();if(n)setTimeout(()=>toast('📖 เริ่ม '+n.C.t),1200);return;}if(c.s[3]&&c.s[3].luna){try{openLuna();}catch(e){}return;}const t=story30Target(c.s);if(t){if(t.zone===zone.id&&Math.hypot(t.x-player.x,t.y-player.y)<1.5)return toast('🎯 อยู่ที่นี่แล้ว!');navTo(t);}else toast('💡 '+c.s[0]+' ('+c.s[1]+')');};
  setInterval(upd,700);window.__story30={cur:story30Cur,upd};})();
 
+/* v30 A3: one hidden golden coin per zone (deterministic, reachable via BFS) */
+(function(){const C={z:null,m:null,t:0};window.__coin30=C;
+ const geo=new THREE.CylinderGeometry(0.22,0.22,0.05,20);geo.rotateX(Math.PI/2);
+ const mat=new THREE.MeshStandardMaterial({color:'#ffd24a',emissive:'#a86a00',emissiveIntensity:0.9,metalness:0.6,roughness:0.3});
+ const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;};
+ const place=z=>{const S=0.5,W=Math.ceil(z.w/S),H=Math.ceil(z.h/S),seen=new Uint8Array(W*H);const sx=Math.floor(player.x/S),sy=Math.floor(player.y/S);if(sx<0||sy<0||sx>=W||sy>=H)return null;const q=[[sx,sy]];seen[sy*W+sx]=1;let n=0;
+  while(q.length&&n<40000){n++;const [x,y]=q.pop();for(const d of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+d[0],ny=y+d[1];if(nx<0||ny<0||nx>=W||ny>=H||seen[ny*W+nx])continue;if(solidAt(z,nx*S+S/2,ny*S+S/2,0.25))continue;seen[ny*W+nx]=1;q.push([nx,ny]);}}
+  const c=[];for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){if(!seen[y*W+x])continue;let ok=1;for(let dy=-1;dy<=1&&ok;dy++)for(let dx=-1;dx<=1;dx++)if(!seen[(y+dy)*W+x+dx]){ok=0;break;}if(ok&&Math.hypot(x-sx,y-sy)>8)c.push([x,y]);}
+  if(!c.length)return null;const k=c[hash(z.id)%c.length];return {x:k[0]*S+S/2,y:k[1]*S+S/2};};
+ const clear=()=>{if(C.m){scene.remove(C.m);C.m=null;}};
+ const tick=()=>{requestAnimationFrame(tick);try{if(zone!==C.z){if(typeof CZA!=='undefined'&&CZA.on)return;C.z=zone;clear();V.hid30=V.hid30||[];if(V.hid30.includes(zone.id))return;C.wait=performance.now()+1500;C.need=1;}
+  if(C.need&&performance.now()>C.wait){C.need=0;const p=place(zone);if(p){C.m=new THREE.Mesh(geo,mat);C.m.position.set(p.x,0.55,p.y);C.p=p;scene.add(C.m);C.told=C.told||{};if(!C.told[zone.id]){C.told[zone.id]=1;toast('✨ มีเหรียญลับซ่อนอยู่ที่นี่ / A hidden coin is nearby');}}}
+  if(C.m){C.t+=0.016;C.m.rotation.y=C.t*2.2;C.m.position.y=0.55+Math.sin(C.t*3)*0.08;if(((C.k=(C.k||0)+1)%45)===0){try{spawnP('spark',C.p.x+rnd(-.3,.3),C.p.y+rnd(-.3,.3),0,-.4,1.2,3,'#ffe27a');}catch(e){}}if(Math.hypot(player.x-C.p.x,player.y-C.p.y)<0.75){clear();V.hid30.push(zone.id);saveV();addGal(5,'เหรียญลับ '+V.hid30.length+'/'+ZONE_IDS.length);try{burst('#ffd84a',24);Audio.sfx('chime');}catch(e){}if([10,25,50].includes(V.hid30.length))addHP(10,'นักล่าเหรียญลับ');}}}catch(e){}};requestAnimationFrame(tick);})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
