@@ -5813,6 +5813,20 @@ function story30Target(s){const g=s&&s[3];if(!g)return null;if(g.luna){return nu
   if(C.need&&performance.now()>C.wait){C.need=0;const p=place(zone);if(p){C.m=new THREE.Mesh(geo,mat);C.m.position.set(p.x,0.55,p.y);C.p=p;scene.add(C.m);C.told=C.told||{};if(!C.told[zone.id]){C.told[zone.id]=1;toast('✨ มีเหรียญลับซ่อนอยู่ที่นี่ / A hidden coin is nearby');}}}
   if(C.m){C.t+=0.016;C.m.rotation.y=C.t*2.2;C.m.position.y=0.55+Math.sin(C.t*3)*0.08;if(((C.k=(C.k||0)+1)%45)===0){try{spawnP('spark',C.p.x+rnd(-.3,.3),C.p.y+rnd(-.3,.3),0,-.4,1.2,3,'#ffe27a');}catch(e){}}if(Math.hypot(player.x-C.p.x,player.y-C.p.y)<0.75){clear();V.hid30.push(zone.id);saveV();addGal(5,'เหรียญลับ '+V.hid30.length+'/'+ZONE_IDS.length);try{burst('#ffd84a',24);Audio.sfx('chime');}catch(e){}if([10,25,50].includes(V.hid30.length))addHP(10,'นักล่าเหรียญลับ');}}}catch(e){}};requestAnimationFrame(tick);})();
 
+/* v30 A4: minimap (desktop/tablet), doors + player + objective marker; click = world map */
+(function(){const cv=document.createElement('canvas');cv.id='mm30';cv.width=168;cv.height=168;document.body.appendChild(cv);const g=cv.getContext('2d');
+ const st=document.createElement('style');st.textContent='#mm30{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:150px;height:150px;z-index:5;border-radius:16px;border:2px solid #e0b23a;background:rgba(20,14,34,.82);box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer}body.touch #mm30{display:none}@media (max-width:760px),(max-height:520px){#mm30{display:none}}body.menu29 #mm30,body.photo #mm30,body.mmoff #mm30{opacity:0!important;pointer-events:none!important}';document.head.appendChild(st);
+ cv.onclick=()=>{try{openMap();}catch(e){}};
+ let bg=null,bz=null,sc=1,ox=0,oy=0;
+ const build=z=>{bz=z;const c=document.createElement('canvas');c.width=168;c.height=168;const q=c.getContext('2d');sc=Math.min(150/z.w,150/z.h);ox=(168-z.w*sc)/2;oy=(168-z.h*sc)/2;q.fillStyle='#3a2c52';q.fillRect(ox,oy,z.w*sc,z.h*sc);
+  const st=Math.max(0.5,1/sc*2);q.fillStyle=(z.out||z.outdoorSky)?'#6a9a5a':'#c8b48a';for(let y=0;y<z.h;y+=st)for(let x=0;x<z.w;x+=st){if(!solidAt(z,x+st/2,y+st/2,0.05))q.fillRect(ox+x*sc,oy+y*sc,st*sc+0.6,st*sc+0.6);}
+  q.fillStyle='#ffd24a';for(const d of z.doors||[]){try{const p=doorSpawn(z,d);q.beginPath();q.arc(ox+p.x*sc,oy+p.y*sc,3,0,7);q.fill();}catch(e){}}bg=c;};
+ let k=0;setInterval(()=>{if(document.hidden||getComputedStyle(cv).display==='none')return;try{if(zone!==bz){if(typeof CZA!=='undefined'&&CZA.on)return;build(zone);}g.clearRect(0,0,168,168);g.drawImage(bg,0,0);
+  g.fillStyle='rgba(255,255,255,.75)';for(const id in npcModels){const n=NPCS.find(n=>n.c.id===id);if(n&&n.zone===zone.id){g.fillRect(ox+n.x*sc-1.5,oy+n.y*sc-1.5,3,3);}}
+  if(typeof NAV!=='undefined'&&NAV&&NAV.on&&NAV.t&&NAV.t.zone===zone.id){k++;g.strokeStyle='#ff6a8a';g.lineWidth=2;g.beginPath();g.arc(ox+NAV.t.x*sc,oy+NAV.t.y*sc,4+(k%4),0,7);g.stroke();}
+  g.fillStyle='#ff4a6a';g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.arc(ox+player.x*sc,oy+player.y*sc,4,0,7);g.fill();g.stroke();
+  g.fillStyle='#ffe9b0';g.font='bold 11px sans-serif';g.fillText((zone.th||'').slice(0,18),8,163);}catch(e){}},300);})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
