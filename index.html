@@ -3444,7 +3444,7 @@ function buildScatter(){if(scatterGrp){scene.remove(scatterGrp);scatterGrp.trave
      case'rockI':P('rock',rockGeo(0),rockMat(),ch,cx,0.2,cz,0.6*s,0.45*s,0.55*s,h*5);break;
      case'flowers':for(let i=0;i<Math.max(3,f.w*f.h*(QN==='low'?4:6));i++){const fx=f.x+hash(i,f.x)*f.w,fz=f.y+hash(f.y,i)*f.h;P('stem',CYL,toon('#3a7a3a'),ch,fx,0.12,fz,0.02,0.24,0.02);P('bloom',SPH,new THREE.MeshStandardMaterial({roughness:0.8}),ch,fx,0.26,fz,0.07,0.06,0.07,0,['#ff8ab0','#ffe066','#ffffff','#b08aff','#ff7a5a'][(i+f.x)%5]);}break;
      case'tuft':for(let i=0;i<(QN==='low'?4:7);i++)P('tuft',bladeGeo(),grassMat(),ch,f.x+0.2+hash(i,f.y)*0.6,0,f.y+0.2+hash(f.x,i)*0.6,0.5,0.55,0.5,h*6);break;}}
-  let n=0;for(const k in parts){const p=parts[k];const im=new THREE.InstancedMesh(p.g,p.m,p.list.length);p.list.forEach((e,i)=>{_sq.setFromAxisAngle(_sp.set(0,1,0),e[6]);_sm.compose(_sp.set(e[0],e[1],e[2]),_sq,_ss.set(e[3],e[4],e[5]));im.setMatrixAt(i,_sm);if(p.col)im.setColorAt(i,_sc.set(e[7]));});
+  let n=0;for(const k in parts){const p=parts[k];const im=new THREE.InstancedMesh(p.g,sway30(k,p.m),p.list.length);p.list.forEach((e,i)=>{_sq.setFromAxisAngle(_sp.set(0,1,0),e[6]);_sm.compose(_sp.set(e[0],e[1],e[2]),_sq,_ss.set(e[3],e[4],e[5]));im.setMatrixAt(i,_sm);if(p.col)im.setColorAt(i,_sc.set(e[7]));});
     im.castShadow=!k.startsWith('bloom')&&!k.startsWith('stem')&&!k.startsWith('tuft');im.receiveShadow=true;im.computeBoundingSphere();scatterGrp.add(im);n++;}
   scatterGrp.userData.chunks=n;}
 
@@ -5875,6 +5875,12 @@ function react30(n){const c=n.c;if(c.creature)return null;const L=[];const hn=HT
  if((friend[c.id]||0)>=10)L.push('เธอแวะมาคุยกับฉันบ่อยมาก ดีใจจริงๆ ที่มีเพื่อนแบบเธอ 💕');
  return L.length?L[Math.floor(Math.random()*L.length)]:null;}
 function luna30(){const h=V.lunaH||0;const M={3:['🌙 ลูน่าให้สร้อยจุกขวดบัตเตอร์เบียร์',15],7:['🦋 ลูน่าให้แว่นสเปกเทรสเปกส์',25],14:['💙 ลูน่า: "เธอคือเพื่อนสนิทที่สุดของฉัน"',40],30:['✨ ลูน่าวาดภาพเธอไว้บนเพดานห้อง',80]};V.lunaM=V.lunaM||[];if(M[h]&&!V.lunaM.includes(h)){V.lunaM.push(h);saveV();setTimeout(()=>{toast(M[h][0]);addGal(M[h][1],'มิตรภาพกับลูน่า '+h+' วัน');try{burst('#9ad0ff',30);}catch(e){}},600);}}
+
+/* v30 A8: wind sway for scatter foliage (one cloned material per kind, vertex-shader only) */
+const SWAY30={u:{value:0},c:new Map()};(function t(){requestAnimationFrame(t);if(!(typeof V!=='undefined'&&V.rm))SWAY30.u.value=performance.now()/1000;})();
+function sway30(k,m){if(!/^(canopy|pine|bleaf|bush|bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return m;let c=SWAY30.c.get(m);if(c)return c;c=m.clone();const amp=/^(tuft|bloom)/.test(k)?0.06:/^wdrop/.test(k)?0.08:0.035;
+ c.onBeforeCompile=sh=>{sh.uniforms.uWind30=SWAY30.u;sh.vertexShader='uniform float uWind30;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n#ifdef USE_INSTANCING\n{float ph=instanceMatrix[3].x*0.7+instanceMatrix[3].z*0.53;float w=sin(uWind30*1.7+ph)*0.7+sin(uWind30*3.1+ph*1.7)*0.3;float hgt=clamp(position.y+0.6,0.0,2.0);transformed.x+=w*'+amp.toFixed(3)+'*hgt;transformed.z+=w*'+(amp*0.6).toFixed(3)+'*hgt;}\n#endif');};
+ c.customProgramCacheKey=()=>'sway30_'+amp;SWAY30.c.set(m,c);return c;}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
