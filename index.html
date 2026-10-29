@@ -3308,7 +3308,7 @@ const _c=new THREE.Color();
 function parseCol(c){try{if(c.startsWith('rgb')){const m=c.match(/[\d.]+/g);_c.setRGB(m[0]/255,m[1]/255,m[2]/255);}else _c.set(c);}catch(e){_c.set('#ffffff');}return _c;}
 const P_HEIGHT={heart:1.6,spark:0.9,dust:1.2,firefly:1.0,feather:0.8,nargle:1.5,flower:0.1,drop:0.2,ember:0.9,bubble:0.7,smoke:2.5};
 const RISERS={feather:1,heart:1,smoke:1,bubble:1,ember:1};
-function spawnP(type,x,y,vx,vy,life,size,color,screen){if(screen)return null;for(let i=0;i<MAX_P;i++){const p=POOL[i];if(!p.on){p.on=true;p.type=type;p.x=x;p.z=y;p.y=P_HEIGHT[type]!=null?P_HEIGHT[type]:1;p.vx=vx;
+function spawnP(type,x,y,vx,vy,life,size,color,screen){if(screen)return null;if(V.rm&&type!=='drop'&&Math.random()<0.7)return null;for(let i=0;i<MAX_P;i++){const p=POOL[i];if(!p.on){p.on=true;p.type=type;p.x=x;p.z=y;p.y=P_HEIGHT[type]!=null?P_HEIGHT[type]:1;p.vx=vx;
   if(RISERS[type]){p.vz=0;p.vy=-vy;}else{p.vz=vy;p.vy=type==='spark'?rnd(-0.5,1.2):type==='drop'?1.2:0;}p.life=life;p.max=life;p.size=size*0.22+(type==='flower'?0.5:0);parseCol(color);p.r=_c.r;p.g=_c.g;p.b=_c.b;p.seed=Math.random()*6;return p;}}return null;}
 function activeCount(type){let n=0;for(const p of POOL)if(p.on&&(!type||p.type===type))n++;return n;}
 function clearWorldParticles(){for(const p of POOL)p.on=false;}
@@ -4077,7 +4077,7 @@ function lunaBubble(text){if(!text)return;luna.bubble=text;luna.bubbleT=5.5;luna
 
 /* ===================== DIALOGUE ===================== */
 let typeTimer=null;
-function typeText(s){clearInterval(typeTimer);const el=$('dlgText');let i=0;el.textContent='';const ch=Array.from(s);typeTimer=setInterval(()=>{i+=2;el.textContent=ch.slice(0,i).join('');if(i%6===0)Audio.sfx('talk');if(i>=ch.length)clearInterval(typeTimer);},22);}
+function typeText(s){clearInterval(typeTimer);const el=$('dlgText');let i=0;el.textContent='';const ch=Array.from(s);typeTimer=setInterval(()=>{i+=(V.tsp||2);el.textContent=ch.slice(0,i).join('');if(i%6===0)Audio.sfx('talk');if(i>=ch.length)clearInterval(typeTimer);},22);}
 function drawPortrait(L,house,face){const p=$('portrait'),g=p.getContext('2d');g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;const H=HOUSES[house||'N']||HOUSES.N;
   const bg=g.createLinearGradient(0,0,0,p.height);bg.addColorStop(0,sh(H.c1,.25));bg.addColorStop(1,sh(H.c1,-.45));g.fillStyle=bg;g.fillRect(0,0,p.width,p.height);
   g.fillStyle='rgba(255,255,255,.07)';for(let y=0;y<p.height;y+=10)g.fillRect(0,y,p.width,5);
@@ -4742,7 +4742,7 @@ function openSettings(){openV('⚙️ ตั้งค่า',B=>{const vol=h17('
  const r1=h17('div',{className:'row'},'🔊 ระดับเสียง ');r1.append(vol);B.append(r1);
  const q=new URLSearchParams(location.search).get('q')||'auto';const r2=h17('div',{className:'row'},'🎨 คุณภาพกราฟิก: ');for(const [k,t] of [['low','ต่ำ (ลื่น)'],['auto','อัตโนมัติ'],['high','สูง']])r2.append(btn(t,()=>{const u=new URL(location.href);if(k==='auto')u.searchParams.delete('q');else u.searchParams.set('q',k);saveV();persist();location.href=u.toString();},q===k?'gold':''));B.append(r2);
  const r3=h17('div',{className:'row'},'🏷️ ป้ายชื่อ: ');r3.append(btn('สลับโหมดป้ายชื่อ',()=>{$('bTags').click();}));B.append(r3);
- const r4=h17('div',{className:'row'},'💾 เกมบันทึกอัตโนมัติใน localStorage · ');r4.append(btn('ส่งออกเซฟ',()=>{saveV();persist();const blob=new Blob([JSON.stringify({base:localStorage.getItem(SAVE_KEY),v17:localStorage.getItem(SAVE_KEY+'_v17')})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hogwarts-cozy-save.json';a.click();}),
+ set30Rows(B);const r4=h17('div',{className:'row'},'💾 เกมบันทึกอัตโนมัติใน localStorage · ');r4.append(btn('ส่งออกเซฟ',()=>{saveV();persist();const blob=new Blob([JSON.stringify({base:localStorage.getItem(SAVE_KEY),v17:localStorage.getItem(SAVE_KEY+'_v17')})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='hogwarts-cozy-save.json';a.click();}),
   btn('นำเข้าเซฟ',()=>{const i=h17('input',{type:'file',accept:'.json'});i.onchange=()=>{const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);if(d.base)localStorage.setItem(SAVE_KEY,d.base);if(d.v17)localStorage.setItem(SAVE_KEY+'_v17',d.v17);location.reload();}catch(e){toast('ไฟล์เซฟไม่ถูกต้อง');}};fr.readAsText(i.files[0]);};i.click();}),
   btn('🗑️ เริ่มใหม่ (ลบความคืบหน้า v17)',()=>{if(!confirm('ลบความคืบหน้าเกลเลียน การ์ด ภารกิจ ทั้งหมด?'))return;localStorage.removeItem(SAVE_KEY+'_v17');location.reload();}));B.append(r4);
  B.append(h17('p',{style:'font-size:12px'},'ตัวละคร/ทรงผม: ปุ่ม ⚙️ มุมขวาบน'));});}
@@ -5751,6 +5751,18 @@ window.__ui={};for(const n of['openDialogue','openHub','openLunaHub','openDirect
   if(fps<50){if(++G.low>=2&&G.lv<4){G.lv++;G.low=0;G.tUp=now+30000;apply();}G.hi=0;}
   else if(fps>58){G.low=0;if(++G.hi>=4&&G.lv>0&&now>G.tUp){G.lv--;G.hi=0;G.tUp=now+30000;apply();}}else{G.low=0;G.hi=0;}};
  if(!/[?&]nogov/.test(location.search))requestAnimationFrame(tick);})();
+
+/* v30 A1: accessibility + pause-when-hidden */
+(function(){const ap=()=>{document.body.classList.toggle('rm30',!!V.rm);document.body.classList.toggle('big30',!!V.big);document.body.classList.toggle('cb30',!!V.cb);};window.__a30=ap;
+ try{ap();}catch(e){setTimeout(ap,500);}
+ document.addEventListener('visibilitychange',()=>{try{if(!Audio.ac)return;if(document.hidden)Audio.ac.suspend();else if(!Audio.muted)Audio.ac.resume();}catch(e){}if(document.hidden){try{saveV();persist();}catch(e){}}});
+ window.addEventListener('pagehide',()=>{try{saveV();persist();}catch(e){}});
+ const st=document.createElement('style');st.textContent='body.rm30 *{animation-duration:0s!important;transition-duration:0s!important}body.big30 .modal .card,body.big30 #dlg,body.big30 #toast{font-size:118%!important}body.big30 .btn{min-height:44px}.set30 button.on30{outline:2px solid #fff3c0;background:linear-gradient(180deg,#e8c050,#a8741a);color:#2a1a08}';document.head.appendChild(st);})();
+function set30Rows(B){const row=(lab,opts,key)=>{const r=h17('div',{className:'row set30'},lab+' ');for(const [v,t] of opts){r.append(btn(t,()=>{V[key]=v;saveV();__a30();openSettings();},(V[key]||opts[0][0])===v?'gold':''));}B.append(r);};
+ row('💬 ความเร็วตัวอักษร / Text speed:',[[2,'ปกติ'],[1,'ช้า'],[4,'เร็ว'],[999,'ทันที']],'tsp');
+ row('🌀 ลดการเคลื่อนไหว / Reduced motion:',[[0,'ปิด'],[1,'เปิด']],'rm');
+ row('🔠 ตัวอักษรใหญ่ / Large text:',[[0,'ปิด'],[1,'เปิด']],'big');
+ row('🎨 สัญลักษณ์บ้าน (ตาบอดสี) / House symbols:',[[0,'ปิด'],[1,'เปิด']],'cb');}
 
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
