@@ -6024,6 +6024,29 @@ function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return
  setInterval(()=>{if(zone!==L.z||timeIdx!==L.ti){if(typeof CZA!=='undefined'&&CZA.on)return;L.z=zone;L.ti=timeIdx;clear();clearTimeout(L.pend);L.pend=setTimeout(()=>{try{build();}catch(e){console.warn('life31',e);}},450);}},250);
 })();
 
+/* v31 P1 */
+/* v31 P1: cheap ambience particles - falling leaves (1 instanced draw call), dusk/night fireflies in green places, hearth embers, water glints, indoor sunbeam motes */
+(function(){const N=28,geo=new THREE.PlaneGeometry(0.14,0.09);const mat=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,transparent:true,opacity:0.95,depthWrite:false});
+ const im=new THREE.InstancedMesh(geo,mat,N);im.frustumCulled=false;im.castShadow=false;im.visible=false;scene.add(im);
+ const COLS=['#e8892a','#d8b23a','#c8502a','#9ab84a','#e8a84a','#f0c0d0'].map(c=>new THREE.Color(c));const D=[];for(let i=0;i<N;i++){D.push({x:0,y:-9,z:0,s:Math.random()*6,v:0.3+Math.random()*0.4});im.setColorAt(i,COLS[i%COLS.length]);}
+ const P31={im,on:false};window.__part31=P31;const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(1,1,1),ps=new THREE.Vector3();
+ const leafy=z=>{const t=z.v31||'';return (z.out||z.outdoorSky)&&(/garden|forest|moor|paddock|village/.test(t)||/forest|grove|garden|orchard|glade|wood|trail|lawn|hollow|courtyard/.test(z.id))&&weather!=='snow';};
+ let last=performance.now(),acc=0;
+ function tick(){requestAnimationFrame(tick);const now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;if(document.hidden)return;const z=zone;if(!z)return;
+  const lv=leafy(z)&&!(typeof CZA!=='undefined'&&CZA.on);if(lv!==P31.on){P31.on=lv;im.visible=lv;if(lv)for(const d of D){d.x=player.x+(Math.random()*2-1)*9;d.z=player.y+(Math.random()*2-1)*7;d.y=Math.random()*5;}}
+  if(lv){const t=now/1000;for(let i=0;i<N;i++){const d=D[i];d.y-=d.v*dt;d.x+=Math.sin(t*1.3+d.s)*0.35*dt+0.12*dt;if(d.y<0.02||Math.abs(d.x-player.x)>11||Math.abs(d.z-player.y)>9){d.y=3.5+Math.random()*2;d.x=player.x+(Math.random()*2-1)*9;d.z=player.y+(Math.random()*2-1)*7;}
+    e.set(t*1.7+d.s,t*0.9+d.s*2,Math.sin(t*2+d.s));q.setFromEuler(e);ps.set(d.x,d.y,d.z);m4.compose(ps,q,sc);im.setMatrixAt(i,m4);}im.instanceMatrix.needsUpdate=true;}
+  acc+=dt;if(acc<0.1)return;acc=0;if(typeof uiOpen!=='undefined'&&uiOpen)return;
+  const ti=TIMES[timeIdx],out=!!(z.out||z.outdoorSky),t31=z.v31||'';
+  try{
+   if((ti==='sunset'||ti==='night')&&out&&/garden|forest|moor|lake|paddock/.test(t31+(z.id==='firefly31'?'forest':''))&&Math.random()<(z.id==='firefly31'?0.6:0.25)&&activeCount('firefly')<36)spawnP('firefly',player.x+rnd(-8,8),player.y+rnd(-6,6),rnd(-.3,.3),rnd(-.3,.3),rnd(4,7),2.5,ti==='sunset'?'#ffe07a':'#d8ff7a');
+   if((z.light==='fire'||/cozy/.test(t31))&&Math.random()<0.18&&activeCount('ember')<10)spawnP('ember',player.x+rnd(-6,6),player.y+rnd(-5,5),rnd(-.1,.1),rnd(.2,.4),rnd(1.2,2),rnd(1.5,2.5),pick(['#ffb050','#ff8030']));
+   if(z.water&&ti!=='night'&&Math.random()<0.3&&activeCount('spark')<20){const w=z.water;spawnP('spark',w[0]+Math.random()*w[2],w[1]+Math.random()*w[3],0,0,0.7,2.5,'#ffffff');}
+   if(!out&&/classroom|hall|office|shop/.test(t31)&&ti!=='night'&&Math.random()<0.25&&activeCount('dust')<50)spawnP('dust',player.x+rnd(-5,5),player.y+rnd(-4,4),rnd(-.05,.05),-rnd(.02,.08),rnd(4,7),rnd(1.2,2),'#fff2c0');
+  }catch(err){}
+ }
+ requestAnimationFrame(tick);})();
+
 var PROF={on:/[?&]prof/.test(location.search)||!!window.__profOn,cur:{},ev:{},last:0,spikes:[],frames:[],
  frame(ts){if(this.last){const d=ts-this.last;this.frames.push(d);let js=0;for(const k in this.cur)if(k!=='render')js+=this.cur[k];for(const k in this.ev)js+=this.ev[k];this.js=this.js||[];this.js.push(js);this.rs=this.rs||[];this.rs.push(this.cur.render||0);if(js>16){const c={};for(const k in this.cur)if(this.cur[k]>2)c[k]=Math.round(this.cur[k]);for(const k in this.ev)c['ev:'+k]=Math.round(this.ev[k]);this.spikes.push({t:Math.round(ts),d:Math.round(d),js:Math.round(js),z:zone&&zone.id,c});}}this.last=ts;this.cur={};this.ev={};},
  mark(k,ms){if(this.on)this.ev[k]=(this.ev[k]||0)+ms;},wrap(k,f){const P=this;return function(){if(!P.on)return f.apply(this,arguments);const t=performance.now();try{return f.apply(this,arguments);}finally{P.mark(k,performance.now()-t);}};}};
