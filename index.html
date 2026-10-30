@@ -5987,6 +5987,7 @@ function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return
  function plan(z){const t=TYPE(z),n=night(),out=!!(z.out||z.outdoorSky);const F=[],C=[];
   const fN={classroom:n?0:3,hall:n?1:3,shop:2,cozy:2,office:n?1:2,cave:0,garden:n?0:2,forest:0,lake:n?0:2,village:n?1:3,moor:n?0:1,beach:n?0:2,paddock:n?0:2}[t];
   if(z.v31&&fN)for(let i=0;i<fN;i++)F.push((n||tod()==='sunset')&&out);
+  if(!z.v31&&z.w*z.h>=150&&!/quidditch|pitch|yule|great_hall|tri_|match|sorting|exam|stands/.test(z.id)){let mains=0;for(const q of NPCS)if(q.zone===z.id)mains++;const o={village:n?1:3,garden:n?0:2,lake:n?0:2,moor:n?0:1,forest:0,in:n?0:1}[t]||0;const k=Math.max(0,o-Math.floor(mains/3));for(let i=0;i<k;i++)F.push((n||tod()==='sunset')&&out);}
   const add=(k,c)=>{for(let i=0;i<c;i++)C.push(k);};
   if(/cozy|shop|village|in/.test(t))add('cat',t==='in'?(Math.random()<0.3?1:0):1);
   if(n&&(out||t==='office'))add('owl',1);
@@ -5998,11 +5999,11 @@ function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return
   if(!z.v31){C.splice(5);}
   if(lowQ()){F.splice(Math.ceil(F.length/2));C.splice(Math.ceil(C.length/2));}
   return {F,C};}
- const free=(z,x,y)=>{try{return !solidAt(z,x,y,0.25)&&!(z.water&&x>z.water[0]-0.3&&x<z.water[0]+z.water[2]+0.3&&y>z.water[1]-0.3&&y<z.water[1]+z.water[3]+0.3);}catch(e){return false;}};
+ const free=(z,x,y)=>{if(!isFinite(x)||!isFinite(y))return false;try{return !solidAt(z,x,y,0.25)&&!(z.water&&x>z.water[0]-0.3&&x<z.water[0]+z.water[2]+0.3&&y>z.water[1]-0.3&&y<z.water[1]+z.water[3]+0.3);}catch(e){return false;}};
  const rndPt=(z,near)=>{for(let k=0;k<30;k++){let x,y;if(near&&k<20){x=near[0]+(Math.random()*2-1)*near[2];y=near[1]+(Math.random()*2-1)*near[2];}else{x=1.5+Math.random()*(z.w-3);y=1.5+Math.random()*(z.h-3);}if(free(z,x,y))return [x,y];}return null;};
  function clear(){if(L.g){scene.remove(L.g);L.g=null;}L.ents=[];}
  function build(){clear();const z=zone;if(!z||!__game||!scene)return;const P=plan(z);if(!P.F.length&&!P.C.length)return;const g=new THREE.Group();g.name='life31';
-  const wp=(z.sits||[]).map(s=>[s[0],s[1]]);
+  const wp=(z.sits||[]).map(s=>Array.isArray(s)?[s[0],s[1]]:[s&&s.x,s&&s.y]).filter(a=>isFinite(a[0])&&isFinite(a[1]));
   for(const lan of P.F){const p=rndPt(z);if(!p)continue;const o=folk(lan);o.position.set(p[0],0,p[1]);g.add(o);L.ents.push({k:'folk',o,x:p[0],y:p[1],tx:p[0],ty:p[1],sp:0.9+Math.random()*0.4,w:Math.random()*3,ph:Math.random()*6,wp});}
   for(const k of P.C){let near=null;if(k==='frog'&&z.water)near=[z.water[0]+z.water[2]/2,z.water[1]+z.water[3]+1,Math.max(2,z.water[2]/2)];const p=rndPt(z,near);if(!p)continue;const o=critter(k);const e={k,o,x:p[0],y:p[1],tx:p[0],ty:p[1],sp:{cat:0.8,owl:0,frog:1.4,rabbit:1.6,bird:1.2,crab:0.7,fly:1.0}[k],w:Math.random()*3,ph:Math.random()*6,near,hop:0};
    if(k==='owl'){const q=rndPt(z);if(q){e.x=q[0];e.y=q[1];}o.position.y=0;}o.position.set(e.x,0,e.y);g.add(o);L.ents.push(e);}
