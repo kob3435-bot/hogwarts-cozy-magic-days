@@ -5704,7 +5704,7 @@ var CHR27=(function(){const PERS={luna:'dreamy',hermione:'ponder',ron:'stretch',
  if(!/nog2s/.test(location.search))try{for(const c of CHARACTERS){const s=SET[c.id];if(s&&c.look)Object.assign(c.look,s);}}catch(e){}
  const LT={};function letterTex(ch,bg){const k=ch+bg;if(LT[k])return LT[k];const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,64,64);g.fillStyle='#f2d26a';g.font='bold 52px serif';g.textAlign='center';g.textBaseline='middle';g.fillText(ch,32,35);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return LT[k]=t;}
  const _qa=qAccessories;const MC={};const MM=(M,k,c,o)=>MC[k]||(MC[k]=M(c,o));
- qAccessories=function(c){_qa(c);if(/nog2w/.test(location.search))return;try{const {L,id,lite,ghost,hd,chest,hand,stu}=c;const M=(col,o)=>MM(c.M,col+JSON.stringify(o||{}),col,o);if(lite||ghost||!c.anime)return;
+ qAccessories=function(c){_qa(c);if(/nog2w/.test(location.search))return;try{const {L,id,lite,ghost,hd,chest,hand,stu}=c;const M=(col,o)=>MM(c.M,col+(o?Object.keys(o).map(k=>{const v=o[k];return k+':'+(v&&typeof v==='object'?(v.uuid||v.isColor&&v.getHexString()||'o'):v);}).join(','):''),col,o);if(lite||ghost||!c.anime)return;
   // cheek blush on everyone young/cute (not elves/peeves)
   if(stu&&!L.beard){const bm=M('#f7b4b8',{r:0.9});for(const s of[-1,1]){const b=hm(G_SPH,bm,s*0.056,0.078,0.094,0.018,0.009,0.004);b.rotation.y=s*0.45;b.userData.noOutline=1;hd.add(b);}}
   if(L.scar){const sm=M('#c8402e',{r:0.5});const pts=[[0.03,0.19,-0.6],[0.035,0.177,0.6],[0.03,0.164,-0.6]];for(const [x,y,r] of pts){const s=hm(G_BOX,sm,x,y,0.104,0.003,0.012,0.003);s.rotation.z=r;s.rotation.x=-0.35;s.userData.noOutline=1;hd.add(s);}}
