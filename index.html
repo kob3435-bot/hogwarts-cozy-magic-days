@@ -6005,9 +6005,9 @@ function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return
   for(const lan of P.F){const p=rndPt(z);if(!p)continue;const o=folk(lan);o.position.set(p[0],0,p[1]);g.add(o);L.ents.push({k:'folk',o,x:p[0],y:p[1],tx:p[0],ty:p[1],sp:0.9+Math.random()*0.4,w:Math.random()*3,ph:Math.random()*6,wp});}
   for(const k of P.C){let near=null;if(k==='frog'&&z.water)near=[z.water[0]+z.water[2]/2,z.water[1]+z.water[3]+1,Math.max(2,z.water[2]/2)];const p=rndPt(z,near);if(!p)continue;const o=critter(k);const e={k,o,x:p[0],y:p[1],tx:p[0],ty:p[1],sp:{cat:0.8,owl:0,frog:1.4,rabbit:1.6,bird:1.2,crab:0.7,fly:1.0}[k],w:Math.random()*3,ph:Math.random()*6,near,hop:0};
    if(k==='owl'){const q=rndPt(z);if(q){e.x=q[0];e.y=q[1];}o.position.y=0;}o.position.set(e.x,0,e.y);g.add(o);L.ents.push(e);}
-  scene.add(g);L.g=g;}
+  for(const e of L.ents)e.o.visible=false;L.rev=0;scene.add(g);L.g=g;}
  let last=performance.now();
- function tick(){requestAnimationFrame(tick);const now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;if(!L.g||document.hidden)return;const z=zone,t=now/1000;
+ function tick(){requestAnimationFrame(tick);const now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;if(!L.g||document.hidden)return;if(L.rev<L.ents.length){L.ents[L.rev++].o.visible=true;}const z=zone,t=now/1000;
   for(const e of L.ents){const o=e.o,u=o.userData;
    if(e.k==='cat'&&night()){o.scale.y=0.7;o.position.y=Math.sin(t*1.2+e.ph)*0.005;if(u.tl)u.tl.rotation.z=0.9;continue;}
    if(e.k==='owl'){if(u.hd)u.hd.rotation.y=Math.sin(t*0.5+e.ph)*0.9;o.position.y=Math.abs(Math.sin(t*0.8+e.ph))*0.03;continue;}
@@ -6022,7 +6022,7 @@ function sway30(k,m){if(!/^(bloom|tuft|wdrop)/.test(k)||!m||!m.isMaterial)return
    if(e.k==='frog'||e.k==='rabbit'||e.k==='bird'){e.hop+=dt*(e.k==='bird'?9:5);o.position.y=Math.abs(Math.sin(e.hop))*(e.k==='rabbit'?0.18:0.1);}else if(e.k==='folk')o.position.y=Math.abs(Math.sin(t*8+e.ph))*0.03;}
  }
  requestAnimationFrame(tick);
- setInterval(()=>{if(zone!==L.z||timeIdx!==L.ti){if(typeof CZA!=='undefined'&&CZA.on)return;L.z=zone;L.ti=timeIdx;clear();clearTimeout(L.pend);L.pend=setTimeout(()=>{try{build();}catch(e){console.warn('life31',e);}},450);}},250);
+ setInterval(()=>{if(zone!==L.z||timeIdx!==L.ti){if(typeof CZA!=='undefined'&&CZA.on)return;L.z=zone;L.ti=timeIdx;clear();clearTimeout(L.pend);L.pend=setTimeout(()=>{const go=()=>{try{build();}catch(e){console.warn('life31',e);}};(window.requestIdleCallback?requestIdleCallback(go,{timeout:2500}):go());},1200);}},250);
 })();
 
 /* v31 P1 */
